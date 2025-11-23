@@ -13,6 +13,21 @@ type Props = {
   prefetchStatus: PrefetchStatus;
 };
 
+/**
+ * Render navigation UI for selecting a network, toggling arrow-lock, and showing prefetch readiness.
+ *
+ * @param options - Array of selectable network options (each with `id` and `label`).
+ * @param value - Currently selected option id, or `undefined` when none is selected.
+ * @param onChange - Called with the selected option id when the selection changes.
+ * @param arrowLockEnabled - When `true`, the arrow-lock toggle is shown in its active state.
+ * @param onToggleArrowLock - Callback invoked when the arrow-lock toggle is clicked.
+ * @param prefetchStatus - Readiness flags for adjacent prefetched networks:
+ *   - `prevReady`: previous network is prefetched and ready
+ *   - `nextReady`: next network is prefetched and ready
+ *   - `nextTwoReady`: second-next network is prefetched and ready
+ *
+ * @returns The NetworkNavigation React element.
+ */
 export default function NetworkNavigation({
   options,
   value,

@@ -3,6 +3,13 @@ import { useAppSnapshot } from "../../data-sources/useAppSnapshot";
 import { useContentJob } from "../../data-sources/useContentJob";
 import styles from "./styles/ContentPage.module.css";
 
+/**
+ * Renders the Content Generator page that lets the user select a target network, start or cancel content-generation jobs, and view live job logs.
+ *
+ * Displays a network selector (including "All networks"), action buttons for "Generate Missing Content", "Force Generate All", and "Cancel" (enabled only while a job is running), and a summary with a live-scrolling log pane that auto-scrolls to the bottom when logs update.
+ *
+ * @returns The React element for the Content Generator page.
+ */
 export default function ContentPage() {
   const { snapshot } = useAppSnapshot();
   const { networks = [] } = snapshot ?? { networks: [] };

@@ -20,10 +20,29 @@ table = dynamodb.Table(DYNAMODB_TABLE)
 
 # Hash function
 def hash_image_url(url):
+    """
+    Return a 16-character hexadecimal identifier derived from an image URL.
+    
+    Parameters:
+        url (str): The image URL to hash.
+    
+    Returns:
+        str: A 16-character lowercase hexadecimal string consisting of the first 16 characters of the SHA-256 hex digest of `url`.
+    """
     return hashlib.sha256(url.encode()).hexdigest()[:16]  # 16 characters hash
 
 # Resize image if necessary
 def resize_image(image, width):
+    """
+    Resize an image down to a maximum width while preserving its aspect ratio.
+    
+    Parameters:
+        image (PIL.Image.Image): Source image to resize.
+        width (int): Target maximum width in pixels; image is only scaled if its width is greater than this value.
+    
+    Returns:
+        PIL.Image.Image: Resized image using Lanczos resampling if scaling was performed, otherwise the original image.
+    """
     if image.width > width:
         ratio = width / image.width
         new_height = int(image.height * ratio)
@@ -32,6 +51,16 @@ def resize_image(image, width):
 
 # Check if file exists in S3
 def file_exists_in_s3(bucket, key):
+    """
+    Check whether an object exists in the specified S3 bucket at the given key.
+    
+    Parameters:
+        bucket (str): Name of the S3 bucket.
+        key (str): S3 object key to check.
+    
+    Returns:
+        bool: `True` if the object exists, `False` otherwise.
+    """
     try:
         s3.head_object(Bucket=bucket, Key=key)
         return True
@@ -40,6 +69,18 @@ def file_exists_in_s3(bucket, key):
 
 # Download image from the given URL
 def download_image(url):
+    """
+    Download an image from the given URL and return it as a PIL Image.
+    
+    Parameters:
+        url (str): The HTTP(S) URL of the image to download.
+    
+    Returns:
+        Image.Image: A PIL Image object opened from the downloaded content.
+    
+    Raises:
+        Exception: If the HTTP GET response status is not 200.
+    """
     response = requests.get(url)
     if response.status_code == 200:
         return Image.open(BytesIO(response.content))
@@ -49,6 +90,18 @@ def download_image(url):
 # Main function to process images
 def process_images(force=False):
     # Scan the DynamoDB table
+    """
+    Process image URLs stored in the DynamoDB table and upload resized JPEGs to S3.
+    
+    Scans all items in the configured DynamoDB table, and for each item with an `imageUrl`:
+    - Computes a deterministic hashed filename and target S3 key.
+    - Skips uploading if the S3 key already exists unless `force` is True.
+    - Downloads the image, resizes it to the configured target width, encodes it as JPEG, and uploads it to the configured S3 bucket with content type `image/jpeg`.
+    - Prints progress messages for skipped, uploaded, and error cases.
+    
+    Parameters:
+    	force (bool): If True, reprocess and upload images even when the target S3 key already exists. Defaults to False.
+    """
     response = table.scan()
     for item in response['Items']:
         image_url = item.get('imageUrl')

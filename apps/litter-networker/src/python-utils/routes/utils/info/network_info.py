@@ -9,6 +9,15 @@ all_info = {
 
 def get_network_info(queryUniqueId):
 
+    """
+    Retrieve network information for a given uniqueId or return the predefined "all" network info.
+    
+    Parameters:
+        queryUniqueId (str): The uniqueId of the network to look up. Use the literal string "all" to retrieve the predefined summary for all networks.
+    
+    Returns:
+        dict: If a matching item exists in the LN-NetworksInfo table, the item's attributes are returned as a dictionary. If no item is found or an error occurs, returns a dictionary with an "Error" key and a descriptive message (e.g., {"Error": "No item found for uniqueId: ..."}).
+    """
     if queryUniqueId=="all":
         global all_info
         return all_info
@@ -38,7 +47,12 @@ def get_network_info(queryUniqueId):
     
 def get_all_network_ids():
    """
-   This function retrieves all uniqueId values from the LN-NetworksInfo table.
+   Retrieve all `uniqueId` values from the LN-NetworksInfo DynamoDB table.
+   
+   Handles DynamoDB scan pagination to collect `uniqueId` from every item in the table.
+   
+   Returns:
+       list: A list of `uniqueId` strings from all items in the LN-NetworksInfo table.
    """
    # Initialize a session using AWS credentials and region.
    dynamodb = boto3.resource('dynamodb')

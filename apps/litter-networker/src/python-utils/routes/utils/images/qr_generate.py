@@ -9,6 +9,17 @@ from routes.utils.images.image_utils import save_image_to_s3, image_exists_on_s3
 
 def generate_qr(network, no_background=False, force_generate=False):
 
+    """
+    Generate a QR code image for the given network and upload it to S3.
+    
+    Parameters:
+    	network (str): Network identifier to encode in the QR (use "all" to encode the base URL without a network suffix).
+    	no_background (bool): If True, remove the image background (make non-black pixels transparent) before saving.
+    	force_generate (bool): If True, regenerate and overwrite the image on S3 even if it already exists.
+    
+    Raises:
+    	Exception: If the remote QR service returns a non-200 response when fetching the QR image.
+    """
     is_all = ( network == "all" )
 
     # firstly let's generate output file-path...    
@@ -44,6 +55,15 @@ def generate_qr(network, no_background=False, force_generate=False):
     save_image_to_s3(image, s3_key)
 
 def remove_background(image):
+    """
+    Convert all non-black pixels in the image to fully transparent.
+    
+    Parameters:
+        image (PIL.Image.Image): Image to process; will be converted to RGBA if needed.
+    
+    Returns:
+        PIL.Image.Image: The same image object with every pixel whose RGB components are not all zero replaced by (0, 0, 0, 0) (fully transparent).
+    """
     image = image.convert("RGBA")
     width, height = image.size
     
@@ -58,6 +78,11 @@ def remove_background(image):
 
 def main():
 
+    """
+    Run QR generation in either single-file or multi-file mode.
+    
+    By default runs in single-file mode and generates a QR with a transparent background for the network "anfieldlitter". In multi-file mode it retrieves all network IDs, iterates with a progress indicator, and generates both background and transparent-background QR images for each network.
+    """
     isSingleFileMode = True
 
     if isSingleFileMode:
@@ -75,4 +100,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

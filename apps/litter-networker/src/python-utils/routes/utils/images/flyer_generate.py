@@ -5,6 +5,19 @@ from routes.utils.images.image_utils import save_image_to_s3, load_image_from_s3
 
 def generate_flyer(net, force_generate=False):
     
+    """
+    Generate and upload a flyer image and its thumbnail for a network to S3.
+    
+    Creates a composed flyer by combining a background and foreground template, overlaying the network QR code, rendering the network name (with automatic scaling and line-wrapping), optional "Litter Network" label, contact email, website URL, and Facebook/branding text. Saves the full-size image and a 1/5-size thumbnail to predetermined S3 paths.
+    
+    Parameters:
+        net (str): Network identifier to generate the flyer for, or the literal "all" to generate the generic flyer.
+        force_generate (bool): If True, regenerate and upload images even if both full and thumbnail already exist on S3. If False, the function exits early when both images are present.
+    
+    Notes:
+        - If required source images, QR image, or font files cannot be opened or loaded, the function prints an error and returns without saving images.
+        - The function has no return value; its observable effect is saving image files to S3.
+    """
     is_all = ( net == "all")
 
     # firstly let's generate output file-paths...
@@ -227,6 +240,12 @@ def generate_flyer(net, force_generate=False):
 
 def main():
 
+    """
+    Entry point that generates flyer images for either a single network or all networks.
+    
+    When configured for single-file mode, invokes generation for the hard-coded network "anfieldlitter".
+    Otherwise, retrieves all network IDs and invokes flyer generation for each, displaying a progress bar during the batch run.
+    """
     isSingleFileMode = True
 
     if isSingleFileMode:
