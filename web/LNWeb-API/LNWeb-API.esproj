@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.1738743">
+  <PropertyGroup>
+    <!--Command to run on project build-->
+    <BuildCommand>
+    </BuildCommand>
+    <!--Command to run on project clean-->
+    <CleanCommand>
+    </CleanCommand>
+    <PackageJsonDirectory>$(MSBuildProjectDirectory)\</PackageJsonDirectory>
+    <StartupCommandWorkingDirectory>$(MSBuildProjectDirectory)\src\</StartupCommandWorkingDirectory>
+    <StartupCommand>
+    </StartupCommand>
+  </PropertyGroup>
+</Project>

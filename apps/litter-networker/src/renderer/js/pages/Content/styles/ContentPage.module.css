@@ -1,0 +1,140 @@
+.pageShell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 32px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.pageSurface {
+  width: 100%;
+  height: 100%;
+  background: var(--color-surface);
+  border-radius: 22px;
+  border: 1px solid var(--color-border);
+  padding: 24px;
+  box-shadow: var(--color-card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 28px;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.pageSubtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.formRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.input {
+  border-radius: 12px;
+  border: 1px solid rgba(24, 34, 54, 0.2);
+  padding: 8px 12px;
+  min-width: 220px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.primaryButton,
+.secondaryButton {
+  border-radius: 14px;
+  border: 1px solid rgba(38, 128, 235, 0.6);
+  background: rgba(38, 128, 235, 0.1);
+  color: #2669d2;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  border-style: dashed;
+}
+
+.cancelButton {
+  border-radius: 14px;
+  border: 1px solid rgba(181, 35, 35, 0.6);
+  background: rgba(181, 35, 35, 0.1);
+  color: #b52323;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.disabledButton {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.logs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+
+.logsTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.logPane {
+  border-radius: 14px;
+  border: 1px solid rgba(24, 34, 54, 0.1);
+  padding: 16px;
+  min-height: 220px;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  position: relative;
+  background: rgba(0, 0, 0, 0.95);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.logPane[data-empty="true"] {
+  justify-content: center;
+}
+
+.logLine {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.message {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

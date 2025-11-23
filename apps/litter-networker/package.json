@@ -1,0 +1,45 @@
+{
+  "name": "litter-networker",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/electron/electron/main/main.js",
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\" \"npm:start:electron\"",
+    "dev:background": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:renderer": "vite dev --host",
+    "dev:electron": "tsc -p src/electron/tsconfig.json --watch",
+    "start:electron": "wait-on dist/electron/electron/main/main.js dist/electron/electron/preload/index.js http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
+    "start:electron:debug": "wait-on dist/electron/electron/main/main.js dist/electron/electron/preload/index.js http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron --inspect=9229 .",
+    "build": "npm run build:renderer && npm run build:electron && npm run copy:python-utils",
+    "build:renderer": "vite build",
+    "build:electron": "tsc -p src/electron/tsconfig.json",
+    "copy:python-utils": "rm -rf dist/python-utils && mkdir -p dist/python-utils && cp -R src/python-utils/* dist/python-utils/",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p src/electron/tsconfig.json"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "^3.936.0",
+    "@aws-sdk/client-cost-explorer": "^3.682.0",
+    "@aws-sdk/client-dynamodb": "^3.540.0",
+    "@aws-sdk/client-s3": "^3.937.0",
+    "@aws-sdk/credential-providers": "^3.936.0",
+    "@aws-sdk/lib-dynamodb": "^3.540.0",
+    "date-fns": "^2.30.0",
+    "node-cache": "^5.1.2",
+    "node-fetch": "^2.7.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/node-fetch": "^2.6.4",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^28.2.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.0",
+    "wait-on": "^7.0.1"
+  }
+}
