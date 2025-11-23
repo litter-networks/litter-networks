@@ -1,0 +1,37 @@
+.placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--color-text-primary);
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 32px 40px;
+  text-align: center;
+  max-width: 420px;
+  box-shadow: var(--color-card-shadow);
+}
+
+.label {
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  color: var(--color-text-primary);
+}
+
+.card p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}

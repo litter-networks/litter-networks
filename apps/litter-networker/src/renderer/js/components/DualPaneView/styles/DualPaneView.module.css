@@ -1,0 +1,119 @@
+.paneGrid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) 4px minmax(0, 1fr);
+  gap: 6px;
+  min-height: 0;
+  height: 100%;
+  align-items: stretch;
+}
+
+.paneCard {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--color-card-shadow);
+  backdrop-filter: blur(6px);
+  min-height: 0;
+  height: 100%;
+}
+
+.paneCardReady {
+  border-color: var(--color-accent);
+  box-shadow: var(--color-card-shadow-strong);
+}
+
+.paneToolbar {
+  padding: 14px 16px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.paneUrlField {
+  flex: 1;
+  display: flex;
+}
+
+.paneUrlField input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
+  padding: 8px 12px;
+  height: 36px;
+}
+
+.ghostButton {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  width: 34px;
+  height: 34px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 0;
+}
+
+.splitHandle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: col-resize;
+  user-select: none;
+  height: 100%;
+}
+
+.splitHandle span {
+  width: 4px;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(58, 141, 255, 0.6), rgba(122, 198, 255, 0.85));
+  box-shadow: 0 0 12px rgba(58, 141, 255, 0.5);
+  opacity: 0;
+  transform: scaleX(0.4);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.splitHandle:hover span,
+.splitHandle:focus-visible span,
+.splitHandleDragging span {
+  opacity: 1;
+  box-shadow: 0 0 18px rgba(124, 233, 255, 0.9);
+  transform: scaleX(1);
+}
+
+.splitHandleReady span {
+  box-shadow: 0 0 16px var(--color-accent);
+}
+
+.webviewFrame {
+  flex: 1;
+  border: none;
+  background: var(--color-bg);
+}
+
+.paneContent {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.paneContent > * {
+  flex: 1;
+  min-height: 0;
+}
+
+.prefetchWebview {
+  display: none;
+}
