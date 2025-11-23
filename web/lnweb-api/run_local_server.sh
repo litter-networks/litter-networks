@@ -11,6 +11,7 @@ if [ ! -d "node_modules" ]; then
 fi
 
 export NODE_PATH="$SCRIPT_DIR/lambda-layer/nodejs/node_modules:$SCRIPT_DIR/node_modules"
+export AWS_PROFILE="${AWS_PROFILE:-ln}"
 
 echo "Starting LNWeb-API locally on http://local.litternetworks.org:8080 ..."
 exec node src/server.js
