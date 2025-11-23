@@ -5,7 +5,12 @@ const NodeCache = require("node-cache");
 // Initialize the DynamoDB client
 const dynamoDBClient = new DynamoDBClient({ region: 'eu-west-2' });
 
-const cacheForNews = new NodeCache({ stdTTL: 5 * 60 }); // Cache for news batches (5 min limit)
+const cacheForNews = new NodeCache({ stdTTL: 5 * 60 }); /**
+ * Produce a short, deterministic identifier for an image URL.
+ *
+ * @param {string} url - The input URL to hash.
+ * @returns {string} The first 16 hexadecimal characters of the SHA-256 hash of the input URL.
+ */
 
 function hashImageUrl(url) {
     return createHash('sha256').update(url).digest('hex').slice(0, 16);

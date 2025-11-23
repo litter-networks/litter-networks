@@ -2,6 +2,14 @@ const express = require("express");
 const router = express.Router();
 const networksInfo = require("../utils/networks-info");
 
+/**
+ * Create and configure an Express router with a GET /districts/:districtId/local-info endpoint.
+ *
+ * The endpoint validates the presence of `districtId` path parameter, looks up district local
+ * information by case-insensitive `uniqueId`, and returns the matching info as JSON.
+ *
+ * @returns {import('express').Router} The configured Express router.
+ */
 async function initializeRoutes() {
     router.get("/districts/:districtId/local-info", async (req, res) => {
         try {

@@ -6,14 +6,11 @@ const cache = new NodeCache({ stdTTL: 5 * 60 });
 const dynamoDb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: "eu-west-2" }));
 
 /**
- * Determine whether a network belongs to a particular district.
+ * Check if a network's district list includes the specified district.
  *
- * `districtId` is stored as a comma-separated string (e.g. "district-1,district-2") to support
- * networks spanning multiple districts, so we split and compare IDs exactly.
- *
- * @param {string | null | undefined} networkDistrictId
- * @param {string} targetDistrictId
- * @returns {boolean}
+ * @param {string|null|undefined} networkDistrictId - Comma-separated district IDs (e.g. "district-1,district-2"); may be null or undefined.
+ * @param {string} targetDistrictId - District ID to check for.
+ * @returns {boolean} `true` if `targetDistrictId` is present in `networkDistrictId`, `false` otherwise.
  */
 function isNetworkInDistrict(networkDistrictId, targetDistrictId) {
     if (typeof networkDistrictId !== "string" || !targetDistrictId) {
@@ -27,11 +24,32 @@ function isNetworkInDistrict(networkDistrictId, targetDistrictId) {
         .some((id) => id === targetDistrictId);
 }
 
+/**
+ * Retrieve all items from a DynamoDB table using a Scan operation.
+ * @param {string} tableName - The name of the DynamoDB table to scan.
+ * @returns {Array<Object>} The array of items from the table, or an empty array if none are found.
+ */
 async function fetchTable(tableName) {
     const data = await dynamoDb.send(new ScanCommand({ TableName: tableName }));
     return data.Items || [];
 }
 
+/**
+ * Builds and returns aggregated area information for all districts, including each district's networks and associated map details.
+ *
+ * The result is cached in memory under the key "areaInfo" to avoid repeated table scans.
+ *
+ * @returns {Array<Object>} An array of district objects. Each district has:
+ *  - mapName: string (lowercased, spaces replaced with underscores)
+ *  - mapStyle: string (formatted as "zone-style-<mapStyle>")
+ *  - uniqueId: string
+ *  - fullName: string
+ *  - networks: Array<Object> where each network object contains:
+ *      - uniqueId: string
+ *      - fullName: string
+ *      - mapSource: string ('custom' if not provided)
+ *      - mapFile: string|null
+ */
 async function getAreaInfo() {
     const cached = cache.get("areaInfo");
     if (cached) {

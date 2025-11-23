@@ -2,7 +2,11 @@
 
 const initializeApp = require('./app');
 
-// Initialize the app and start the server
+/**
+ * Initialize the application and start an HTTP server on localhost:8080.
+ *
+ * Starts a startup timer and logs initialization progress. On successful initialization, begins listening on 127.0.0.1:8080 and ends the timer; on failure, logs the error and exits the process with code 1.
+ */
 async function startServer() {
     try {
         console.time('App startup time');

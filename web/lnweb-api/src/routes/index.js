@@ -4,6 +4,16 @@ const router = express.Router();
 const { setCacheControl, setNoCache } = require("../utils/cache-control");
 
 
+/**
+ * Create and configure the main Express router, mounting sub-routers and applying per-route cache policies.
+ *
+ * Configures a root GET endpoint that returns a welcome message, mounts a no-cache `/user` router for
+ * authentication endpoints, mounts cached routers for `/info`, `/maps`, `/news`, `/stats`, `/knowledge`
+ * and `/join-in` (client max-age 300 seconds, CDN s-maxage 86400 seconds), and adds a 404 fallback for unknown paths.
+ * The function logs start and completion messages and returns the configured router instance.
+ *
+ * @returns {import('express').Router} The configured Express router.
+ */
 async function initializeRoutes() {
 
     console.log("Routes initializing...");

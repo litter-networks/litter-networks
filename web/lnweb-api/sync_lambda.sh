@@ -4,7 +4,7 @@ set -e  # Exit immediately if a command exits with a non-zero status
 
 clear
 
-# Function to handle errors
+# on_error prints an error message indicating which `current_stage` failed and notifies that the script is exiting.
 function on_error() {
     echo "Error: The script failed during the '$current_stage' stage. Exiting..."
 }
@@ -18,7 +18,7 @@ LAMBDA_DEPLOY=${LAMBDA_DEPLOY:-true}
 # Start time for the entire script
 start_time=$(date +%s)
 
-# Function to calculate and print elapsed time
+# print_time_taken prints the elapsed time in seconds since the given start time and echoes "<label> took <seconds> seconds."
 function print_time_taken() {
     end_time=$(date +%s)
     elapsed=$(( end_time - $1 ))
