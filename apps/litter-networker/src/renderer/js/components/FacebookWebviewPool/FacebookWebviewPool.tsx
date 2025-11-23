@@ -25,6 +25,17 @@ type Props = {
   onRegisterReload?: (fn: () => void) => void;
 };
 
+/**
+ * Render a small pool of WebView elements that keep the active entry loaded and prefetch a few neighbor entries.
+ *
+ * Renders up to POOL_SIZE webviews, ensures the active entry's URL is always used for the visible view, exposes a reload hook for the active view via `onRegisterReload`, and reports loaded-state changes for the active and neighbor network IDs through `onStatusChange`.
+ *
+ * @param active - The entry that must be shown as the active/visible network (its `url` is always used for the active webview).
+ * @param neighbors - Optional list of additional entries to prefetch; duplicates by `networkId` are ignored and the list is capped at the pool size.
+ * @param onStatusChange - Optional callback invoked with a map from `networkId` to `true`/`false` indicating whether that network's webview has finished loading; called only when the status signature changes.
+ * @param onRegisterReload - Optional callback used to register a function that will reload the currently active webview when invoked.
+ * @returns A React element containing the stacked webviews used for active display and background prefetching.
+ */
 export default function FacebookWebviewPool({
   active,
   neighbors = [],

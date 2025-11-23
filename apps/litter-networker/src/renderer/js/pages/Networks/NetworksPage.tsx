@@ -36,6 +36,13 @@ const getDetailHtml = (row: NetworksResponse["rows"][number]) => {
 const getDetailBlocks = (row: NetworksResponse["rows"][number]) =>
   getDetailHtml(row).map((html) => ({ html }));
 
+/**
+ * Render the Networks page: an inline-editable table UI for viewing and managing network records.
+ *
+ * Presents a filterable list of network rows with per-row inline editing, per-row commit status indicators, an add-new-row form, delete actions, and expandable detail panels that render HTML blocks. Data is sourced from the networks data hook and mutations are performed via the host API; the component refreshes its data after successful changes.
+ *
+ * @returns The React element containing the networks table, controls, and detail drawers.
+ */
 export default function NetworksPage() {
   const { data, loading, error, refresh } = useNetworksData();
   const [openDetails, setOpenDetails] = useState<Set<string>>(new Set());

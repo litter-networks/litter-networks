@@ -32,6 +32,17 @@ const MAX_LEFT_RATIO = 0.9;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
 
+/**
+ * Renders a resizable two-pane layout with a draggable vertical split and optional per-pane overrides.
+ *
+ * @param leftPane - Configuration for the left pane (id, title, url).
+ * @param rightPane - Configuration for the right pane (id, title, url).
+ * @param leftOverride - If provided, replaces the left pane's webview with a FacebookWebviewPool and supplies override `url`, `networkId`, optional `prefetch` neighbors, and reload/status hooks.
+ * @param rightOverride - If provided, overrides the right pane's displayed `url`.
+ * @param prefetchStatus - Optional object describing prefetch readiness used to adjust split-handle styling.
+ * @param leftExtras - Optional React nodes rendered as toolbar extras in the left pane.
+ * @returns The rendered dual-pane React element with a draggable split handle and persisted split ratio.
+ */
 export default function DualPaneView({
   leftPane,
   rightPane,
@@ -168,7 +179,21 @@ export default function DualPaneView({
 
 // --------------------------------------------------------------------
 // Subcomponent — Panel
-// --------------------------------------------------------------------
+/**
+ * Render a pane containing a toolbar (reload button, URL display, optional extras) and content.
+ *
+ * The toolbar shows `urlOverride` if provided; otherwise it shows `pane.url`. Clicking the reload
+ * button calls `onReload` when supplied; if `onReload` is not provided, the component attempts to
+ * call `reload()` on the internal webview element.
+ *
+ * @param pane - Pane configuration (id, title, url) used as the default content and URL.
+ * @param urlOverride - Optional URL to display and load instead of `pane.url`.
+ * @param body - Optional custom React node to render as the pane's content; when omitted a webview pointing to the effective URL is rendered.
+ * @param onReload - Optional callback invoked when the reload button is clicked; if omitted the webview's `reload()` method is used when available.
+ * @param className - Optional additional class name(s) applied to the pane container.
+ * @param toolbarExtras - Optional React node(s) rendered in the toolbar alongside the URL field and reload button.
+ * @returns The rendered pane section element.
+ */
 
 function Panel({
   pane,

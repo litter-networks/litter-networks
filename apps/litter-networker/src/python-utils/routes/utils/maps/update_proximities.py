@@ -7,6 +7,14 @@ from tqdm import tqdm
 from datetime import datetime
 
 def get_dynamodb_items():
+    """
+    Retrieve all items from the LN-NetworksMapInfo DynamoDB table.
+    
+    This performs one or more scan requests (handling pagination via LastEvaluatedKey) to collect every item.
+    
+    Returns:
+        list: A list of DynamoDB items in the low-level attribute-value format (each item is a dict as returned by boto3's scan).
+    """
     dynamodb = boto3.client('dynamodb', region_name='eu-west-2')
     table_name = 'LN-NetworksMapInfo'
     response = dynamodb.scan(TableName=table_name)
@@ -23,6 +31,17 @@ def get_dynamodb_items():
 
 def write_dynamodb_items(results):
     # Set up DynamoDB resource
+    """
+    Write proximity results to the LN-NetworksProximityInfo DynamoDB table.
+    
+    Each entry in `results` is upserted as an item with keys:
+    - `uniqueId`: the item identifier (table primary key),
+    - `nearbyNetworks`: JSON string of the nearby networks list,
+    - `lastUpdated`: timestamp in "YYYY-MM-DD HH:MM:SS" format (UTC-local time of invocation).
+    
+    Parameters:
+        results (dict): Mapping from `uniqueId` (str) to a sequence or structure describing nearby networks for that id.
+    """
     dynamodb = boto3.resource('dynamodb', region_name='eu-west-2')
     table = dynamodb.Table('LN-NetworksProximityInfo')
 
@@ -44,6 +63,11 @@ def write_dynamodb_items(results):
         )
 
 def update_proximities():
+    """
+    Update nearest-network proximities for all maps: read map metadata from DynamoDB, fetch GeoJSON geometries from S3, compute pairwise distances, and write each map's five closest neighbors back to DynamoDB.
+    
+    For each DynamoDB item with a map source, the function loads the corresponding GeoJSON from S3, derives either a centroid for polygonal geometries or uses geometry nearest points otherwise, computes geodesic distances (miles) between items, selects the five nearest neighbors per item (rounded to three decimals), and persists the results to the proximity DynamoDB table. Items with missing mapSource or invalid/missing GeoJSON geometries are skipped and reported.
+    """
     dynamodb_items = get_dynamodb_items()
     s3 = boto3.client('s3', region_name='eu-west-2')
 

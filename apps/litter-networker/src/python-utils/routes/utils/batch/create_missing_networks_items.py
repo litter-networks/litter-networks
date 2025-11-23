@@ -15,11 +15,13 @@ import concurrent.futures
 
 def create_missing_networks_items(specific_network="", force_generate=False):
     """
-    Creates missing network items based on the provided specific network or all networks.
-
+    Generate any missing QR codes, flyer images, and logo images for the given network(s), then update global proximity mappings.
+    
+    When a specific network uniqueId is provided, only that network and a global "all" group are processed; otherwise all networks and the "all" group are processed. After ensuring assets exist (or are regenerated when requested), proximity information is updated globally.
+    
     Args:
-        specific_network (str, optional): The specific network to process. Defaults to "".
-        force_generate (bool, optional): Whether to force generate items. Defaults to False.
+        specific_network (str, optional): UniqueId of a single network to process. If empty, all networks are processed. Defaults to "".
+        force_generate (bool, optional): If True, existing assets will be regenerated; if False, existing assets will be left intact when possible. Defaults to False.
     """
     
     if specific_network:
@@ -76,6 +78,9 @@ def create_missing_networks_items(specific_network="", force_generate=False):
     update_proximities()
 
 def main():
+    """
+    Run generation of missing network assets using default options.
+    """
     create_missing_networks_items()
 
 

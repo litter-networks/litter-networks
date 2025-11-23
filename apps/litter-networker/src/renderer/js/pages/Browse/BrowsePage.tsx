@@ -16,6 +16,13 @@ const preserveSubPath = (prev: string | null, nextBase: string) => {
   return `${nextBase.replace(/\/$/, "")}${tail}`;
 };
 
+/**
+ * Render the main Browse page for navigating networks, applying bag counts, and viewing dual-pane content.
+ *
+ * Manages network selection and URL preservation, per-network bag counting and stats refresh, mock-mode synchronization with main, adjacent-network prefetching, and keyboard navigation; composes NetworkNavigation, BagCounter, and DualPaneView with appropriate overrides and prefetch status handling.
+ *
+ * @returns The rendered Browse page React element.
+ */
 export default function BrowsePage() {
   const { snapshot, loading, refresh } = useAppSnapshot();
   const [selectedNetwork, setSelectedNetwork] = useState<string>();

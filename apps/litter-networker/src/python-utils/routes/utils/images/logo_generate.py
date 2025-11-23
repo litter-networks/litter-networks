@@ -19,6 +19,16 @@ class ImageStyle(Enum):
 def generate_logo(net, image_style=ImageStyle.BANNER_ON_WHITE, force_generate=False):
 
     # Determine the base directory where the script is located
+    """
+    Generate and upload a styled network logo and a thumbnail to S3.
+    
+    Creates a full-size PNG and a thumbnail PNG for the given network ID using the specified ImageStyle, rendering the network display name (from `logoName` or `fullName`, split on "|" into separate lines), a centered "litternetworks.org" URL line, and an optional "Volunteer" label for volunteer styles. If both output files already exist on S3 and `force_generate` is False, the function returns without modifying remote assets. The final images are uploaded to S3 at paths of the form `proc/images/resources/logo/logo-{net}{extra_tokens}.png` and `...-thumb.png`.
+    
+    Parameters:
+        net (str): Network identifier used to look up display name and to name output files.
+        image_style (ImageStyle): Visual style to apply (controls template, colors, scaling, and whether a "Volunteer" label is included).
+        force_generate (bool): If True, regenerate and upload images even if they already exist on S3; if False, skip generation when both files are present.
+    """
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
     # General settings
@@ -168,6 +178,11 @@ def generate_logo(net, image_style=ImageStyle.BANNER_ON_WHITE, force_generate=Fa
 
 def main():
 
+    """
+    Generate logo images for networks in all predefined styles and upload them to S3.
+    
+    When run in single-file mode (isSingleFileMode = True) this generates logos only for the hard-coded network "anfieldlitter". In the default mode it retrieves all network IDs via get_all_network_ids(), iterates them with a tqdm progress bar, and calls generate_logo for each network for the following ImageStyle values: BANNER_ON_WHITE, BANNER_ON_GREEN, BLACK_AND_WHITE, BLACK_AND_WHITE_VOLUNTEER, GREEN, GREEN_ALPHA, GREEN_ALPHA_VOLUNTEER, and WHITE_ALPHA. The local flags isSingleFileMode and isForceGenerate (both False by default) control single-network processing and whether generation is forced even if outputs already exist.
+    """
     isSingleFileMode = False
     isForceGenerate = False
 
