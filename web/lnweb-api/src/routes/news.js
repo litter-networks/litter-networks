@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 
@@ -6,6 +5,12 @@ const newsController = require("../controllers/news-controller.js");
 
 const cdnHost = "https://cdn.litternetworks.org";
 
+/**
+ * Create and configure Express routes for the news endpoints.
+ *
+ * Configures a JSON endpoint for fetching press cuttings and two legacy CSV endpoints.
+ * @returns {import('express').Router} The Express Router instance with configured news routes.
+ */
 function initializeRoutes() {
 
     // news:

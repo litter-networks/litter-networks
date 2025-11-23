@@ -1,4 +1,4 @@
-﻿const { Issuer } = require("openid-client");
+const { Issuer } = require("openid-client");
 const jwt = require("jsonwebtoken");
 const jwkToPem = require("jwk-to-pem");
 const axios = require("axios");
@@ -23,6 +23,13 @@ let clientInstance = null;
 let cachedSigningKeys = null;
 const secureCookies = true;
 
+/**
+ * Retrieve a decrypted parameter value from AWS SSM Parameter Store.
+ *
+ * @param {string} parameterName - The name or path of the parameter in SSM.
+ * @returns {string} The parameter's decrypted value.
+ * @throws {Error} If the parameter cannot be retrieved or decryption fails.
+ */
 async function getParameterFromStore(parameterName) {
     const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
     const ssmClient = new SSMClient({ region: "eu-west-2" });
@@ -37,7 +44,13 @@ async function getParameterFromStore(parameterName) {
     }
 }
 
-// 🔄 Initialize OpenID Client
+/**
+ * Create and cache the OpenID Connect client for the configured Cognito user pool.
+ *
+ * Initializes an OpenID client via discovery and stores a singleton instance for reuse.
+ * @returns {import('openid-client').Client} The initialized OpenID client instance.
+ * @throws {Error} If discovery of the issuer or client initialization fails.
+ */
 async function initializeAuth() {
     if (clientInstance) return clientInstance;
 
@@ -62,7 +75,14 @@ async function initializeAuth() {
     return clientInstance;
 }
 
-// 🔄 Fetch Cognito Public Keys for JWT Verification
+/**
+ * Retrieve and cache the Cognito JSON Web Key Set (JWKS) used to verify JWT signatures.
+ *
+ * Fetches the JWKS from the Cognito user pool's .well-known endpoint on first call and caches
+ * the `keys` array for subsequent calls to avoid repeated network requests.
+ *
+ * @returns {Array<Object>} The Cognito JWKS `keys` array (cached after the first fetch).
+ */
 async function fetchCognitoSigningKeys() {
     if (!cachedSigningKeys) {
         const url = `https://cognito-idp.${REGION}.amazonaws.com/${USER_POOL_ID}/.well-known/jwks.json`;
@@ -72,7 +92,11 @@ async function fetchCognitoSigningKeys() {
     return cachedSigningKeys;
 }
 
-// 🔄 Refresh Token Function
+/**
+ * Exchanges a Cognito refresh token for a new token set.
+ * @param {string} refreshToken - The refresh token previously issued by Cognito.
+ * @returns {object|null} The token set returned by Cognito (for example `id_token`, `access_token`, `refresh_token`, `expires_in`) or `null` if the refresh failed.
+ */
 async function refreshCognitoSession(refreshToken) {
     try {
         const response = await axios.post(
@@ -93,6 +117,12 @@ async function refreshCognitoSession(refreshToken) {
     }
 }
 
+/**
+ * Verify the request's Cognito ID token (refreshing it when expired) and attach the token payload to `req.user`.
+ * 
+ * @param {Object} req - Express request object containing cookies (`lnweb_auth_data`, `lnweb_refresh`). On successful verification, `req.user` is set to the decoded token payload.
+ * @returns {boolean} `true` if the request contains a valid Cognito ID token (or the token was successfully refreshed and verified), `false` otherwise.
+ */
 async function isUserAuthenticated(req) {
     let idToken = req.cookies?.lnweb_auth_data;
     const refreshToken = req.cookies?.lnweb_refresh;
@@ -148,6 +178,9 @@ async function isUserAuthenticated(req) {
     }
 }
 
+/**
+ * Express middleware that ensures the incoming request is authenticated; calls `next()` when authenticated and responds with a 401 JSON error when not.
+ */
 async function validateAuthToken(req, res, next) {
     if (await isUserAuthenticated(req)) {
         return next(); // Proceed to next middleware/route
@@ -155,7 +188,11 @@ async function validateAuthToken(req, res, next) {
     res.status(401).json({ isAuthenticated: false, error: "Access Denied" });
 }
 
-// 🔄 Business Logic Functions
+/**
+ * Initiates the OpenID Connect login flow by creating state and nonce, persisting them in a secure cookie, and redirecting the client to the provider's authorization URL.
+ *
+ * The function sets a httpOnly, secure, SameSite=Strict cookie named `lnweb_auth_state` containing the `state` and `nonce` and then issues an HTTP redirect to the generated authorization URL.
+ */
 async function handleLogin(req, res) {
     const client = await initializeAuth();
     if (!client) return res.status(500).send("Authentication service unavailable.");
@@ -173,6 +210,11 @@ async function handleLogin(req, res) {
     res.redirect(authUrl);
 }
 
+/**
+ * Handles the OpenID Connect callback: exchanges the authorization code for tokens, stores the ID token in a secure cookie, persists the refresh token temporarily in DynamoDB, and redirects to the refresh-cookie route.
+ *
+ * On success this sets a secure, HttpOnly cookie `lnweb_auth_data` containing the ID token, stores the refresh token in the `LNWeb-TempTokens` DynamoDB table keyed by a SHA-256 hash of the ID token (expires in 10 minutes), and redirects the client to `/api/user/login-set-refresh-cookie`. If the previously-stored auth state cookie is missing, responds with HTTP 400 and a JSON error.
+ */
 async function handleLoginCallback(req, res) {
     const client = await initializeAuth();
     const params = client.callbackParams(req);
@@ -206,6 +248,14 @@ async function handleLoginCallback(req, res) {
     res.redirect("/api/user/login-set-refresh-cookie");
 }
 
+/**
+ * Exchanges a temporary refresh token stored in DynamoDB for a persistent refresh cookie and redirects to clear auth state.
+ *
+ * Reads the ID token from the `lnweb_auth_data` cookie, computes its SHA-256 hash to locate a one-time refresh token in the `LNWeb-TempTokens` DynamoDB table, deletes that table entry, sets the `lnweb_refresh` httpOnly secure cookie, and redirects to `/api/user/login-clear-state-cookie`. Responds with 400 if the ID token or refresh token is missing, and 500 on unexpected errors.
+ *
+ * @param {import('express').Request} req - Express request; expects `req.cookies.lnweb_auth_data`.
+ * @param {import('express').Response} res - Express response used to set cookies, send error responses, or redirect.
+ */
 async function handleSetRefreshCookie(req, res) {
     try {
         const idToken = req.cookies?.lnweb_auth_data;
@@ -248,6 +298,12 @@ async function handleSetRefreshCookie(req, res) {
     }
 }
 
+/**
+ * Clears the stored OpenID auth state cookie and redirects the client to the root path.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object used to clear the cookie and perform the redirect.
+ */
 function handleClearStateCookie(req, res) {
     res.clearCookie("lnweb_auth_state", { httpOnly: true, secure: secureCookies, sameSite: "Strict", path: "/" });
 
@@ -256,12 +312,24 @@ function handleClearStateCookie(req, res) {
 }
 
 
+/**
+ * Clears the ID token cookie and continues the logout flow.
+ *
+ * Removes the `lnweb_auth_data` HTTP-only cookie and redirects the client to
+ * `/api/user/logout-clear-refresh-cookie` to complete refresh-cookie cleanup and sign-out.
+ */
 function handleLogout(req, res) {
     res.clearCookie("lnweb_auth_data", { httpOnly: true, secure: secureCookies, sameSite: "Strict" });
 
     res.redirect("/api/user/logout-clear-refresh-cookie");
 }
 
+/**
+ * Clear the refresh-token cookie and redirect the client to the Cognito logout endpoint.
+ *
+ * Clears the `lnweb_refresh` cookie (HttpOnly, secure, SameSite = "Strict", path = "/")
+ * and redirects the response to the configured Cognito logout URL with `client_id` and `logout_uri`.
+ */
 function handleClearRefreshCookie(req, res) {
     res.clearCookie("lnweb_refresh", { httpOnly: true, secure: secureCookies, sameSite: "Strict", path: "/" });
 

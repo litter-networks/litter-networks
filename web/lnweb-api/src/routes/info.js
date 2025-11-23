@@ -1,7 +1,15 @@
-
 const express = require("express");
 const router = express.Router();
 
+/**
+ * Create and configure an Express router with legacy CSV endpoints and modern network info routes.
+ *
+ * Configures legacy CSV routes for district and network exports and adds:
+ * - GET /networks to return all networks
+ * - GET /networks/:networkId/nearby to return nearby networks for a given networkId
+ *
+ * @returns {import('express').Router} The configured Express router instance.
+ */
 async function initializeRoutes() {
 
     // ===========================================================================================

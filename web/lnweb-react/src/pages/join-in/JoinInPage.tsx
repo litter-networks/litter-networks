@@ -13,13 +13,13 @@ interface InfoBlock {
 }
 
 /**
- * Render the "Join In" page presenting local participation resources and contact options.
+ * Render the Join In page with local participation resources and contact options.
  *
- * Displays a page title, a loading notice while district data is fetched, guidance when no network
- * is selected, and a list of resource/action blocks (e.g., bag disposal, reporting, recycling,
- * scrap-metal merchants, contact) tailored to the selected network's local information.
+ * Shows the page title, a loading notice while district data is fetched, guidance when no
+ * network is selected, and a list of resource/action blocks (e.g., bag disposal, reporting,
+ * recycling, scrap-metal merchants, contact) tailored to the selected network's local information.
  *
- * @returns The page's JSX containing the title, conditional notices, and a list of resource/action blocks appropriate to the current network.
+ * @returns A React element containing the title, any conditional notices, and the list of resource/action blocks appropriate to the current network.
  */
 export function JoinInPage() {
   const { network } = useNavData();
@@ -216,6 +216,12 @@ function buildBlocks(info: DistrictLocalInfo | null): InfoBlock[] {
   return blocks;
 }
 
+/**
+ * Parse a district's local scrap metal links field into a validated array of merchant records.
+ *
+ * @param value - The raw `localScrapMetalUrls` value which may be an array, a JSON string, or other type.
+ * @returns An array of objects each containing `name` and `url`; returns an empty array if the input is missing, invalid, or cannot be parsed.
+ */
 function parseScrapMerchantLinks(value: DistrictLocalInfo['localScrapMetalUrls']) {
   if (!value) {
     return [];

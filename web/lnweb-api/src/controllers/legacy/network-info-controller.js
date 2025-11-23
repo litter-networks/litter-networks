@@ -1,7 +1,12 @@
 const NetworksInfo = require("../../utils/networks-info.js");
 
 
-// Helper function to generate CSV content
+/**
+ * Builds a CSV string from an array of headers and rows.
+ * @param {string[]} headers - Ordered column names.
+ * @param {Array<Array<any>>} rows - Array of rows, each row being an array of field values corresponding to headers.
+ * @returns {string} The CSV content where each field is wrapped in double quotes and internal double quotes are escaped. 
+ */
 function generateCsv(headers, rows) {
     const csvBuilder = [];
     
@@ -21,7 +26,11 @@ function generateCsv(headers, rows) {
     return csvBuilder.join('\n');
 }
 
-// Helper function to gather all unique headers from all records
+/**
+ * Collects all unique property names from an array of record objects.
+ * @param {Object[]} records - Array of objects to extract keys from.
+ * @returns {string[]} Array of unique header names found across all records.
+ */
 function gatherHeaders(records) {
     const headersSet = new Set();
     records.forEach(record => {
@@ -32,7 +41,11 @@ function gatherHeaders(records) {
     return Array.from(headersSet); // Convert the Set back to an array
 }
 
-// Route handler function to get districts as CSV
+/**
+ * Responds with a CSV containing all districts.
+ *
+ * Retrieves all districts, constructs a CSV with dynamically gathered headers and rows, and sends it with Content-Type `text/csv`. On failure sends HTTP 500 with the error message.
+ */
 async function getDistrictsCsv(req, res) {
     try {
         const districts = await NetworksInfo.getAllDistricts();
@@ -55,7 +68,13 @@ async function getDistrictsCsv(req, res) {
     }
 }
 
-// Route handler function to get districts local info as CSV
+/**
+ * Send all districts' local information as a CSV response.
+ *
+ * Retrieves all district-local-info records, infers CSV headers from the union of object keys,
+ * generates CSV rows aligned to those headers, sets Content-Type to `text/csv`, and sends the CSV.
+ * On error responds with HTTP 500 and an error message.
+ */
 async function getDistrictsLocalInfoCsv(req, res) {
     try {
         const districtsLocalInfos = await NetworksInfo.getAllDistrictLocalInfos();
@@ -78,7 +97,15 @@ async function getDistrictsLocalInfoCsv(req, res) {
     }
 }
 
-// Route handler function to get networks as CSV
+/**
+ * Send all networks as a CSV response.
+ *
+ * Fetches all networks, builds a CSV with headers gathered from the network objects (ensuring
+ * `contactEmail` and `aboutText` are present), injects specific `contactEmail`/`aboutText` values
+ * for known networks by `uniqueId`, and returns the CSV with Content-Type `text/csv`.
+ *
+ * On failure, responds with HTTP 500 and an error message.
+ */
 async function getNetworksCsv(req, res) {
     try {
         const networks = await NetworksInfo.getAllNetworks();
@@ -147,4 +174,3 @@ async function getNetworksCsv(req, res) {
 
 // Export the functions to register them in the router
 module.exports = {  getDistrictsCsv, getDistrictsLocalInfoCsv, getNetworksCsv  };
-

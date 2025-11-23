@@ -1,10 +1,19 @@
-﻿const express = require("express");
+const express = require("express");
 const cookieParser = require('cookie-parser');
 
 console.log(`LNWeb-API - Running Node.js version: ${process.version}`);
 
 const app = express();
 
+/**
+ * Recursively logs HTTP methods and paths for an Express router layer and its sub-routers.
+ *
+ * Inspects a single Express router/route layer and prints any direct route's methods and path,
+ * recursing into nested router stacks while applying an accumulated path prefix.
+ *
+ * @param {object} layer - An Express router or route layer (from app._router.stack or router.stack).
+ * @param {string} [prefix=""] - Accumulated path prefix for nested routers.
+ */
 function debugListRoutes(layer, prefix = "") {
     if (layer.route) {
         // Direct route (GET, POST, etc.)
@@ -17,6 +26,13 @@ function debugListRoutes(layer, prefix = "") {
     }
 }
 
+/**
+ * Configure middleware, routing, and error handling on the shared Express `app` instance.
+ *
+ * Applies cookie parsing, CORS restricted to origins under `litternetworks.org`, JSON body parsing,
+ * a request logging middleware, mounts routes from `./routes/index` at `/`, adds a 404 fallback
+ * for unmatched routes, and a terminal error-handling middleware that logs and responds with a 500.
+ */
 async function setupMiddleware() {
 
     console.log("Setting up middleware...");

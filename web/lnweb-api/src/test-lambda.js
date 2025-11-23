@@ -1,4 +1,10 @@
-const { lambdaHandler } = require('./lambda'); // Adjust if your handler is in a different file
+const { lambdaHandler } = require('./lambda'); /**
+ * Simulates an API Gateway invocation of the local `lambdaHandler` for manual testing.
+ *
+ * Builds a configurable API Gateway–style event, invokes `lambdaHandler` with an empty context,
+ * and logs the response or any error. Adjust `httpMethod`, `rawPath`, `headers`,
+ * `queryStringParameters`, and `body` in the event to test different requests.
+ */
 
 async function testLambda() {
     // Simulated API Gateway event

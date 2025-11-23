@@ -1,8 +1,13 @@
-
 const express = require("express");
 const router = express.Router();
 const networksInfo = require("../utils/networks-info.js");
 
+/**
+ * Create and configure an Express Router with endpoints that provide bag and network statistics.
+ *
+ * Registers routes for fetching bag information, a network/district summary, and a legacy bag-stats JSON endpoint.
+ * @returns {import('express').Router} The configured Express Router with the registered statistics routes.
+ */
 async function initializeRoutes() {
 
     // bag-stats (being used by stats pages - so not deprecated):
