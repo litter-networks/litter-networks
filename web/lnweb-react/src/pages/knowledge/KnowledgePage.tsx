@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { fetchKnowledgeChildPages, fetchKnowledgePage, type KnowledgeChildPage } from '@/data-sources/knowledge';
 import { usePageTitle } from '@/shared/usePageTitle';
 import { KnowledgeContents } from './components/KnowledgeContents';
+import DOMPurify from 'dompurify';
 import styles from './styles/knowledge.module.css';
 
 const CONTENT_PLACEHOLDER = '{{knowledge-base-contents}}';
@@ -141,11 +142,7 @@ export function KnowledgePage() {
         ) : (
           blocks.map((block, index) =>
             block.type === 'html' ? (
-              <div
-                key={`html-${index}`}
-                className={styles.htmlBlock}
-                dangerouslySetInnerHTML={{ __html: block.html ?? '' }}
-              />
+              renderHtmlBlock(block.html, `/${filterString}`, index)
             ) : (
               <KnowledgeContents
                 key={`contents-${index}`}
@@ -177,6 +174,191 @@ function updateInternalLinks(html: string, base: string) {
     const normalized = `${base}${url}`.replace(/\/+/g, '/');
     return `href="${normalized}"`;
   });
+}
+
+const SAFE_IFRAME_HOSTS = new Set(['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com']);
+
+const SANITIZE_CONFIG: import('dompurify').Config = {
+  ALLOWED_TAGS: [
+    'a',
+    'b',
+    'blockquote',
+    'br',
+    'caption',
+    'code',
+    'div',
+    'em',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'i',
+    'img',
+    'iframe',
+    'li',
+    'ol',
+    'p',
+    'pre',
+    'strong',
+    'span',
+    'small',
+    'sub',
+    'sup',
+    'summary',
+    'details',
+    'u',
+    'ul',
+    'table',
+    'tbody',
+    'td',
+    'th',
+    'tr',
+    'dl',
+    'dt',
+    'dd',
+  ],
+  ALLOWED_ATTR: [
+    'href',
+    'target',
+    'rel',
+    'title',
+    'class',
+    'id',
+    'src',
+    'alt',
+    'style',
+    'width',
+    'height',
+    'role',
+    'aria-label',
+    'allow',
+    'allowfullscreen',
+    'frameborder',
+  ],
+  FORBID_TAGS: ['script'],
+  ALLOW_DATA_ATTR: false,
+  RETURN_TRUSTED_TYPE: false,
+};
+
+function renderHtmlBlock(html: string | undefined, linkBase: string, index: number) {
+  const safeHtml = sanitizeKnowledgeHtml(html, linkBase);
+  if (!safeHtml) {
+    return (
+      <div key={`html-${index}`} className={styles.blockFallback}>
+        <p>Content unavailable.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      key={`html-${index}`}
+      className={styles.htmlBlock}
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
+    />
+  );
+}
+
+function sanitizeKnowledgeHtml(html: string | undefined, linkBase: string) {
+  if (!html) {
+    return '';
+  }
+
+  const updatedLinks = updateInternalLinks(html, linkBase);
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return updatedLinks;
+  }
+
+  const sanitizedRaw = DOMPurify.sanitize(updatedLinks, SANITIZE_CONFIG);
+  const sanitized = typeof sanitizedRaw === 'string' ? sanitizedRaw : '';
+  if (!sanitized.trim()) {
+    return '';
+  }
+
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = sanitized;
+  wrapper.querySelectorAll<HTMLAnchorElement>('a').forEach((anchor) => {
+    const href = anchor.getAttribute('href');
+    if (!isSafeHref(href)) {
+      anchor.removeAttribute('href');
+      anchor.removeAttribute('target');
+      anchor.removeAttribute('rel');
+      return;
+    }
+    const normalized = href!.trim();
+    anchor.setAttribute('href', normalized);
+    if (!anchor.hasAttribute('rel')) {
+      anchor.setAttribute('rel', 'noopener noreferrer');
+    }
+    if (!anchor.hasAttribute('target')) {
+      anchor.setAttribute('target', '_blank');
+    }
+  });
+  wrapper.querySelectorAll<HTMLIFrameElement>('iframe').forEach((iframe) => {
+    const src = iframe.getAttribute('src');
+    const normalizedSrc = normalizeIframeSrc(src);
+    if (!normalizedSrc || !isSafeIframeSrc(normalizedSrc)) {
+      iframe.remove();
+      return;
+    }
+    iframe.setAttribute('src', normalizedSrc);
+  });
+
+  return wrapper.innerHTML;
+}
+
+function isSafeHref(href: string | null) {
+  if (!href) {
+    return false;
+  }
+  const trimmed = href.trim();
+  if (!trimmed) {
+    return false;
+  }
+  const normalized = trimmed.toLowerCase();
+  if (normalized.startsWith('javascript:') || normalized.startsWith('data:')) {
+    return false;
+  }
+  const schemeMatch = normalized.match(/^([a-z][a-z0-9+.-]*):/);
+  if (schemeMatch) {
+    const scheme = schemeMatch[1];
+    return ['http', 'https', 'mailto', 'tel'].includes(scheme);
+  }
+  return true;
+}
+
+function normalizeIframeSrc(src: string | null) {
+  if (!src) {
+    return null;
+  }
+  const trimmed = src.trim();
+  if (!trimmed) {
+    return null;
+  }
+  if (trimmed.startsWith('//')) {
+    return `https:${trimmed}`;
+  }
+  return trimmed;
+}
+
+function isSafeIframeSrc(src: string | null) {
+  if (!src) {
+    return false;
+  }
+  try {
+    const url = new URL(src, window.location.origin);
+    if (url.protocol !== 'https:') {
+      return false;
+    }
+    if (!SAFE_IFRAME_HOSTS.has(url.hostname) || !url.pathname.startsWith('/embed/')) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function buildBreadcrumbs(filterString: string, knowledgePath: string): Breadcrumb[] {

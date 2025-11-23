@@ -13,18 +13,20 @@ export function NewsPage() {
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(true);
   const lastIdRef = useRef<string | undefined>(undefined);
+  const isMountedRef = useRef(true);
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current) {
       return;
     }
 
     const controller = new AbortController();
+    const signal = controller.signal;
     loadingRef.current = true;
     setLoading(true);
     setError(null);
 
     try {
-      const data = await fetchNewsItems(lastIdRef.current, controller.signal);
+      const data = await fetchNewsItems(lastIdRef.current, signal);
       setItems((prev) => {
         const next = [...prev, ...data];
         lastIdRef.current = next[next.length - 1]?.uniqueId;
@@ -36,13 +38,14 @@ export function NewsPage() {
         setHasMore(false);
       }
     } catch (err) {
-      console.error('Failed to load news', err);
-      if (!controller.signal.aborted) {
-        setError(err instanceof Error ? err.message : 'Unable to load news');
+      if (signal.aborted || !isMountedRef.current) {
+        return;
       }
+      console.error('Failed to load news', err);
+      setError(err instanceof Error ? err.message : 'Unable to load news');
     } finally {
       loadingRef.current = false;
-      if (!controller.signal.aborted) {
+      if (!signal.aborted && isMountedRef.current) {
         setLoading(false);
       }
     }
@@ -51,6 +54,13 @@ export function NewsPage() {
   useEffect(() => {
     loadMore();
   }, [loadMore]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {

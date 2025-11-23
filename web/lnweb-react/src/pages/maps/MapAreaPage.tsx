@@ -7,6 +7,7 @@ import styles from './styles/map-area.module.css';
 export function MapAreaPage() {
   const mapRootRef = useRef<HTMLDivElement | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') ?? '';
   useEffect(() => {
@@ -19,6 +20,7 @@ export function MapAreaPage() {
 
     async function load() {
       setMapReady(false);
+      setMapError(null);
       const [areaInfo] = await Promise.all([
         fetchAreaInfo(controller.signal),
         loadMapsAssets(),
@@ -42,6 +44,7 @@ export function MapAreaPage() {
           setMapReady(true);
         } catch (error) {
           console.error('Could not render area map', error);
+          setMapError('Sorry, the map could not be loaded right now.');
         }
       }
     }
@@ -51,6 +54,7 @@ export function MapAreaPage() {
         return;
       }
       console.error('Failed to initialise area map', error);
+      setMapError('Sorry, the map could not be loaded right now.');
     });
 
     return () => {
@@ -64,7 +68,11 @@ export function MapAreaPage() {
     <div className={styles.page}>
       <div className={styles.mapSurface}>
         <div id="map" ref={mapRootRef} className={styles.mapRoot} />
-        {!mapReady && <div className={styles.mapPlaceholder}>Loading map…</div>}
+        {!mapReady && (
+          <div className={mapError ? styles.mapError : styles.mapPlaceholder}>
+            {mapError ?? 'Loading map…'}
+          </div>
+        )}
       </div>
     </div>
   );

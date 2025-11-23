@@ -5,14 +5,30 @@ const loadedCss = new Set<string>();
 
 export async function loadMapsAssets() {
   await Promise.all([
-    ensureCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'),
-    ensureCss('https://cdn.litternetworks.org/css/maps.css'),
+    ensureCss(
+      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+      'sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H',
+      'anonymous',
+    ),
+    ensureCss(
+      'https://cdn.litternetworks.org/css/maps.css',
+      'sha384-zR6gXLggfih2rRvjpeSGoCPsqkFGPLPzxa58ww943ZomF9uVvTApN2tt0Is9tVgK',
+      'anonymous',
+    ),
   ]);
-  await ensureScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
-  await ensureScript('https://cdn.litternetworks.org/js/maps.js');
+  await ensureScript(
+    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+    'sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH',
+    'anonymous',
+  );
+  await ensureScript(
+    'https://cdn.litternetworks.org/js/maps.js',
+    'sha384-fkne35iYTpuzOuGDCawh1eVhyYggV0aufzqHM1OodyIsPbjWVwrBgSoPt6ZN5c/o',
+    'anonymous',
+  );
 }
 
-function ensureScript(src: string) {
+function ensureScript(src: string, integrity?: string, crossOrigin?: string) {
   if (loadedScripts.has(src)) {
     return Promise.resolve();
   }
@@ -21,6 +37,12 @@ function ensureScript(src: string) {
   }
   const promise = new Promise<void>((resolve, reject) => {
     const script = document.createElement('script');
+    if (integrity) {
+      script.integrity = integrity;
+    }
+    if (crossOrigin) {
+      script.crossOrigin = crossOrigin;
+    }
     script.src = src;
     script.async = true;
     script.onload = () => {
@@ -38,7 +60,7 @@ function ensureScript(src: string) {
   return promise;
 }
 
-function ensureCss(href: string) {
+function ensureCss(href: string, integrity?: string, crossOrigin?: string) {
   if (loadedCss.has(href)) {
     return Promise.resolve();
   }
@@ -48,6 +70,12 @@ function ensureCss(href: string) {
   const promise = new Promise<void>((resolve, reject) => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
+    if (integrity) {
+      link.integrity = integrity;
+    }
+    if (crossOrigin) {
+      link.crossOrigin = crossOrigin;
+    }
     link.href = href;
     link.onload = () => {
       loadedCss.add(href);

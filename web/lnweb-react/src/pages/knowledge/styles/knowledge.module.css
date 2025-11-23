@@ -200,6 +200,15 @@
   margin: 0 auto;
 }
 
+.blockFallback {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border: 1px solid rgba(31, 42, 28, 0.2);
+  border-radius: 8px;
+  background-color: #f8f8f8;
+  color: #2f322d;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0);
