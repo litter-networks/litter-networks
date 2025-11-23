@@ -40,8 +40,7 @@ exports.lambdaHandler = async (event, context) => {
         };
     
         // Proxy the transformed event to the Express server.
-        // Use 'PROMISE' mode to correctly return async API Gateway response
-        const response = await awsServerlessExpress.proxy(server, transformedEvent, context, 'PROMISE').promise;
+        const response = awsServerlessExpress.proxy(server, transformedEvent, context);
 
         // Debug log the response before returning it
         console.log(`Lambda Response [from Path: ${path}, Method: ${method}]:`, JSON.stringify(response, null, 2));
@@ -62,4 +61,3 @@ exports.lambdaHandler = async (event, context) => {
         };        
     }
 };
-

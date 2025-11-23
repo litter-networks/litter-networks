@@ -1,7 +1,8 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavData } from '@/features/nav/NavDataContext';
 import { fetchDistrictLocalInfo, type DistrictLocalInfo } from '@/data-sources/joinIn';
 import { usePageTitle } from '@/shared/usePageTitle';
+import { getPrimaryDistrictId } from '@/shared/districtIds';
 import styles from './styles/join-in.module.css';
 
 interface InfoBlock {
@@ -26,9 +27,11 @@ export function JoinInPage() {
   const [loading, setLoading] = useState(false);
   usePageTitle('Join In');
 
+  const districtId = useMemo(() => getPrimaryDistrictId(network?.districtId), [network?.districtId]);
+
   useEffect(() => {
     let cancelled = false;
-    if (!network?.districtId) {
+    if (!districtId) {
       setLocalInfo(null);
       setLoading(false);
       return;
@@ -36,7 +39,7 @@ export function JoinInPage() {
 
     const controller = new AbortController();
     setLoading(true);
-    fetchDistrictLocalInfo(network.districtId, controller.signal)
+    fetchDistrictLocalInfo(districtId, controller.signal)
       .then((info) => {
         if (!cancelled) {
           setLocalInfo(info);
@@ -59,7 +62,7 @@ export function JoinInPage() {
       cancelled = true;
       controller.abort();
     };
-  }, [network?.districtId]);
+  }, [districtId]);
 
   const blocks = buildBlocks(localInfo);
   const titlePrefix = localInfo ? 'Local Info' : 'Reach Out';
@@ -114,7 +117,8 @@ function linkTypeClass(type: InfoBlock['type']) {
  * merchants, recycling centres (if available), and a contact block.
  *
  * @param info - District-local information used to populate context-specific blocks; may be `null` to indicate no local data.
- * @returns An array of `InfoBlock` objects representing links (internal, email, or external) and descriptions for each resource.
+ * @returns An array of `InfoBlock` objects representing links (internal, email, or external) and descriptions for each resource.*/
+
 function buildBlocks(info: DistrictLocalInfo | null): InfoBlock[] {
   if (!info) {
     return [
@@ -210,7 +214,6 @@ function buildBlocks(info: DistrictLocalInfo | null): InfoBlock[] {
   });
 
   return blocks;
-}
 }
 
 function parseScrapMerchantLinks(value: DistrictLocalInfo['localScrapMetalUrls']) {

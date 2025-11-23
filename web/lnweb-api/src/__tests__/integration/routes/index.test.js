@@ -1,9 +1,12 @@
 const request = require('supertest');
 const express = require('express');
 const app = express();
+const routesPromise = require('../../../routes/index');
 
-// Use the actual routes
-app.use('/', require('../../../routes/index'));
+beforeAll(async () => {
+  const router = await routesPromise;
+  app.use('/', router);
+});
 
 describe('Index Routes', () => {
   it('GET / should return welcome message', async () => {

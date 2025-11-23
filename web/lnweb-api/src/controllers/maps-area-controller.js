@@ -5,6 +5,28 @@ const { DynamoDBDocumentClient, ScanCommand } = require("@aws-sdk/lib-dynamodb")
 const cache = new NodeCache({ stdTTL: 5 * 60 });
 const dynamoDb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: "eu-west-2" }));
 
+/**
+ * Determine whether a network belongs to a particular district.
+ *
+ * `districtId` is stored as a comma-separated string (e.g. "district-1,district-2") to support
+ * networks spanning multiple districts, so we split and compare IDs exactly.
+ *
+ * @param {string | null | undefined} networkDistrictId
+ * @param {string} targetDistrictId
+ * @returns {boolean}
+ */
+function isNetworkInDistrict(networkDistrictId, targetDistrictId) {
+    if (typeof networkDistrictId !== "string" || !targetDistrictId) {
+        return false;
+    }
+
+    return networkDistrictId
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean)
+        .some((id) => id === targetDistrictId);
+}
+
 async function fetchTable(tableName) {
     const data = await dynamoDb.send(new ScanCommand({ TableName: tableName }));
     return data.Items || [];
@@ -25,11 +47,7 @@ async function getAreaInfo() {
     const mapInfoByNetwork = new Map(networkMaps.map((item) => [item.uniqueId, item]));
 
     const areaInfo = districts.map((district) => {
-        const districtNetworks = networks.filter(
-            (network) =>
-                network.districtId === district.uniqueId ||
-                (typeof network.districtId === "string" && network.districtId.includes(district.uniqueId)),
-        );
+        const districtNetworks = networks.filter((network) => isNetworkInDistrict(network.districtId, district.uniqueId));
 
         const networkEntries = districtNetworks.map((network) => {
             const mapInfo = mapInfoByNetwork.get(network.uniqueId) || {};

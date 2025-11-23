@@ -5,6 +5,7 @@ import { fetchStatsSummary, type StatsSummary } from '@/data-sources/stats';
 import { useNavData } from '@/features/nav/NavDataContext';
 import { StatsSummaryImage } from '@/components/stats/StatsSummaryImage';
 import { usePageTitle } from '@/shared/usePageTitle';
+import { getPrimaryDistrictId } from '@/shared/districtIds';
 import styles from './styles/join-in-stats.module.css';
 
 interface BoardTarget {
@@ -63,6 +64,7 @@ export function JoinInStatsPage() {
   }, [network?.uniqueId]);
 
   const boardTargets = useMemo<BoardTarget[]>(() => {
+    const districtUniqueId = getPrimaryDistrictId(network?.districtId);
     const targets: BoardTarget[] = [];
     if (network?.uniqueId) {
       targets.push({
@@ -71,10 +73,10 @@ export function JoinInStatsPage() {
         caption: `${network.fullName ?? network.uniqueId} Litter Network`,
       });
     }
-    if (network?.districtId) {
+    if (districtUniqueId) {
       targets.push({
         id: 'district',
-        uniqueId: network.districtId,
+        uniqueId: districtUniqueId,
         caption: `${network.districtFullName ?? 'Local'} Area`,
       });
     }

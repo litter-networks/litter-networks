@@ -1,5 +1,5 @@
-const { DynamoDBClient, QueryCommand } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, ScanCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, QueryCommand, ScanCommand } = require("@aws-sdk/lib-dynamodb");
 const { format } = require("@fast-csv/format");
 
 // Initialize the DynamoDB client
@@ -21,13 +21,13 @@ const getPressCuttingsCsvDeprecated = async (req, res) => {
 
             let scanCommand = new ScanCommand(scanParams);
             let data = await docClient.send(scanCommand);
-            documents = data.Items;
+            documents = data.Items || [];
 
             // Continue scanning if necessary (pagination)
             while (data.LastEvaluatedKey) {
                 scanParams.ExclusiveStartKey = data.LastEvaluatedKey;
                 data = await docClient.send(new ScanCommand(scanParams));
-                documents = documents.concat(data.Items);
+                documents = documents.concat(data.Items || []);
             }
         } else {
             // Perform a query if scope and/or scopeId are provided
@@ -35,6 +35,7 @@ const getPressCuttingsCsvDeprecated = async (req, res) => {
                 TableName: 'LN-PressCuttings',
                 KeyConditionExpression: '',
                 ExpressionAttributeValues: {},
+                ExpressionAttributeNames: {},
                 ScanIndexForward: false, // for descending order
                 ConsistentRead: true
             };
@@ -42,25 +43,25 @@ const getPressCuttingsCsvDeprecated = async (req, res) => {
             if (scopeId) {
                 queryParams.KeyConditionExpression += '#scopeId = :scopeId';
                 queryParams.ExpressionAttributeValues[':scopeId'] = scopeId;
-                queryParams.ExpressionAttributeNames = { '#scopeId': 'scopeId' };
+                queryParams.ExpressionAttributeNames['#scopeId'] = 'scopeId';
             }
 
             if (scope) {
                 if (queryParams.KeyConditionExpression.length > 0) queryParams.KeyConditionExpression += ' AND ';
                 queryParams.KeyConditionExpression += '#scope = :scope';
                 queryParams.ExpressionAttributeValues[':scope'] = scope;
-                queryParams.ExpressionAttributeNames = { '#scope': 'scope' };
+                queryParams.ExpressionAttributeNames['#scope'] = 'scope';
             }
 
             let queryCommand = new QueryCommand(queryParams);
             let data = await docClient.send(queryCommand);
-            documents = data.Items;
+            documents = data.Items || [];
 
             // Continue querying if necessary (pagination)
             while (data.LastEvaluatedKey) {
                 queryParams.ExclusiveStartKey = data.LastEvaluatedKey;
                 data = await docClient.send(new QueryCommand(queryParams));
-                documents = documents.concat(data.Items);
+                documents = documents.concat(data.Items || []);
             }
         }
 

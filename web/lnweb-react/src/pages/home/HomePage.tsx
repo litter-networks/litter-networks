@@ -237,6 +237,7 @@ function NewsGallery({ items }: NewsGalleryProps) {
  * The left column includes introductory and join-in blocks; the right column includes news and informational blocks.
  *
  * @returns A tuple `[left, right]` where each element is an array of `WelcomeBlock` representing a column of blocks.
+ */
 function createDefaultColumns(): WelcomeBlock[][] {
   const left: WelcomeBlock[] = [
     {

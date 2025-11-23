@@ -6,7 +6,7 @@ const newsController = require("../controllers/news-controller.js");
 
 const cdnHost = "https://cdn.litternetworks.org";
 
-async function initializeRoutes() {
+function initializeRoutes() {
 
     // news:
     router.get('/get-press-cuttings-json/:prevUniqueId?', async (req, res) => {
