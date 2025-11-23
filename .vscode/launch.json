@@ -1,0 +1,62 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Litter Networker: Run Electron (debug)",
+      "type": "pwa-node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/apps/litter-networker",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:electron:debug"],
+      "console": "integratedTerminal",
+      "outputCapture": "std",
+      "preLaunchTask": "Litter Networker: Prepare Dev Environment"
+    },
+    {
+      "name": "Litter Networker: Attach to Electron",
+      "type": "pwa-node",
+      "request": "attach",
+      "address": "localhost",
+      "port": 9229,
+      "protocol": "inspector",
+      "restart": true,
+      "timeout": 20000
+    },
+    {
+      "name": "lnweb-api: Run Server",
+      "type": "pwa-node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/web/lnweb-api",
+      "program": "${workspaceFolder}/web/lnweb-api/src/server.js",
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_PATH": "${workspaceFolder}/web/lnweb-api/lambda-layer/nodejs/node_modules:${workspaceFolder}/web/lnweb-api/node_modules"
+      }
+    },
+    {
+      "name": "lnweb-react: Browser",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/web/lnweb-react",
+      "preLaunchTask": "lnweb-react: Dev Server",
+      "timeout": 20000
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Litter Networker (Electron + Renderer)",
+      "configurations": [
+        "Litter Networker: Run Electron (debug)",
+        "Litter Networker: Attach to Electron"
+      ]
+    },
+    {
+      "name": "LNWeb Stack (API + React)",
+      "configurations": [
+        "lnweb-api: Run Server",
+        "lnweb-react: Browser"
+      ]
+    }
+  ]
+}
