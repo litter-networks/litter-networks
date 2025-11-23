@@ -1,0 +1,46 @@
+.appShell {
+  height: 100vh;
+  min-height: 0;
+  background: linear-gradient(145deg, var(--color-bg) 0%, var(--color-bg-alt) 55%, #d1d9ee 100%);
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.tabShell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pageContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.tabPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.loadingState {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  padding: 16px;
+  text-align: center;
+}
+
+.loadingState > div {
+  max-width: 80%;
+  text-transform: none;
+  letter-spacing: normal;
+}

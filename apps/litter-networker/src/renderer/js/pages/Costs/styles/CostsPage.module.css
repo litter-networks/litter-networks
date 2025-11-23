@@ -1,0 +1,119 @@
+.pageShell {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  width: 100%;
+}
+
+.pageSurface {
+  width: 100%;
+  background: var(--color-surface);
+  border-radius: 22px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--color-card-shadow);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.pageSubtitle {
+  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.refreshButton {
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 14px;
+  border: 2px solid rgba(55, 181, 119, 0.6);
+  background: #fff;
+  color: #1e5b33;
+  box-shadow: none;
+  font-size: 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.refreshButton:hover:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.message,
+.error {
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 1px dashed rgba(24, 34, 54, 0.2);
+}
+
+.error {
+  color: #b52323;
+  border-color: rgba(181, 35, 35, 0.4);
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid var(--color-border);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeader {
+  text-align: left;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(24, 34, 54, 0.1);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.subLabel {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: none;
+}
+
+.tableRow {
+  transition: background 0.2s ease;
+}
+
+.tableRow:hover {
+  background: rgba(58, 141, 255, 0.04);
+}
+
+.tableCell {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(24, 34, 54, 0.05);
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.totalRow {
+  background: rgba(24, 34, 54, 0.04);
+  font-weight: 600;
+}

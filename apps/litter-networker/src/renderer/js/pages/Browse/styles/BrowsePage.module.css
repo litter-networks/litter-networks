@@ -1,0 +1,49 @@
+.pageShell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px clamp(16px, 2vw, 32px) 20px;
+  min-height: 0;
+  flex: 1;
+  height: 100%;
+  color: var(--color-text-primary);
+}
+
+.controlsRow {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.loadingState {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 16px;
+  text-align: center;
+}
+
+.loadingState > div {
+  max-width: 80%;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.mockToggle {
+  margin-left: 8px;
+}
+
+
+.paneWrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  height: 100%;
+}

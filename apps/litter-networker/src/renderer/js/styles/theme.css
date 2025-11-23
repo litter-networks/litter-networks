@@ -1,0 +1,20 @@
+:root {
+  --color-bg: #f2f5fb;
+  --color-bg-alt: #e5ecf7;
+  --color-surface: rgba(255, 255, 255, 0.8);
+  --color-surface-muted: rgba(255, 255, 255, 0.65);
+  --color-border: rgba(96, 117, 155, 0.35);
+  --color-text-primary: #182236;
+  --color-text-secondary: rgba(24, 34, 54, 0.7);
+  --color-accent: #3a8dff;
+  --color-accent-soft: rgba(58, 141, 255, 0.18);
+  --color-accent-strong: rgba(58, 141, 255, 0.8);
+  --color-card-shadow: 0 18px 40px rgba(41, 55, 86, 0.18);
+  --color-card-shadow-strong: 0 20px 60px rgba(41, 55, 86, 0.26);
+  --color-input-bg: rgba(241, 245, 252, 0.95);
+  --color-input-border: rgba(82, 103, 145, 0.4);
+  --color-bag-button: linear-gradient(180deg, #75c277, #49a55e);
+  --color-bag-button-border: rgba(49, 111, 64, 0.5);
+  --color-cta-gradient: linear-gradient(120deg, #42d56c, #6fffc7);
+  --color-cta-text: #0f3b0f;
+}
