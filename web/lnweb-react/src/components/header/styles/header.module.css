@@ -1,0 +1,308 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 3000;
+  background: transparent;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 3;
+  padding: 2px 12px;
+  margin: 0;
+  gap: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.4s ease;
+}
+
+.joinInHeaderColor {
+  color: white;
+  background-color: var(--join-in-color-active);
+}
+
+.newsHeaderColor {
+  color: white;
+  background-color: var(--news-color);
+}
+
+.knowledgeHeaderColor {
+  color: white;
+  background-color: var(--info-color-active);
+}
+
+.joinInHeaderSearchColor {
+  background-color: var(--join-in-color-search);
+}
+
+.newsHeaderSearchColor {
+  background-color: var(--news-color-search);
+}
+
+.knowledgeHeaderSearchColor {
+  background-color: var(--info-color-search);
+}
+
+.navbarQuote {
+  font-family: 'Garamond Bold', serif;
+  font-size: 20px;
+  font-weight: 100;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.quoteList {
+  list-style: none;
+  margin: 0;
+  padding: 0 15px 0 0;
+}
+
+.navbarCenter {
+  display: flex;
+  justify-content: center;
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.navbarRight {
+  display: flex;
+  justify-content: flex-end;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.navbarBrand {
+  font-family: Calibri, 'Source Sans Pro', Arial, sans-serif;
+  font-size: 30px;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.09);
+  border-radius: 15px;
+  padding: 6px 8px;
+  min-width: max-content;
+  position: relative;
+}
+
+.navbarBrandOpen {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.navbarBrandLink {
+  display: flex;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.navbarBrandLogo {
+  height: 25px;
+  margin: 0 8px 0 10px;
+}
+
+.brandList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdownArrow {
+  height: 16px;
+  margin-left: 15px;
+  margin-right: 5px;
+  opacity: 0.6;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.dropdownArrowOpen {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+.navList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 6px;
+}
+
+.navListItem {
+  list-style: none;
+}
+
+.navItemLink {
+  display: inline-flex;
+  align-items: center;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 20px 14px;
+  border-bottom: 4px solid transparent;
+  opacity: 0.8;
+}
+
+.navItemLink:hover,
+.navItemCurrent {
+  border-bottom-color: white;
+  opacity: 1;
+}
+
+.filterMenu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  list-style: none;
+  margin: 0;
+  padding: 8px 12px 12px;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.09);
+  z-index: 2000;
+  margin-top: -2px;
+}
+
+.filterMenuOpen {
+  display: block;
+}
+
+.filterSearch {
+  padding-bottom: 10px;
+}
+
+.filterSearchInput {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid transparent;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: white;
+  caret-color: white;
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.08);
+}
+
+.filterSearchInput::placeholder {
+  color: white;
+  opacity: 0.8;
+}
+
+.filterSearchInput:focus {
+  outline: none;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.menuLabel {
+  display: block;
+  padding: 8px 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.menuItemLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 8px 12px;
+}
+
+.menuItemLink:hover {
+  box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.18);
+  border-radius: 10px;
+}
+
+.distanceMeta {
+  margin-left: auto;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.hidden {
+  display: none;
+}
+
+.joinInSubMenu {
+  position: relative;
+  z-index: 1;
+  width: 92%;
+  margin: 0 auto;
+  margin-top: -6px;
+  padding: 10px 8px 6px;
+  background-color: var(--join-in-color-subheader);
+  transition: background-color 0.4s ease;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.joinInSubMenuList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-evenly;
+  gap: 12px;
+}
+
+.joinInSubMenuList li {
+  display: flex;
+  align-items: center;
+}
+
+.joinInSubMenuList .navItemLink {
+  display: inline-flex;
+  height: 100%;
+  align-items: center;
+  color: white;
+  text-decoration: none;
+  font-size: 15px;
+  margin-top: 12px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  border-bottom: 4px solid transparent;
+}
+
+.joinInSubMenuList .navItemLink:hover,
+.joinInSubMenuList .navItemCurrent {
+  border-bottom-color: white;
+}
+
+.btnSubMenuJoinIn {
+  color: white;
+  text-decoration: none;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  margin-top: 12px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  opacity: 0.85;
+  transition: transform 0.15s ease;
+}
+
+.btnSubMenuJoinIn:hover {
+  transform: scale(1.02);
+}
+
+.externalLinkIcon {
+  height: 16px;
+}
+
+.facebookIcon {
+  height: 14px;
+  opacity: 0.8;
+}
