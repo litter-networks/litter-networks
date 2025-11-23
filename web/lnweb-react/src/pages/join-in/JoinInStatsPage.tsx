@@ -5,6 +5,7 @@ import { fetchStatsSummary, type StatsSummary } from '@/data-sources/stats';
 import { useNavData } from '@/features/nav/NavDataContext';
 import { StatsSummaryImage } from '@/components/stats/StatsSummaryImage';
 import { usePageTitle } from '@/shared/usePageTitle';
+import { getPrimaryDistrictId } from '@/shared/districtIds';
 import styles from './styles/join-in-stats.module.css';
 
 interface BoardTarget {
@@ -14,13 +15,12 @@ interface BoardTarget {
 }
 
 /**
- * Render the "Join In | Stats" page showing a rotating set of stats boards and a summary panel.
+ * Render the Join In | Stats page with a rotator of stats boards, a summary panel, and a style toggle.
  *
- * The component fetches a stats summary for the current navigation network, manages loading and error
- * states, cycles through board targets (network, district, all) every 5 seconds when multiple targets
- * are available, and provides a style toggle (formal/casual) via the route parameter.
+ * Fetches and displays a stats summary for the current navigation network, showing loading and error
+ * states as appropriate and cycling through available board targets when multiple targets exist.
  *
- * @returns The page's JSX element containing the board rotator, style toggle, and summary card.
+ * @returns The page's root JSX element
  */
 export function JoinInStatsPage() {
   const { network, buildPath } = useNavData();
@@ -63,6 +63,7 @@ export function JoinInStatsPage() {
   }, [network?.uniqueId]);
 
   const boardTargets = useMemo<BoardTarget[]>(() => {
+    const districtUniqueId = getPrimaryDistrictId(network?.districtId);
     const targets: BoardTarget[] = [];
     if (network?.uniqueId) {
       targets.push({
@@ -71,10 +72,10 @@ export function JoinInStatsPage() {
         caption: `${network.fullName ?? network.uniqueId} Litter Network`,
       });
     }
-    if (network?.districtId) {
+    if (districtUniqueId) {
       targets.push({
         id: 'district',
-        uniqueId: network.districtId,
+        uniqueId: districtUniqueId,
         caption: `${network.districtFullName ?? 'Local'} Area`,
       });
     }

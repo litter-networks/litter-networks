@@ -1,0 +1,125 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  LNWebApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: LNWeb-API
+      Handler: src/lambda.lambdaHandler
+      Runtime: nodejs22.x
+      CodeUri: src/
+      MemorySize: 512
+      Timeout: 10
+      Layers:
+        - arn:aws:lambda:eu-west-2:851725192804:layer:LNWebAPILambdaLayer:3
+      FunctionUrlConfig:
+        AuthType: NONE # make it IAM in near future
+      Environment:
+        Variables:
+          STAGE: "prod"
+      Role: !GetAtt LNWebApiLambdaExecutionRole.Arn
+
+  LNWebApiLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LNAdminParameterStoreAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                Resource:
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/LNWeb-API/*'
+        - PolicyName: LambdaBasicExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "arn:aws:logs:*:*:*"
+        - PolicyName: AccessSecretsManagerPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:google-recaptcha-creds-*"
+        - PolicyName: DynamoDBReadAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeTable
+                  - dynamodb:BatchGetItem
+                  - dynamodb:GetItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*"
+        - PolicyName: DynamoDBWriteAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                Resource:
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/LN-ReachOut" 
+        - PolicyName: DynamoDBAuthTempTokensAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                Resource:
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/LNWeb-TempTokens"
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::lnweb-docs"
+                  - !Sub "arn:aws:s3:::lnweb-docs/*"
+                  - !Sub "arn:aws:s3:::lnweb-public"
+                  - !Sub "arn:aws:s3:::lnweb-public/*"
+
+  # Restrict Lambda Function URL to CloudFront
+  LambdaFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LNWebApiFunction
+      Action: "lambda:InvokeFunctionUrl"
+      Principal: "cloudfront.amazonaws.com"
+      SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/E38XGOGM7XNRC5"
+
+Outputs:
+  LambdaFunctionUrl:
+    Description: "Lambda Function URL"
+    Value: !GetAtt LNWebApiFunctionUrl.FunctionUrl
+
