@@ -1,0 +1,150 @@
+const NetworksInfo = require("../../utils/networks-info.js");
+
+
+// Helper function to generate CSV content
+function generateCsv(headers, rows) {
+    const csvBuilder = [];
+    
+    // Function to wrap each field with quotes and escape quotes inside the field
+    const wrapWithQuotes = (field) => {
+        return `"${String(field).replace(/"/g, '""')}"`;
+    };
+
+    // Add headers to CSV, wrapping each header with quotes
+    csvBuilder.push(headers.map(wrapWithQuotes).join(','));
+    
+    // Add each row to CSV, wrapping each field with quotes
+    rows.forEach(row => {
+        csvBuilder.push(row.map(wrapWithQuotes).join(','));
+    });
+
+    return csvBuilder.join('\n');
+}
+
+// Helper function to gather all unique headers from all records
+function gatherHeaders(records) {
+    const headersSet = new Set();
+    records.forEach(record => {
+        Object.keys(record).forEach(key => {
+            headersSet.add(key); // Add all unique headers
+        });
+    });
+    return Array.from(headersSet); // Convert the Set back to an array
+}
+
+// Route handler function to get districts as CSV
+async function getDistrictsCsv(req, res) {
+    try {
+        const districts = await NetworksInfo.getAllDistricts();
+
+        // Gather all unique headers dynamically from all the objects' attribute names
+        const headers = gatherHeaders(districts);
+
+        // Prepare rows for CSV based on the headers
+        // eslint-disable-next-line security/detect-object-injection
+        const rows = districts.map(district => headers.map(header => district[header] || ''));
+
+        // Generate CSV content
+        const csvContent = generateCsv(headers, rows);
+
+        // Return CSV
+        res.header('Content-Type', 'text/csv');
+        res.send(csvContent);
+    } catch (err) {
+        res.status(500).send('Error generating CSV: ' + err.message);
+    }
+}
+
+// Route handler function to get districts local info as CSV
+async function getDistrictsLocalInfoCsv(req, res) {
+    try {
+        const districtsLocalInfos = await NetworksInfo.getAllDistrictLocalInfos();
+
+        // Gather all unique headers dynamically from all the objects' attribute names
+        const headers = gatherHeaders(districtsLocalInfos);
+
+        // Prepare rows for CSV based on the headers
+        // eslint-disable-next-line security/detect-object-injection
+        const rows = districtsLocalInfos.map(info => headers.map(header => info[header] || ''));
+
+        // Generate CSV content
+        const csvContent = generateCsv(headers, rows);
+
+        // Return CSV
+        res.header('Content-Type', 'text/csv');
+        res.send(csvContent);
+    } catch (err) {
+        res.status(500).send('Error generating CSV: ' + err.message);
+    }
+}
+
+// Route handler function to get networks as CSV
+async function getNetworksCsv(req, res) {
+    try {
+        const networks = await NetworksInfo.getAllNetworks();
+
+        // Gather all unique headers dynamically from all the objects' attribute names
+        const headers = gatherHeaders(networks);
+
+        // Ensure that 'contactEmail' and 'aboutText' headers are present
+        if (!headers.includes('contactEmail')) {
+            headers.push('contactEmail');
+        }
+        if (!headers.includes('aboutText')) {
+            headers.push('aboutText');
+        }
+
+        // Prepare rows for CSV based on the headers
+        const rows = networks.map(network => {
+            // Initialize the row with values based on headers
+            // eslint-disable-next-line security/detect-object-injection
+            const row = headers.map(header => network[header] || '');
+
+            row[headers.indexOf('contactEmail')] = '';
+            row[headers.indexOf('aboutText')] = '';
+
+            // Additional custom logic for specific networks based on uniqueId
+            switch (network.uniqueId) {
+                case 'croftlitter':
+                    row[headers.indexOf('contactEmail')] = 'croft@litternetworks.org';
+                    row[headers.indexOf('aboutText')] = `<p>Welcome to 'Croft Litter Network' - your community-run resource for reporting and volunteering to clean up litter problems in our amazing area!</p><p>Spotted a litter problem? Simply post on the 'Croft Litter Network' Facebook group with as much info as you can - ideally including a description of the problem and where to find it, perhaps photos, and a map / what3words location.</p><p>Cleaned up some litter? Simply comment on the post it was reported on, or if your own ad-hoc route (perhaps your daily exercise route?), then please do let us know via a new post (again on the 'Croft Litter Network' group) the route / area you've cleaned so others know it may not need doing again for a while (or that it may need checking again soon!)</p><p>If you are interested in taking part we recommend a litter-picking kit (at least a picker / grabber, bin bags and strong gloves - safety first every time). Home Bargains, B&M and (online) Pickerz sell grabbers at a very reasonable price, or if you'd like pro-quality kit then (online) HH Environmental are industry-standard. And perhaps we can between us bulk-purchase kit at a discount community price if there is enough interest.   Some groups in the network may even be able to loan us kit!</p>`;
+                    break;
+                case 'fairfieldandhowleylitter':
+                    row[headers.indexOf('contactEmail')] = 'fh@litternetworks.org';
+                    break;
+                case 'winwicklitter':
+                    row[headers.indexOf('contactEmail')] = 'winwick@litternetworks.org';
+                    break;
+                case 'tptwarrington':
+                    row[headers.indexOf('aboutText')] = `<p>Welcome to 'Trans Pennine Trail Warrington Litter Network' - your community-run resource for reporting and volunteering to clean up litter problems at any point on this fantastic cross-country trail which runs east/west through our town!</p><p>Spotted a litter problem? Simply post on the 'Trans Pennine Trail Warrington Litter Network' Facebook group with as much info as you can - ideally including a description of the problem and where to find it, perhaps photos, and a map / what3words location.</p><p>Cleaned up some litter? Simply comment on the post it was reported on, or if your own ad-hoc route (perhaps your daily exercise route?), then please do let us know via a new post (again on our Facebook group) the route / area you've cleaned so others know it may not need doing again for a while (or that it may need checking again soon!)</p><p>If you are interested in taking part we recommend a litter-picking kit (at least a picker / grabber, bin bags and strong gloves - safety first every time). Home Bargains, B&M and (online) Pickerz sell grabbers at a very reasonable price, or if you'd like pro-quality kit then (online) HH Environmental are industry-standard. It is worth asking whether any free kit is available also - which is periodically the case!</p>`;
+                    break;
+                case 'warringtoncentrelitter':
+                    row[headers.indexOf('aboutText')] = `<p>Welcome to 'Warrington Centre Litter Network' - your community-run resource for reporting and volunteering to clean up litter problems in our town centre!</p><p>Spotted a litter problem? Simply post on the 'Warrington Centre Litter Network' Facebook group with as much info as you can - ideally including a description of the problem and where to find it, perhaps photos, and a map / what3words location.</p><p>Cleaned up some litter? Simply comment on the post it was reported on, or if your own ad-hoc route (perhaps your daily exercise route?), then please do let us know via a new post (again on our Facebook group) the route / area you've cleaned so others know it may not need doing again for a while (or that it may need checking again soon!)</p><p>If you are interested in taking part we recommend a litter-picking kit (at least a picker / grabber, bin bags and strong gloves - safety first every time). Home Bargains, B&M and (online) Pickerz sell grabbers at a very reasonable price, or if you'd like pro-quality kit then (online) HH Environmental are industry-standard. It is worth asking whether any free kit is available also - which is periodically the case!</p>`;
+                    break;
+                case 'riverweaverlitter':
+                    row[headers.indexOf('aboutText')] = `<p>Welcome to 'River Weaver Litter Network' - your community-run resource for reporting and volunteering to clean up litter problems at any point on this lovely waterway which runs for over 50 miles through some of the most beautiful and historic parts of Cheshire!</p><p>Spotted a litter problem? Simply post on the 'River Weaver Litter Network' Facebook group with as much info as you can - ideally including a description of the problem and where to find it, perhaps photos, and a map / what3words location.</p><p>Cleaned up some litter? Simply comment on the post it was reported on, or if your own ad-hoc route (perhaps your daily exercise route?), then please do let us know via a new post (again on our Facebook group) the route / area you've cleaned so others know it may not need doing again for a while (or that it may need checking again soon!)</p><p>If you are interested in taking part we recommend a litter-picking kit (at least a picker / grabber, bin bags and strong gloves - safety first every time). Home Bargains, B&M and (online) Pickerz sell grabbers at a very reasonable price, or if you'd like pro-quality kit then (online) HH Environmental are industry-standard. It is worth asking whether any free kit is available also - which is periodically the case!</p>`;
+                    break;
+                case 'manchesterlitter':
+                    row[headers.indexOf('aboutText')] = `<p>Welcome to 'Manchester Central Litter Network' - your community-run resource for reporting and volunteering to clean up litter problems in our vibrant and historic city centre!</p><p>Spotted a litter problem? Simply post on the 'Manchester Central Litter Network' Facebook group with as much info as you can - ideally including a description of the problem and where to find it, perhaps photos, and a map / what3words location.</p><p>Cleaned up some litter? Simply comment on the post it was reported on, or if your own ad-hoc route (perhaps your daily exercise route?), then please do let us know via a new post (again on our Facebook group) the route / area you've cleaned so others know it may not need doing again for a while (or that it may need checking again soon!)</p><p>If you are interested in taking part we recommend a litter-picking kit (at least a picker / grabber, bin bags and strong gloves - safety first every time). Home Bargains, B&M and (online) Pickerz sell grabbers at a very reasonable price, or if you'd like pro-quality kit then (online) HH Environmental are industry-standard. It is worth asking whether any free kit is available also - which is periodically the case!</p>`;
+                    break;
+                // Add more cases as needed
+            }
+
+            return row;
+        });
+
+
+        // Generate CSV content
+        const csvContent = generateCsv(headers, rows);
+
+        // Return CSV
+        res.header('Content-Type', 'text/csv');
+        res.send(csvContent);
+    } catch (err) {
+        res.status(500).send('Error generating CSV: ' + err.message);
+    }
+}
+
+// Export the functions to register them in the router
+module.exports = {  getDistrictsCsv, getDistrictsLocalInfoCsv, getNetworksCsv  };
+
