@@ -3,6 +3,11 @@ import { useNavData } from '@/features/nav/NavDataContext';
 import { getSectionFromPath } from '@/shared/sections';
 import styles from './styles/footer.module.css';
 
+/**
+ * Render the site footer with Privacy and Terms links and styling that reflects the active section.
+ *
+ * @returns The footer element containing Privacy and Terms links, a divider, and the current year copyright
+ */
 export function Footer() {
   const { buildPath } = useNavData();
   const location = useLocation();
@@ -23,6 +28,12 @@ export function Footer() {
   );
 }
 
+/**
+ * Selects the footer CSS class corresponding to the given site section.
+ *
+ * @param section - The site section (for example: `'news'`, `'knowledge'`, or other section identifiers)
+ * @returns The CSS module class name for the footer: `styles.newsFooter` for `'news'`, `styles.knowledgeFooter` for `'knowledge'`, otherwise `styles.joinInFooter`
+ */
 function getFooterColorClass(section: ReturnType<typeof getSectionFromPath>) {
   switch (section) {
     case 'news':

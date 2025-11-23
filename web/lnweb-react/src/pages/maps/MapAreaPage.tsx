@@ -4,6 +4,13 @@ import { fetchAreaInfo } from '@/data-sources/maps';
 import { loadMapsAssets } from '@/shared/mapsAssets';
 import styles from './styles/map-area.module.css';
 
+/**
+ * Renders the "Choose - Litter Networks" map page that initializes and displays an interactive areas map.
+ *
+ * Initializes the map based on the optional `mode` URL query parameter, manages loading and error state, and shows a loading placeholder or an error message until the map is ready.
+ *
+ * @returns The JSX element containing the map container and its loading/error UI.
+ */
 export function MapAreaPage() {
   const mapRootRef = useRef<HTMLDivElement | null>(null);
   const [mapReady, setMapReady] = useState(false);

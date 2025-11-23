@@ -19,6 +19,12 @@ interface AreaInfoResponse {
   areaInfo: AreaInfoEntry[];
 }
 
+/**
+ * Fetches area information used for maps.
+ *
+ * @param signal - Optional AbortSignal to cancel the request.
+ * @returns An array of `AreaInfoEntry` objects; an empty array if the response contains no `areaInfo`.
+ */
 export async function fetchAreaInfo(signal?: AbortSignal): Promise<AreaInfoEntry[]> {
   const data = await apiRequest<AreaInfoResponse>({
     path: '/maps/area-info',

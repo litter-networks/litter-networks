@@ -55,6 +55,13 @@ const headerClassMap: Record<BlockType, string> = {
 const css = (name?: string) => (name ? styles[name] ?? name : '');
 const cx = (...names: Array<string | undefined>) => names.map(css).filter(Boolean).join(' ');
 
+/**
+ * Render the home page as two columns of informational block cards derived from navigation context.
+ *
+ * The component sets the document title to "Welcome" and selects column content based on the current network (falls back to a default layout when no network is present).
+ *
+ * @returns The React element tree for the home page containing two columns of block cards.
+ */
 export function HomePage() {
   const { network, buildPath } = useNavData();
   usePageTitle('Welcome');
@@ -84,6 +91,15 @@ interface BlockCardProps {
   buildPath: (path?: string) => string;
 }
 
+/**
+ * Render a clickable home-page block card for the given welcome block.
+ *
+ * Renders the block title, an external-link indicator for external URLs, optional description, and media (image, gallery, or stats image); internal links are resolved via `buildPath` and external links open in a new tab with safe rel attributes.
+ *
+ * @param block - Metadata for the block (title, link, type, description, image settings).
+ * @param buildPath - Function that converts an internal route path into a full href for navigation.
+ * @returns The JSX element for the block card.
+ */
 function BlockCard({ block, buildPath }: BlockCardProps) {
   const isExternal = /^https?:\/\//i.test(block.link);
   const href = isExternal ? block.link : buildPath(block.link);
@@ -124,6 +140,12 @@ function BlockCard({ block, buildPath }: BlockCardProps) {
   );
 }
 
+/**
+ * Render the appropriate media for a WelcomeBlock: a news gallery, a stats board image, a standard image, or nothing.
+ *
+ * @param block - The WelcomeBlock whose media should be rendered. If `block.imageUrl` is `'news-block-gallery'` a rotating gallery is rendered; if `block.imageClass` is `'stats-image'` a `StatsBoardImage` is rendered using `block.statsUniqueId` (or `'all'`); if `block.imageUrl` is falsy nothing is rendered.
+ * @returns A React element representing the selected media, or `null` when the block has no image configured.
+ */
 function BlockMedia({ block }: { block: WelcomeBlock }) {
   if (block.imageUrl === 'news-block-gallery') {
     return <NewsGallery items={galleryItems} />;
@@ -164,6 +186,14 @@ interface NewsGalleryProps {
   items: GalleryItem[];
 }
 
+/**
+ * Renders an auto-rotating image gallery that displays one slide at a time with a caption overlay.
+ *
+ * The gallery advances to the next slide every 8 seconds and renders nothing when `items` is empty.
+ *
+ * @param items - Array of gallery items; each item must include `url` for the image source and `captionHtml` for the caption markup.
+ * @returns The gallery element when `items` contains entries, `null` otherwise.
+ */
 function NewsGallery({ items }: NewsGalleryProps) {
   const [index, setIndex] = useState(0);
 
@@ -201,6 +231,12 @@ function NewsGallery({ items }: NewsGalleryProps) {
   );
 }
 
+/**
+ * Create the default two-column layout of welcome blocks for the home page.
+ *
+ * The left column includes introductory and join-in blocks; the right column includes news and informational blocks.
+ *
+ * @returns A tuple `[left, right]` where each element is an array of `WelcomeBlock` representing a column of blocks.
 function createDefaultColumns(): WelcomeBlock[][] {
   const left: WelcomeBlock[] = [
     {
@@ -250,6 +286,12 @@ function createDefaultColumns(): WelcomeBlock[][] {
   return [left, right];
 }
 
+/**
+ * Builds the two-column set of welcome blocks tailored for a given network.
+ *
+ * @param network - Network object whose identifiers and metadata are used to construct network-specific links and image references
+ * @returns A two-element array `[leftColumn, rightColumn]` where each element is an array of `WelcomeBlock` objects for that column
+ */
 function createNetworkColumns(network: Network): WelcomeBlock[][] {
   const facebookLink = `https://www.facebook.com/groups/${network.uniqueId}`;
   const statsImage = `${appEnv.staticAssetsBaseUrl}/images/stats-board.png`;

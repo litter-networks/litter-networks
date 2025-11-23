@@ -11,6 +11,15 @@ const navLinks = [
   { label: 'Knowledge', path: 'knowledge' },
 ];
 
+/**
+ * Renders the site header with section-aware styling, brand/filter menu trigger, and primary navigation.
+ *
+ * Renders a navigation bar whose colors adapt to the current section, a central FilterMenuTrigger for network
+ * selection and search, and the main nav links. When the current section is "join-in", renders an additional
+ * join-in submenu with Map, Stats, Reach Out, Resources, and an external Facebook link.
+ *
+ * @returns The header JSX element containing the navbar, brand/filter trigger, navigation links, and conditional join-in submenu.
+ */
 export function Header() {
   const { buildPath, facebookLink } = useNavData();
   const location = useLocation();
@@ -122,6 +131,15 @@ export function Header() {
   );
 }
 
+/**
+ * Renders the header brand trigger that toggles and contains the FilterMenu.
+ *
+ * The trigger opens the FilterMenu on hover, toggles it via the dropdown arrow, and closes it when clicking outside.
+ *
+ * @param headerColorClass - CSS class applied to the menu for header color styling
+ * @param searchColorClass - CSS class applied to the menu search input for search color styling
+ * @returns The brand trigger element with the embedded FilterMenu
+ */
 function FilterMenuTrigger({
   headerColorClass,
   searchColorClass,
@@ -180,6 +198,18 @@ function FilterMenuTrigger({
   );
 }
 
+/**
+ * Render the filter dropdown used to search and switch between networks.
+ *
+ * Displays a search input, matching network results, nearby networks for the current network, and general links
+ * (one of which preserves the current location to return to after navigation).
+ *
+ * @param open - Whether the menu is visible
+ * @param onRequestClose - Callback invoked to request the menu be closed (e.g., when a link is clicked)
+ * @param headerColorClass - CSS class applied to the menu that controls header-related coloring
+ * @param searchColorClass - CSS class applied to the search input that controls search-related coloring
+ * @returns The filter menu JSX element containing search results, nearby networks, and general navigation links
+ */
 function FilterMenu({
   open,
   onRequestClose,
@@ -304,6 +334,12 @@ function FilterMenu({
   );
 }
 
+/**
+ * Selects the header color CSS class for a given site section.
+ *
+ * @param section - Site section identifier (for example `'news'`, `'knowledge'`, or other section names)
+ * @returns The CSS module class name to apply to the header: `newsHeaderColor` for `'news'`, `knowledgeHeaderColor` for `'knowledge'`, and `joinInHeaderColor` for all other values
+ */
 function getHeaderColorClass(section: ReturnType<typeof getSectionFromPath>) {
   switch (section) {
     case 'news':
@@ -315,6 +351,12 @@ function getHeaderColorClass(section: ReturnType<typeof getSectionFromPath>) {
   }
 }
 
+/**
+ * Selects the CSS class used for the header's search color based on the current section.
+ *
+ * @param section - Current section identifier returned by `getSectionFromPath` (e.g., `'news'`, `'knowledge'`, `'join-in'`).
+ * @returns The CSS module class for the search color: `styles.newsHeaderSearchColor` for `'news'`, `styles.knowledgeHeaderSearchColor` for `'knowledge'`, and `styles.joinInHeaderSearchColor` otherwise.
+ */
 function getSearchColorClass(section: ReturnType<typeof getSectionFromPath>) {
   switch (section) {
     case 'news':
@@ -326,6 +368,12 @@ function getSearchColorClass(section: ReturnType<typeof getSectionFromPath>) {
   }
 }
 
+/**
+ * Extracts the path portion after the first path segment.
+ *
+ * @param pathname - The full URL pathname (for example, "/network/item" or "/join-in").
+ * @returns The suffix of `pathname` starting at the second segment (including the leading slash), or an empty string if `pathname` is empty or has no suffix.
+ */
 function getPathSuffix(pathname: string) {
   if (!pathname) {
     return '';

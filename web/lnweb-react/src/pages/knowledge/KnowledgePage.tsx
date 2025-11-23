@@ -23,6 +23,13 @@ interface Breadcrumb {
   url?: string;
 }
 
+/**
+ * Render the knowledge article page with breadcrumbs, title/description, sanitized HTML content blocks, and optional contents sections.
+ *
+ * The component loads the requested knowledge page and, when applicable, its child sections; it manages loading and error states and updates the document title from the page metadata.
+ *
+ * @returns A JSX element representing the knowledge page
+ */
 export function KnowledgePage() {
   const params = useParams<{ filterString?: string; '*': string }>();
   const filterString = params.filterString ?? 'all';
@@ -158,6 +165,12 @@ export function KnowledgePage() {
   );
 }
 
+/**
+ * Normalize a route wildcard into a canonical knowledge path.
+ *
+ * @param wildcard - The raw route wildcard (may be empty or contain leading/trailing slashes)
+ * @returns A path string that begins with `knowledge`; if `wildcard` is empty, returns `knowledge`
+ */
 function getKnowledgePath(wildcard: string) {
   const trimmed = wildcard.replace(/^\/+|\/+$/g, '');
   if (!trimmed) {
@@ -166,6 +179,13 @@ function getKnowledgePath(wildcard: string) {
   return trimmed.startsWith('knowledge') ? trimmed : `knowledge/${trimmed}`;
 }
 
+/**
+ * Rewrites root-relative href attributes to resolve against a provided base path.
+ *
+ * @param html - The HTML string to update
+ * @param base - The base path to prefix to hrefs that start with `/` (e.g., `knowledge/section`)
+ * @returns The HTML string with hrefs that begin with `/` rewritten to be prefixed by `base`; external URLs and already-prefixed or protocol-relative links are left unchanged
+ */
 function updateInternalLinks(html: string, base: string) {
   return html.replace(/href="(\/[^"]*)"/g, (match, url) => {
     if (!url.startsWith('/') || url.startsWith(base) || url.startsWith('//') || /^https?:\/\//.test(url)) {
@@ -242,6 +262,14 @@ const SANITIZE_CONFIG: import('dompurify').Config = {
   RETURN_TRUSTED_TYPE: false,
 };
 
+/**
+ * Render a sanitized HTML block or a fallback when content is unavailable.
+ *
+ * @param html - Raw HTML content to render; may be undefined.
+ * @param linkBase - Base path used to rewrite internal links prior to sanitization.
+ * @param index - Zero-based index used to generate a stable element key.
+ * @returns A React element containing the sanitized HTML or a fallback message when sanitization yields no safe content.
+ */
 function renderHtmlBlock(html: string | undefined, linkBase: string, index: number) {
   const safeHtml = sanitizeKnowledgeHtml(html, linkBase);
   if (!safeHtml) {
@@ -261,6 +289,17 @@ function renderHtmlBlock(html: string | undefined, linkBase: string, index: numb
   );
 }
 
+/**
+ * Sanitizes and normalizes knowledge page HTML, ensuring links and iframes are safe for rendering.
+ *
+ * Rewrites internal links against `linkBase`, removes or strips unsafe anchor `href`s, ensures anchors
+ * have `rel="noopener noreferrer"` and `target="_blank"` when allowed, and removes iframes with unsafe sources.
+ * When run in an environment without browser globals (no DOM), returns the link-rewritten HTML without performing DOM sanitization.
+ *
+ * @param html - The raw HTML content to sanitize; empty or undefined input yields an empty string.
+ * @param linkBase - Base path used to resolve and rewrite internal links prior to sanitization.
+ * @returns The sanitized and normalized HTML string, or an empty string if the input is empty or sanitization produces no content.
+ */
 function sanitizeKnowledgeHtml(html: string | undefined, linkBase: string) {
   if (!html) {
     return '';
@@ -314,6 +353,12 @@ function sanitizeKnowledgeHtml(html: string | undefined, linkBase: string) {
   return wrapper.innerHTML;
 }
 
+/**
+ * Determines whether an href value is safe to use in anchor elements.
+ *
+ * @param href - The href value to validate; may be `null` or an empty string
+ * @returns `true` if `href` is a relative URL or uses the `http`, `https`, `mailto`, or `tel` scheme; `false` otherwise
+ */
 function isSafeHref(href: string | null) {
   if (!href) {
     return false;
@@ -334,6 +379,12 @@ function isSafeHref(href: string | null) {
   return true;
 }
 
+/**
+ * Normalize an iframe `src` value by trimming whitespace and resolving protocol-relative URLs to HTTPS.
+ *
+ * @param src - The iframe `src` value; may be `null`, empty, or protocol-relative (e.g., `//www.youtube.com/embed/...`).
+ * @returns The trimmed `src` string with `//` prefixed URLs converted to `https://`, or `null` if the input is `null` or empty.
+ */
 function normalizeIframeSrc(src: string | null) {
   if (!src) {
     return null;
@@ -348,6 +399,12 @@ function normalizeIframeSrc(src: string | null) {
   return trimmed;
 }
 
+/**
+ * Determines whether an iframe source URL is allowed for embedding.
+ *
+ * @param src - The iframe `src` value to validate, or `null`
+ * @returns `true` if `src` resolves to an `https` URL whose hostname is in `SAFE_IFRAME_HOSTS` and whose path starts with `/embed/`, `false` otherwise.
+ */
 function isSafeIframeSrc(src: string | null) {
   if (!src) {
     return false;
@@ -366,6 +423,13 @@ function isSafeIframeSrc(src: string | null) {
   }
 }
 
+/**
+ * Create breadcrumb entries from a knowledge path, producing a title for each segment and a URL for all but the last.
+ *
+ * @param filterString - Route prefix to use when constructing breadcrumb URLs (e.g., a filter or base route segment)
+ * @param knowledgePath - Slash-separated knowledge path (may include leading/trailing slashes) whose segments become breadcrumb items
+ * @returns An array of Breadcrumb objects; each has a `title`, and all except the final breadcrumb include a `url`
+ */
 function buildBreadcrumbs(filterString: string, knowledgePath: string): Breadcrumb[] {
   const segments = knowledgePath.split('/').filter(Boolean);
   const crumbs: Breadcrumb[] = [];
@@ -381,6 +445,12 @@ function buildBreadcrumbs(filterString: string, knowledgePath: string): Breadcru
   return crumbs;
 }
 
+/**
+ * Convert a hyphen-separated string to Title Case and join segments with spaces.
+ *
+ * @param value - The input string with hyphen-separated words (e.g., "node-js-faqs")
+ * @returns The input transformed to Title Case with spaces between words (e.g., "Node Js Faqs")
+ */
 function toTitleCase(value: string) {
   return value
     .split('-')

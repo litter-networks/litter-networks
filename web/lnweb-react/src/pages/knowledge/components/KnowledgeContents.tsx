@@ -8,6 +8,14 @@ interface KnowledgeContentsProps {
   loading: boolean;
 }
 
+/**
+ * Render a list of knowledge sections and their child pages as navigable links.
+ *
+ * @param sections - Sections to render; each section may include `pageTitle`, optional `pageDescription`, `pageUrl`, and an optional `childPages` array with the same fields.
+ * @param filterString - Segment inserted into generated link paths to scope the destination (used when building each item's URL).
+ * @param loading - If `true`, render a loading notice instead of the sections.
+ * @returns A React element containing the rendered knowledge contents, a loading notice when `loading` is `true`, or `null` when `sections` is empty.
+ */
 export function KnowledgeContents({ sections, filterString, loading }: KnowledgeContentsProps) {
   if (loading) {
     return (
@@ -64,6 +72,13 @@ export function KnowledgeContents({ sections, filterString, loading }: Knowledge
   );
 }
 
+/**
+ * Build a normalized route path for a knowledge page using the given filter segment.
+ *
+ * @param filterString - Path segment representing the active filter or category
+ * @param pageUrl - Page path or URL for the target page; a leading slash will be ignored
+ * @returns A normalized path string in the form `/{filter}/{page}` with consecutive slashes collapsed
+ */
 function buildKnowledgeLink(filterString: string, pageUrl: string) {
   const normalized = pageUrl.startsWith('/') ? pageUrl.slice(1) : pageUrl;
   return `/${filterString}/${normalized}`.replace(/\/+/g, '/');

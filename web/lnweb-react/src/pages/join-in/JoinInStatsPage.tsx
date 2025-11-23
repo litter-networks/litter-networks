@@ -13,6 +13,15 @@ interface BoardTarget {
   caption: string;
 }
 
+/**
+ * Render the "Join In | Stats" page showing a rotating set of stats boards and a summary panel.
+ *
+ * The component fetches a stats summary for the current navigation network, manages loading and error
+ * states, cycles through board targets (network, district, all) every 5 seconds when multiple targets
+ * are available, and provides a style toggle (formal/casual) via the route parameter.
+ *
+ * @returns The page's JSX element containing the board rotator, style toggle, and summary card.
+ */
 export function JoinInStatsPage() {
   const { network, buildPath } = useNavData();
   const { formal } = useParams<{ formal?: string }>();
@@ -145,6 +154,17 @@ export function JoinInStatsPage() {
   );
 }
 
+/**
+ * Builds a concise, human-readable summary string describing network, district, and national statistics.
+ *
+ * When a `networkName` is provided and `summary.memberCountNetwork` is a number, includes a sentence about that network
+ * and, if applicable, a sentence about its district. Always includes a sentence summarizing totals across the UK.
+ *
+ * @param summary - The fetched statistics used to compose the text (member counts and network totals).
+ * @param networkName - Optional name of the network to mention in the summary.
+ * @param districtName - Optional name of the district to mention when describing district-level totals; falls back to "local" if omitted.
+ * @returns A single string containing one or more sentences describing the provided statistics.
+ */
 function buildSummaryText(summary: Awaited<ReturnType<typeof fetchStatsSummary>>, networkName?: string, districtName?: string) {
   const formatNumber = (value?: number | null) => {
     if (typeof value === 'number') {

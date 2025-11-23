@@ -20,6 +20,16 @@ interface ProviderProps {
   children: ReactNode;
 }
 
+/**
+ * Provides navigation-related data and utilities to descendant components via NavDataContext.
+ *
+ * Resolves the selected network from `filterStringParam`, redirects to `/all` for missing or invalid filters,
+ * fetches nearby networks for the selected network, and exposes derived values (displayName, facebookLink),
+ * a `buildPath` helper, and the current networks/loading state.
+ *
+ * @param filterStringParam - Optional network identifier (uniqueId or shortId) used to select the active network; when absent the provider will navigate to the "all" view.
+ * @returns The React context provider element that supplies NavData to its children.
+ */
 export function NavDataProvider({ filterStringParam, children }: ProviderProps) {
   const { networks, loading } = useNetworks();
   const navigate = useNavigate();
@@ -116,7 +126,12 @@ export function NavDataProvider({ filterStringParam, children }: ProviderProps) 
   return <NavDataContext.Provider value={value}>{children}</NavDataContext.Provider>;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
+/**
+ * Accesses the current navigation data from NavDataProvider.
+ *
+ * @returns The NavData context value containing navigation state and helpers.
+ * @throws Error if called outside of a NavDataProvider.
+ */
 export function useNavData() {
   const context = useContext(NavDataContext);
   if (!context) {
@@ -125,6 +140,12 @@ export function useNavData() {
   return context;
 }
 
+/**
+ * Computes a human-readable display name for a network used in navigation headers.
+ *
+ * @param network - The network object to derive the display name from.
+ * @returns The resolved display name: `'Litter Networks'` if neither `fullName` nor `uniqueId` exist; otherwise the available name, with `' Litter Network'` appended when that base name is shorter than 18 characters.
+ */
 function buildDisplayName(network: Network) {
   const baseName = network.fullName ?? network.uniqueId ?? '';
   if (!baseName) {

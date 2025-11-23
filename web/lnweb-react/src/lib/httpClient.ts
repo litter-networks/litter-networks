@@ -25,6 +25,14 @@ const jsonHeaders = {
   'Content-Type': 'application/json',
 };
 
+/**
+ * Perform an HTTP request against the configured API base URL and return the parsed JSON response.
+ *
+ * @param path - Path appended to the configured API base URL (should begin with `/` when appropriate)
+ * @param parseJson - If `false`, the function does not parse the response body and returns `undefined`; defaults to `true`
+ * @returns The response body parsed as JSON and typed as `TResponse`, or `undefined` when `parseJson` is `false`
+ * @throws HttpError when the response has a non-OK status; the error includes the HTTP status and the parsed error body (JSON or text)
+ */
 export async function apiRequest<TResponse>({
   path,
   method = 'GET',

@@ -11,6 +11,16 @@ interface StatsBoardImageProps {
   variant?: 'casual' | 'formal';
 }
 
+/**
+ * Renders a generated statistics board image for a given identifier.
+ *
+ * While generating the image it displays an optional placeholder and sets `aria-busy` on the rendered `<img>`.
+ *
+ * @param uniqueId - Identifier used to fetch bags information for rendering the stats board
+ * @param placeholderSrc - Optional image URL used while the stats board is being generated
+ * @param variant - Visual variant of the board; use `'formal'` to render the formal art, otherwise the casual art is used
+ * @returns A fragment containing a hidden `<canvas>` used for rendering and an `<img>` that displays the generated stats board (or the placeholder while loading)
+ */
 export function StatsBoardImage({
   uniqueId,
   className,
@@ -74,6 +84,12 @@ export function StatsBoardImage({
   );
 }
 
+/**
+ * Load an image from a URL with cross-origin anonymous enabled.
+ *
+ * @param src - The image source URL
+ * @returns The loaded HTMLImageElement, or a rejected promise with the load error event
+ */
 function loadBaseImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();

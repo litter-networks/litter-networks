@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
 import { useNavData } from '@/features/nav/NavDataContext';
 
+/**
+ * Set the document title to a page-specific title followed by the current network suffix.
+ *
+ * If the active network exposes `fullName` or `uniqueId`, the suffix will be "`<name> Litter Network`"; otherwise the suffix will be "Litter Networks". The final document title will be formatted as "`<title> - <suffix>`".
+ *
+ * @param title - Page-specific title text to place before the network suffix
+ */
 export function usePageTitle(title: string) {
   const { network } = useNavData();
 

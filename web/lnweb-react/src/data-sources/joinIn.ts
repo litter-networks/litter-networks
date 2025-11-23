@@ -12,6 +12,13 @@ export interface DistrictLocalInfo {
   [key: string]: unknown;
 }
 
+/**
+ * Fetches local information for a district from the Join In API.
+ *
+ * @param districtId - The district identifier to include in the API path
+ * @param signal - Optional AbortSignal to cancel the request
+ * @returns The district's local information, or `null` if `districtId` is falsy or the request fails
+ */
 export async function fetchDistrictLocalInfo(districtId: string, signal?: AbortSignal): Promise<DistrictLocalInfo | null> {
   if (!districtId) {
     return null;

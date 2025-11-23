@@ -11,6 +11,15 @@ interface InfoBlock {
   type: 'email' | 'external' | 'internal';
 }
 
+/**
+ * Render the "Join In" page presenting local participation resources and contact options.
+ *
+ * Displays a page title, a loading notice while district data is fetched, guidance when no network
+ * is selected, and a list of resource/action blocks (e.g., bag disposal, reporting, recycling,
+ * scrap-metal merchants, contact) tailored to the selected network's local information.
+ *
+ * @returns The page's JSX containing the title, conditional notices, and a list of resource/action blocks appropriate to the current network.
+ */
 export function JoinInPage() {
   const { network } = useNavData();
   const [localInfo, setLocalInfo] = useState<DistrictLocalInfo | null>(null);
@@ -85,12 +94,27 @@ export function JoinInPage() {
   );
 }
 
+/**
+ * Selects the CSS class corresponding to a link's semantic type.
+ *
+ * @param type - The link type: 'email', 'external', or 'internal'
+ * @returns The CSS class name associated with the provided link type
+ */
 function linkTypeClass(type: InfoBlock['type']) {
   if (type === 'email') return styles.linkEmail;
   if (type === 'external') return styles.linkExternal;
   return styles.linkInternal;
 }
 
+/**
+ * Build a list of actionable info blocks for the Join In page based on district-local data.
+ *
+ * When `info` is null, returns a minimal set of blocks that guide the user to choose a network or contact support.
+ * When `info` is provided, returns blocks for bag disposal, reporting fly-tipping and trolleys, any configured scrap-metal
+ * merchants, recycling centres (if available), and a contact block.
+ *
+ * @param info - District-local information used to populate context-specific blocks; may be `null` to indicate no local data.
+ * @returns An array of `InfoBlock` objects representing links (internal, email, or external) and descriptions for each resource.
 function buildBlocks(info: DistrictLocalInfo | null): InfoBlock[] {
   if (!info) {
     return [
@@ -186,6 +210,7 @@ function buildBlocks(info: DistrictLocalInfo | null): InfoBlock[] {
   });
 
   return blocks;
+}
 }
 
 function parseScrapMerchantLinks(value: DistrictLocalInfo['localScrapMetalUrls']) {
