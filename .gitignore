@@ -1,0 +1,12 @@
+*.cpuprofile
+*.deb
+*.log
+**/__pycache__/
+**/.DS_Store
+**/.venv/
+**/.vs/
+**/bin/
+**/dist/
+**/FileContentIndex/
+**/node_modules/
+**/obj/

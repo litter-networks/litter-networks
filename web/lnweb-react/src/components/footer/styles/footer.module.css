@@ -1,0 +1,40 @@
+.footer {
+  position: relative;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.2);
+  color: white;
+  text-align: center;
+  padding: 2px 0;
+  transition: background-color 0.4s ease;
+}
+
+.joinInFooter {
+  background-color: var(--join-in-color-active);
+}
+
+.newsFooter {
+  background-color: var(--news-color);
+}
+
+.knowledgeFooter {
+  background-color: var(--info-color-active);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.container a {
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 400;
+}
+
+.divider {
+  color: inherit;
+}
