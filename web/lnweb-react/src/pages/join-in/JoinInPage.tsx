@@ -156,18 +156,7 @@ function buildBlocks(info: DistrictLocalInfo | null): InfoBlock[] {
     },
   ];
 
-  const scrapMerchants = Array.isArray(info.localScrapMetalUrls)
-    ? info.localScrapMetalUrls
-    : typeof info.localScrapMetalUrls === 'string'
-      ? (() => {
-          try {
-            const parsed = JSON.parse(info.localScrapMetalUrls);
-            return Array.isArray(parsed) ? parsed : [];
-          } catch {
-            return [];
-          }
-        })()
-      : [];
+  const scrapMerchants = parseScrapMerchantLinks(info.localScrapMetalUrls);
 
   scrapMerchants.forEach((item) => {
     if (item?.name && item?.url) {
@@ -197,4 +186,36 @@ function buildBlocks(info: DistrictLocalInfo | null): InfoBlock[] {
   });
 
   return blocks;
+}
+
+function parseScrapMerchantLinks(value: DistrictLocalInfo['localScrapMetalUrls']) {
+  if (!value) {
+    return [];
+  }
+
+  const ensureArray = (input: unknown): Array<{ name: string; url: string }> | null => {
+    if (!Array.isArray(input)) {
+      return null;
+    }
+    return input.filter(
+      (entry): entry is { name: string; url: string } =>
+        typeof entry === 'object' &&
+        entry !== null &&
+        typeof (entry as { name?: unknown }).name === 'string' &&
+        typeof (entry as { url?: unknown }).url === 'string',
+    );
+  };
+
+  if (Array.isArray(value)) {
+    return ensureArray(value) ?? [];
+  }
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return ensureArray(parsed) ?? [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
 }
