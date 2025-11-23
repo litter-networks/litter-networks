@@ -8,7 +8,7 @@ const networksInfo = require("../utils/networks-info.js");
  * Registers routes for fetching bag information, a network/district summary, and a legacy bag-stats JSON endpoint.
  * @returns {import('express').Router} The configured Express Router with the registered statistics routes.
  */
-async function initializeRoutes() {
+function initializeRoutes() {
 
     // bag-stats (being used by stats pages - so not deprecated):
     router.get('/get-bags-info/:uniqueId', async (req, res) => {
@@ -44,7 +44,7 @@ async function initializeRoutes() {
                 return total + (typeof count === 'number' ? count : 0);
             }, 0);
 
-            let memberCountNetwork = null;
+            let memberCountNetwork = 0;
             let districtName = '';
             let numNetworksInDistrict = 0;
             let memberCountDistrict = 0;
@@ -58,7 +58,7 @@ async function initializeRoutes() {
             if (selectedNetwork) {
                 const districtId = selectedNetwork.districtId;
                 memberCountNetwork =
-                    memberCountByNetwork.get(selectedNetwork.uniqueId) ?? 3;
+                    memberCountByNetwork.get(selectedNetwork.uniqueId) ?? 0;
 
                 if (districtId) {
                     const districtNetworks = allNetworks.filter((network) => network.districtId === districtId);
@@ -94,7 +94,6 @@ async function initializeRoutes() {
         try {
             const { uniqueId } = req.params;
 
-            const networksInfo = require("../utils/networks-info.js");
             const bagsInfo = await networksInfo.getBagsInfo(uniqueId);
 
             res.json(bagsInfo.bagCounts);

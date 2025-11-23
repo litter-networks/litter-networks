@@ -7,9 +7,31 @@
  */
 
 function setCacheControl({ maxAge, sMaxAge } = {}) {
+    const sanitizeAge = (value) => {
+        const parsed = Number(value);
+        if (!Number.isFinite(parsed) || parsed < 0) {
+            return null;
+        }
+        return Math.floor(parsed);
+    };
+
+    const normalizedMaxAge = sanitizeAge(maxAge);
+    const normalizedSMaxAge = sanitizeAge(sMaxAge);
+
     return (req, res, next) => {
         if (req.method === "GET" || req.method === "HEAD") {
-            res.set("Cache-Control", `public, max-age=${maxAge}, s-maxage=${sMaxAge}`);
+            const directives = ["public"];
+
+            if (normalizedMaxAge !== null) {
+                directives.push(`max-age=${normalizedMaxAge}`);
+            }
+            if (normalizedSMaxAge !== null) {
+                directives.push(`s-maxage=${normalizedSMaxAge}`);
+            }
+
+            if (directives.length > 1) {
+                res.set("Cache-Control", directives.join(", "));
+            }
         }
         next();
     };

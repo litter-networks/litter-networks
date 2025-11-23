@@ -62,9 +62,11 @@ async function getDistrictsCsv(req, res) {
 
         // Return CSV
         res.header('Content-Type', 'text/csv');
+        res.header('Content-Disposition', 'attachment; filename="network-info.csv"');
         res.send(csvContent);
     } catch (err) {
-        res.status(500).send('Error generating CSV: ' + err.message);
+        console.error('Error generating districts CSV:', err);
+        res.status(500).send('Internal server error generating CSV');
     }
 }
 

@@ -22,6 +22,7 @@ const REGION = "eu-west-2";
 let clientInstance = null;
 let cachedSigningKeys = null;
 const secureCookies = true;
+let clientSecret = null;
 
 /**
  * Retrieve a decrypted parameter value from AWS SSM Parameter Store.
@@ -57,11 +58,13 @@ async function initializeAuth() {
     try {
         console.log("🔄 Discovering Cognito OpenID configuration...");
         const issuer = await Issuer.discover(`https://cognito-idp.${REGION}.amazonaws.com/${USER_POOL_ID}`);
-        const CLIENT_SECRET = await getParameterFromStore("/LNWeb-API/OPENID_CLIENT_SECRET");
+        if (!clientSecret) {
+            clientSecret = await getParameterFromStore("/LNWeb-API/OPENID_CLIENT_SECRET");
+        }
 
         clientInstance = new issuer.Client({
             client_id: CLIENT_ID,
-            client_secret: CLIENT_SECRET,
+            client_secret: clientSecret,
             redirect_uris: [REDIRECT_URI],
             response_types: ["code"],
         });
@@ -99,11 +102,15 @@ async function fetchCognitoSigningKeys() {
  */
 async function refreshCognitoSession(refreshToken) {
     try {
+        if (!clientSecret) {
+            clientSecret = await getParameterFromStore("/LNWeb-API/OPENID_CLIENT_SECRET");
+        }
         const response = await axios.post(
             `https://cognito-idp.${REGION}.amazonaws.com/${USER_POOL_ID}/oauth2/token`,
             new URLSearchParams({
                 grant_type: "refresh_token",
                 client_id: CLIENT_ID,
+                client_secret: clientSecret,
                 refresh_token: refreshToken
             }),
             {
@@ -123,7 +130,7 @@ async function refreshCognitoSession(refreshToken) {
  * @param {Object} req - Express request object containing cookies (`lnweb_auth_data`, `lnweb_refresh`). On successful verification, `req.user` is set to the decoded token payload.
  * @returns {boolean} `true` if the request contains a valid Cognito ID token (or the token was successfully refreshed and verified), `false` otherwise.
  */
-async function isUserAuthenticated(req) {
+async function isUserAuthenticated(req, res) {
     let idToken = req.cookies?.lnweb_auth_data;
     const refreshToken = req.cookies?.lnweb_refresh;
 
@@ -147,6 +154,9 @@ async function isUserAuthenticated(req) {
 
         // ✅ Successfully refreshed, update idToken for further verification
         idToken = newTokens.id_token;
+        if (res) {
+            res.cookie("lnweb_auth_data", idToken, { httpOnly: true, secure: secureCookies, sameSite: "Strict" });
+        }
         console.log("✅ Token refreshed successfully.");
     }
 
@@ -182,7 +192,7 @@ async function isUserAuthenticated(req) {
  * Express middleware that ensures the incoming request is authenticated; calls `next()` when authenticated and responds with a 401 JSON error when not.
  */
 async function validateAuthToken(req, res, next) {
-    if (await isUserAuthenticated(req)) {
+    if (await isUserAuthenticated(req, res)) {
         return next(); // Proceed to next middleware/route
     }
     res.status(401).json({ isAuthenticated: false, error: "Access Denied" });

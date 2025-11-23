@@ -56,38 +56,47 @@ async function getAreaInfo() {
         return cached;
     }
 
-    const [districts, networks, networkMaps] = await Promise.all([
-        fetchTable("LN-DistrictsInfo"),
-        fetchTable("LN-NetworksInfo"),
-        fetchTable("LN-NetworksMapInfo"),
-    ]);
+    try {
+        const [districts, networks, networkMaps] = await Promise.all([
+            fetchTable("LN-DistrictsInfo"),
+            fetchTable("LN-NetworksInfo"),
+            fetchTable("LN-NetworksMapInfo"),
+        ]);
 
-    const mapInfoByNetwork = new Map(networkMaps.map((item) => [item.uniqueId, item]));
+        const mapInfoByNetwork = new Map(networkMaps.map((item) => [item.uniqueId, item]));
 
-    const areaInfo = districts.map((district) => {
-        const districtNetworks = networks.filter((network) => isNetworkInDistrict(network.districtId, district.uniqueId));
+        const areaInfo = districts.map((district) => {
+            const districtNetworks = networks.filter((network) => isNetworkInDistrict(network.districtId, district.uniqueId));
 
-        const networkEntries = districtNetworks.map((network) => {
-            const mapInfo = mapInfoByNetwork.get(network.uniqueId) || {};
+            const networkEntries = districtNetworks.map((network) => {
+                const mapInfo = mapInfoByNetwork.get(network.uniqueId) || {};
+                return {
+                    uniqueId: network.uniqueId,
+                    fullName: network.fullName,
+                    mapSource: mapInfo.mapSource || 'custom',
+                    mapFile: mapInfo.mapFile || null,
+                };
+            });
+
+            const mapStyleName = district.mapStyle ?? "default";
             return {
-                uniqueId: network.uniqueId,
-                fullName: network.fullName,
-                mapSource: mapInfo.mapSource || 'custom',
-                mapFile: mapInfo.mapFile || null,
+                mapName: (district.fullName || '').toLowerCase().replace(/\s+/g, '_'),
+                mapStyle: `zone-style-${mapStyleName}`,
+                uniqueId: district.uniqueId,
+                fullName: district.fullName,
+                networks: networkEntries,
             };
         });
 
-        return {
-            mapName: (district.fullName || '').toLowerCase().replace(/\s+/g, '_'),
-            mapStyle: `zone-style-${district.mapStyle}`,
-            uniqueId: district.uniqueId,
-            fullName: district.fullName,
-            networks: networkEntries,
-        };
-    });
-
-    cache.set("areaInfo", areaInfo);
-    return areaInfo;
+        cache.set("areaInfo", areaInfo);
+        return areaInfo;
+    } catch (error) {
+        console.error("Failed to fetch area info from DynamoDB tables:", {
+            message: error.message,
+            stack: error.stack,
+        });
+        throw new Error("Failed to retrieve area information");
+    }
 }
 
 module.exports = {

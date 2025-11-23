@@ -31,7 +31,7 @@ async function getParameterFromStore(parameterName) {
  * Registers POST /snap-route (uses auth validation, lazily loads the OpenRouteService API key from AWS Parameter Store on first use, and proxies requests to the OpenRouteService snap endpoint) and GET /area-info (returns area information from the maps-area-controller).
  * @returns {import('express').Router} The configured Express router.
  */
-async function initializeRoutes() {
+function initializeRoutes() {
 
     const { validateAuthToken } = require("../auth");
 

@@ -22,7 +22,7 @@ router.get('/logout-clear-refresh-cookie', handleClearRefreshCookie);
 
 // 🔒 Protected Route (Example)
 router.get('/get-user-info', async (req, res) => {
-    if (await isUserAuthenticated(req)) {
+    if (await isUserAuthenticated(req, res)) {
         res.json({
             isAuthenticated: true,
             username: req.user["cognito:username"],
