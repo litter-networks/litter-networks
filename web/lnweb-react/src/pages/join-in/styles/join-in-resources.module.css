@@ -1,0 +1,182 @@
+.page {
+  padding: 20px 0 40px;
+}
+
+.title {
+  margin-bottom: 20px;
+}
+
+.resourcesList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.resourceLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.resourceCard {
+  border-radius: 12px;
+  background: #fff;
+  border: 5px solid rgba(127, 173, 116, 0.2);
+}
+
+.resourceHeader {
+  background: var(--join-in-color, #6c9c60);
+  padding: 0.6em;
+  text-align: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.resourceHeaderTitle {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.resourceBody {
+  padding: 1em;
+}
+
+.landscape {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.portrait {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.resourceImage {
+  max-width: 30%;
+  min-width: 200px;
+  border-radius: 8px;
+  border: 3px dashed rgba(140, 181, 130, 0.15);
+  background-color: rgba(140, 181, 130, 0.1);
+  object-fit: contain;
+  padding: 6px;
+}
+
+.resourceImageDark {
+  background-color: rgba(140, 181, 130, 1);
+}
+
+.textContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.mainText {
+  text-align: center;
+  font-size: clamp(1rem, 1.4vw, 1.5rem);
+}
+
+.subBlocks {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.subBlock {
+  flex: 1;
+  background-color: rgba(140, 181, 130, 0.12);
+  border-radius: 6px;
+  padding: 12px;
+  min-width: 200px;
+}
+
+.subBlock:nth-child(2) {
+  background-color: rgba(216, 184, 104, 0.2);
+}
+
+.blockTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 8px;
+}
+
+.blockTitlePortrait {
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 8px;
+}
+
+.list,
+.listPortrait {
+  margin: 0;
+  padding-left: 20px;
+  list-style-position: outside;
+}
+
+.list li,
+.listPortrait li {
+  margin-bottom: 6px;
+}
+
+.listPortrait li {
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
+}
+
+.noticeCard {
+  border-radius: 12px;
+  background: #fff;
+  border: 5px solid rgba(216, 184, 104, 0.2);
+  margin-bottom: 24px;
+}
+
+.noticeHeader {
+  background: rgba(216, 184, 104, 0.9);
+  color: #3a2d13;
+  font-weight: 700;
+  padding: 12px 16px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.noticeBody {
+  padding: 18px 20px;
+  line-height: 1.5;
+  color: #2f342d;
+}
+
+.noticeLink {
+  color: inherit;
+}
+
+@media (orientation: portrait) {
+  .landscape {
+    display: none;
+  }
+
+  .portrait {
+    display: flex;
+  }
+
+  .resourceImage {
+    max-width: 60%;
+    margin: 0 auto;
+  }
+}
+
+@media (min-aspect-ratio: 18.5 / 9) and (max-height: 400px) {
+  .landscape {
+    display: none;
+  }
+
+  .portrait {
+    display: flex;
+  }
+}

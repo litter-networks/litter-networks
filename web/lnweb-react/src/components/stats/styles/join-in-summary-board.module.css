@@ -1,0 +1,76 @@
+:global(:root) {
+  --summary-board-font-scale: 1.2;
+}
+
+.board {
+  width: 650px;
+  max-width: 100%;
+  color: #000;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 15px;
+  
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: 'Calibri', 'Arial', 'Helvetica', sans-serif;
+}
+
+.boardBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.boardText {
+  flex: 1;
+}
+
+.boardText p {
+  font-size: calc(var(--summary-board-font-scale) * 1.3rem);
+  line-height: 1.2;
+  margin: 1.2rem 0;
+}
+
+.statName {
+  color: darkgreen;
+  font-weight: 700;
+  font-size: calc(var(--summary-board-font-scale) * 1.8rem);
+}
+
+.statXXXL {
+  font-size: calc(var(--summary-board-font-scale) * 3.8rem);
+  color: rgb(3, 3, 108);
+  font-weight: 700;
+}
+
+.statXXL {
+  font-size: calc(var(--summary-board-font-scale) * 2.6rem);
+  color: #1f3b1a;
+  font-weight: 700;
+}
+
+.statXL {
+  font-size: calc(var(--summary-board-font-scale) * 2.2rem);
+  color: #245d33;
+  font-weight: 700;
+}
+
+.offscreen {
+  position: absolute;
+  top: -10000px;
+  left: -10000px;
+  pointer-events: none;
+}
+
+.placeholder {
+  width: 650px;
+  max-width: 100%;
+  border-radius: 15px;
+  border: 5px dashed rgba(127, 173, 116, 0.4);
+  padding: 30px 20px;
+  text-align: center;
+  color: #4b5c46;
+  background: rgba(255, 255, 255, 0.95);
+  font-family: 'Calibri', 'Arial', 'Helvetica', sans-serif;
+  font-size: calc(var(--summary-board-font-scale) * 1.2rem);
+}
