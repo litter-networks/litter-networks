@@ -7,7 +7,7 @@ export interface DistrictLocalInfo {
   councilBagsDescription?: string;
   councilTakesKBTBags?: string;
   flyTipReportUrl?: string;
-  localScrapMetalUrls?: Array<{ name: string; url: string }>;
+  localScrapMetalUrls?: Array<{ name: string; url: string }> | string | null;
   localRecyclingUrl?: string;
   [key: string]: unknown;
 }
