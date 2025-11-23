@@ -40,6 +40,10 @@ function initializeRoutes() {
             if (!OPENROUTE_API_KEY) {
                 OPENROUTE_API_KEY = await getParameterFromStore("/LNWeb-API/OPENROUTE_API_KEY");
             }
+            if (!OPENROUTE_API_KEY) {
+                console.error("OpenRouteService API key is missing; aborting snap-route proxy call.");
+                return res.status(503).json({ error: "Routing service temporarily unavailable" });
+            }
 
             const response = await fetch('https://api.openrouteservice.org/v2/snap/foot-walking', {
                 method: 'POST',

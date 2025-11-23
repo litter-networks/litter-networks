@@ -25,13 +25,27 @@ function isNetworkInDistrict(networkDistrictId, targetDistrictId) {
 }
 
 /**
- * Retrieve all items from a DynamoDB table using a Scan operation.
+ * Retrieve all items from a DynamoDB table using paginated Scan operations.
  * @param {string} tableName - The name of the DynamoDB table to scan.
- * @returns {Array<Object>} The array of items from the table, or an empty array if none are found.
+ * @returns {Promise<Array<Object>>} Promise resolving to the array of items from the table, or an empty array if none are found.
  */
 async function fetchTable(tableName) {
-    const data = await dynamoDb.send(new ScanCommand({ TableName: tableName }));
-    return data.Items || [];
+    const items = [];
+    let lastEvaluatedKey = undefined;
+
+    do {
+        const params = {
+            TableName: tableName,
+            ExclusiveStartKey: lastEvaluatedKey,
+        };
+        const data = await dynamoDb.send(new ScanCommand(params));
+        if (Array.isArray(data.Items)) {
+            items.push(...data.Items);
+        }
+        lastEvaluatedKey = data.LastEvaluatedKey;
+    } while (lastEvaluatedKey);
+
+    return items;
 }
 
 /**
@@ -39,7 +53,7 @@ async function fetchTable(tableName) {
  *
  * The result is cached in memory under the key "areaInfo" to avoid repeated table scans.
  *
- * @returns {Array<Object>} An array of district objects. Each district has:
+ * @returns {Promise<Array<Object>>} Promise resolving to an array of district objects. Each district has:
  *  - mapName: string (lowercased, spaces replaced with underscores)
  *  - mapStyle: string (formatted as "zone-style-<mapStyle>")
  *  - uniqueId: string

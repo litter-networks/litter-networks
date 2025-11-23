@@ -17,6 +17,9 @@
     "test": "NODE_PATH=./lambda-layer/nodejs/node_modules:./node_modules jest",
     "test:watch": "jest --watch"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "eslintConfig": {},
   "jest": {
     "testEnvironment": "node",
