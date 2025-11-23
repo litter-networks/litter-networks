@@ -278,6 +278,14 @@ const RESOURCE_BLOCKS: ResourceBlockData[] = [
   },
 ];
 
+/**
+ * Render the "Join In | Resources" page, showing downloadable resource cards tailored to the current network.
+ *
+ * Derives a network context from navigation data, sets the page title, conditionally shows an important note
+ * when no network is selected, and renders the list of resource blocks.
+ *
+ * @returns The page element containing the title, optional important note, and resource cards.
+ */
 export function JoinInResourcesPage() {
   const { network } = useNavData();
   usePageTitle('Join In | Resources');
@@ -304,6 +312,13 @@ export function JoinInResourcesPage() {
   );
 }
 
+/**
+ * Render a clickable resource card that links to the downloadable image and displays a preview, main text, and two sub-sections.
+ *
+ * @param block - Metadata and render callbacks for the resource (header, image paths, text builders, and styling flags)
+ * @param context - Context used to build image URLs and render dynamic text (e.g., networkSlug and shortCode)
+ * @returns A JSX element representing the resource card with preview image, descriptive text, and sub-blocks
+ */
 function ResourceBlock({ block, context }: { block: ResourceBlockData; context: ResourceContext }) {
   const downloadUrl = buildImageUrl(block, context, false);
   const previewUrl = buildImageUrl(block, context, true);
@@ -355,6 +370,14 @@ function ResourceBlock({ block, context }: { block: ResourceBlockData; context: 
   );
 }
 
+/**
+ * Render a titled text block containing a list of step items, with an optional portrait layout.
+ *
+ * @param title - The header text displayed above the list of steps.
+ * @param steps - An array of React nodes rendered as the block's list items, in order.
+ * @param portrait - When `true`, applies portrait-specific styling to the title and list.
+ * @returns The JSX element for the titled steps block.
+ */
 function ResourceTextBlock({
   title,
   steps,
@@ -376,6 +399,16 @@ function ResourceTextBlock({
   );
 }
 
+/**
+ * Renders an informational notice about permitted uses of the page's resources and when to contact the organisation.
+ *
+ * The notice explains that resources labelled for specific Litter Networks may be used freely to promote a positive image,
+ * while generic Litter Networks materials imply representation of the organisation and should be preceded by an email to
+ * contact@litternetworks.org describing the intended use. Also clarifies that hi‑vis printing for litter picks is allowed
+ * without prior contact.
+ *
+ * @returns A JSX notice card containing the guidance text and a mailto link to contact@litternetworks.org
+ */
 function ImportantNote() {
   return (
     <div className={styles.noticeCard}>
@@ -401,6 +434,14 @@ function ImportantNote() {
   );
 }
 
+/**
+ * Build the absolute URL for a block's image (preview or full download) for a given network context.
+ *
+ * @param block - Resource block metadata containing imagePath and optional suffixes
+ * @param context - ResourceContext providing the networkSlug to select the network-specific image
+ * @param useThumbnail - If `true`, append the block's thumbnailSuffix (if any) to request a thumbnail variant
+ * @returns The composed PNG image URL from the static assets base, block path, network slug, and applicable suffixes
+ */
 function buildImageUrl(block: ResourceBlockData, context: ResourceContext, useThumbnail: boolean) {
   const suffix = block.imageSuffix ?? '';
   const thumb = useThumbnail ? block.thumbnailSuffix ?? '' : '';

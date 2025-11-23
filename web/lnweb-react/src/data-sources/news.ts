@@ -10,6 +10,12 @@ export interface NewsItem {
   sourceUrl: string;
 }
 
+/**
+ * Fetches news items from the server, optionally starting after the specified item.
+ *
+ * @param prevUniqueId - If provided, requests items after this `uniqueId` to support pagination.
+ * @returns An array of NewsItem objects retrieved from the API.
+ */
 export async function fetchNewsItems(prevUniqueId?: string, signal?: AbortSignal): Promise<NewsItem[]> {
   const path = prevUniqueId ? `/news/get-press-cuttings-json/${prevUniqueId}` : '/news/get-press-cuttings-json';
   return apiRequest<NewsItem[]>({
@@ -18,6 +24,12 @@ export async function fetchNewsItems(prevUniqueId?: string, signal?: AbortSignal
   });
 }
 
+/**
+ * Format a date string as "day<suffix> Month year" (e.g., "5th January 2024").
+ *
+ * @param dateString - A date string parseable by the JavaScript Date constructor.
+ * @returns The formatted date in the form `day<suffix> Month year`, or the original `dateString` if it cannot be parsed.
+ */
 export function formatNewsDate(dateString: string) {
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) {

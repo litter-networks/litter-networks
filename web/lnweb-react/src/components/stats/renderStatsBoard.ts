@@ -24,6 +24,12 @@ const SCALE = {
   offsetX: 10,
 };
 
+/**
+ * Normalize a numeric or numeric-string bag count into a plain number.
+ *
+ * @param value - A number or a string (commas allowed) representing a count; may be undefined.
+ * @returns The parsed numeric value, or `0` if `value` is undefined or cannot be parsed as a number.
+ */
 function parseCount(value?: number | string) {
   if (typeof value === 'number') {
     return value;
@@ -35,6 +41,22 @@ function parseCount(value?: number | string) {
   return 0;
 }
 
+/**
+ * Render a centered statistic line consisting of a leading label, a numeric count, and trailing text onto the provided canvas context.
+ *
+ * Parses and formats the count (adds thousands separators for values >= 10,000) and optionally scales the count's font to fit the available space. Positions the combined text centered horizontally at the specified vertical position and applies colors and scale from `options`.
+ *
+ * @param ctx - Drawing context and canvas used for rendering
+ * @param lineY - Vertical position (unscaled) where the line should be drawn
+ * @param preText - Text preceding the numeric count
+ * @param bagCountValue - Numeric count or string representation to display; non-numeric values are treated as zero
+ * @param postText - Text following the numeric count
+ * @param allowScale - When true, the numeric count's font may be reduced to keep it visually compact
+ * @param bagCountSize - Base font size to use for the numeric count before applying scaling
+ * @param options.scaleFactor - Global scale multiplier applied to positions and font sizes
+ * @param options.textColor - Color used for non-scaled text elements
+ * @param options.textColorScaled - Color used for text when `allowScale` is true
+ */
 function drawStatsLine(
   { ctx, canvas }: DrawContext,
   lineY: number,
@@ -78,6 +100,25 @@ function drawStatsLine(
   ctx.fillText(postText, startX + preWidth + countWidth, lineYScaled);
 }
 
+/**
+ * Render a centered composite statistic line containing a leading label, two numeric counts with intervening text segments, and a trailing label.
+ *
+ * The function formats large counts with thousands separators, optionally scales the primary count to fit, renders the second count at a reduced size, and applies a subdued color for the intermediate text when `isFormal` is true.
+ *
+ * @param ctx - Drawing context and canvas used for rendering
+ * @param lineY - Vertical position (unscaled) for the line baseline
+ * @param preText - Text displayed before the first count
+ * @param bagCountValue - First numeric count (number or numeric string)
+ * @param mid1Text - Text displayed between the first count and the secondary mid text
+ * @param mid2Text - Secondary mid text displayed before the second count
+ * @param bagCount2Value - Second numeric count (number or numeric string)
+ * @param postText - Text displayed after the second count
+ * @param allowScale - Whether the primary count may be scaled down to fit
+ * @param bagCountSize - Base font size for the primary count (before scaling)
+ * @param options.scaleFactor - Global scale factor applied to all layout and fonts
+ * @param options.textColor - Primary text color used for labels and main count
+ * @param options.isFormal - If true, applies a subdued color/opacity to the secondary mid text for a formal appearance
+ */
 function drawStatsDoubleLine(
   { ctx, canvas }: DrawContext,
   lineY: number,
@@ -143,6 +184,20 @@ function drawStatsDoubleLine(
   ctx.fillText(postText, startX + preWidth + countWidth + mid1Width + mid2Width + count2Width, lineYScaled);
 }
 
+/**
+ * Render a statistics board onto the provided canvas using the supplied base image and BagsInfo.
+ *
+ * Renders title lines, multiple statistic lines (month/year/lifetime totals), and an optional date line,
+ * applying a formal visual style when requested or when the base image indicates it.
+ *
+ * @param canvas - The HTMLCanvasElement to draw onto; its size will be set to match `baseImage`.
+ * @param baseImage - The background image used for the board layout.
+ * @param info - BagsInfo containing network/district metadata and bag count values for rendering.
+ * @param options - Optional rendering options.
+ * @param options.formal - When true (or when `baseImage.src` contains "formal"), use the formal visual style.
+ * @returns A PNG data URL representing the rendered canvas image.
+ * @throws Error if a 2D drawing context cannot be obtained from `canvas`.
+ */
 export async function renderStatsBoard(
   canvas: HTMLCanvasElement,
   baseImage: HTMLImageElement,

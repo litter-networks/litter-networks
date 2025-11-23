@@ -3,6 +3,14 @@ import { fetchNewsItems, formatNewsDate, type NewsItem } from '@/data-sources/ne
 import { usePageTitle } from '@/shared/usePageTitle';
 import styles from './styles/news.module.css';
 
+/**
+ * Render the NewsPage component that displays an infinite-scroll list of news items.
+ *
+ * Sets the page title to "News", fetches and appends paginated news items as the user scrolls,
+ * and surfaces a loading indicator, end-of-list message, or an error message as appropriate.
+ *
+ * @returns A React element containing the news list, loading indicator, end-of-list text, and any error message.
+ */
 export function NewsPage() {
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -104,6 +112,12 @@ export function NewsPage() {
   );
 }
 
+/**
+ * Render a table row that displays a single news item as responsive landscape and portrait cards linking to the original source.
+ *
+ * @param item - The NewsItem to render (provides site name, title, description, images, article date, source URL, and uniqueId)
+ * @returns A `<tr>` element containing the card layouts and an anchor that opens the item's source in a new browser tab
+ */
 function NewsRow({ item }: { item: NewsItem }) {
   const formattedDate = formatNewsDate(item.articleDate);
 

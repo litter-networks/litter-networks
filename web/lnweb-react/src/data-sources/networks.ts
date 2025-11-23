@@ -24,6 +24,14 @@ interface UseNetworksResult {
   error: unknown;
 }
 
+/**
+ * Provides a reactive list of networks along with loading and error state.
+ *
+ * Fetches the networks resource when mounted and exposes `networks`, `loading`,
+ * and `error`. Avoids updating state after unmount (cancels in-flight requests).
+ *
+ * @returns An object with `networks` — the fetched array of Network, `loading` — `true` while the fetch is in progress, and `error` — any error encountered or `null`
+ */
 export function useNetworks(): UseNetworksResult {
   const [networks, setNetworks] = useState<Network[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +71,13 @@ export function useNetworks(): UseNetworksResult {
   return { networks, loading, error };
 }
 
+/**
+ * Fetches nearby networks for a given network identifier.
+ *
+ * @param networkId - The unique identifier of the network to query
+ * @param signal - Optional AbortSignal to cancel the request
+ * @returns An array of nearby networks; returns an empty array if none are found or if the server responds with 404
+ */
 export async function fetchNearbyNetworks(networkId: string, signal?: AbortSignal): Promise<NearbyNetwork[]> {
   try {
     const data = await apiRequest<NearbyNetwork[]>({

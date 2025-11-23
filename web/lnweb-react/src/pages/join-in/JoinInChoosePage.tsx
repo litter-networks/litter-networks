@@ -16,6 +16,17 @@ interface LayerClickMessage {
   };
 }
 
+/**
+ * Render the Join In | Choose page with an interactive map and network selection toolbar.
+ *
+ * The component loads area information and map assets, initializes an embedded map,
+ * and updates the displayed Area and Network when the map posts `layerClick` messages
+ * from the same origin. Users can cancel to return to the previous or a safe fallback
+ * path, or choose a highlighted network to navigate into that network (or redirect to
+ * a resolved return URL if provided in navigation state/referrer).
+ *
+ * @returns The React element for the Join In | Choose page.
+ */
 export function JoinInChoosePage() {
   const { network } = useNavData();
   const navigate = useNavigate();
@@ -167,6 +178,16 @@ export function JoinInChoosePage() {
   );
 }
 
+/**
+ * Determine a safe local return URL from navigation state or the document referrer.
+ *
+ * Attempts to read a `returnPath` string from the provided `state` and normalize it to a same-origin URL.
+ * If that is not present or invalid, falls back to normalizing `document.referrer`. Returns `null` if no
+ * suitable local URL can be resolved.
+ *
+ * @param state - Navigation state object that may contain a `returnPath` string
+ * @returns A `URL` object for a validated same-origin return location, or `null` if none is available
+ */
 function resolveReturnUrl(state: unknown): URL | null {
   const statePath = extractReturnPath(state);
   if (statePath) {
@@ -186,6 +207,12 @@ function resolveReturnUrl(state: unknown): URL | null {
   return null;
 }
 
+/**
+ * Extracts a `returnPath` string from a navigation state object.
+ *
+ * @param state - Object that may contain a `returnPath` property
+ * @returns The `returnPath` string if present, otherwise `undefined`
+ */
 function extractReturnPath(state: unknown): string | undefined {
   if (!state || typeof state !== 'object') {
     return undefined;
@@ -194,6 +221,12 @@ function extractReturnPath(state: unknown): string | undefined {
   return typeof candidate === 'string' ? candidate : undefined;
 }
 
+/**
+ * Validate and normalize a URL string to a same-origin URL that does not point to the join-in choose route.
+ *
+ * @param target - The URL string to normalize; may be relative or absolute.
+ * @returns A `URL` object when `target` resolves to the current origin and its pathname does not include `/join-in/choose`, or `null` otherwise.
+ */
 function normalizeLocalUrl(target?: string | null) {
   if (typeof window === 'undefined' || !target) {
     return null;
@@ -212,6 +245,13 @@ function normalizeLocalUrl(target?: string | null) {
   }
 }
 
+/**
+ * Injects the provided `networkId` as the first path segment of `pathname`.
+ *
+ * @param pathname - The original pathname (may include leading or trailing slashes)
+ * @param networkId - The network identifier to place as the first segment
+ * @returns The normalized pathname starting with `/` where the first segment is `networkId`; remaining segments from `pathname` are preserved
+ */
 function buildDestinationPath(pathname: string, networkId: string) {
   const segments = pathname.split('/').filter(Boolean);
   if (segments.length) {

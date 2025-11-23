@@ -11,6 +11,13 @@ interface StatsSummaryImageProps {
   className?: string;
 }
 
+/**
+ * Renders a summary board offscreen, converts it to a PNG using html2canvas, and displays the generated image or a placeholder while the image is prepared.
+ *
+ * The component renders the SummaryBoardContent offscreen for capture, triggers html2canvas to produce a high-DPI canvas when available, and updates the displayed image once rendering completes. If rendering fails or is in progress, a brief placeholder is shown.
+ *
+ * @returns A React fragment containing either the generated PNG image of the summary or a placeholder element shown while the summary image is being prepared.
+ */
 export function StatsSummaryImage({ summary, networkName, districtName, className }: StatsSummaryImageProps) {
   const boardRef = useRef<HTMLDivElement | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
