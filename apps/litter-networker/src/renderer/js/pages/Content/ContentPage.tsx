@@ -13,7 +13,7 @@ import styles from "./styles/ContentPage.module.css";
 export default function ContentPage() {
   const { snapshot } = useAppSnapshot();
   const { networks = [] } = snapshot ?? { networks: [] };
-  const { logs, running, summary, run } = useContentJob();
+  const { logs, running, summary, run, stop } = useContentJob();
   const [selectedNetwork, setSelectedNetwork] = useState<string>(networks[0]?.id ?? "");
 
   const friendlyNetworks = useMemo(

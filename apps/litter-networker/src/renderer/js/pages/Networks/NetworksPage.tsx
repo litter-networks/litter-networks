@@ -5,12 +5,22 @@ import styles from "./styles/NetworksPage.module.css";
 
 type RowStatus = "idle" | "processing" | "success" | "error";
 
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
 const getDetailHtml = (row: NetworksResponse["rows"][number]) => {
-  const name = row.fullName ?? row.uniqueId ?? "";
+  const rawName = row.fullName ?? row.uniqueId ?? "";
+  const name = escapeHtml(rawName);
+  const safeUniqueId = escapeHtml(row.uniqueId ?? "");
   return [
     [
       "<strong>Welcome!</strong> You can find out more about this network, and browse other nearby networks, here:",
-      `https://litternetworks.org/network/${row.uniqueId}`,
+      `https://litternetworks.org/network/${safeUniqueId}`,
       "Please also carefully read our <strong>SAFETY ADVICE</strong> before taking part in any Litter Network activities:",
       "https://litternetworks.org/knowledge/safetyadvice"
     ],
@@ -19,7 +29,7 @@ const getDetailHtml = (row: NetworksResponse["rows"][number]) => {
       `Spotted a litter problem? Simply post on the "${name} Litter Network" Facebook group with as much info as you can - ideally including a description of the problem and where to find it, perhaps photos, and a map / what3words location.`,
       `Cleaned up some litter? Simply comment on the post it was reported on, or if your own ad-hoc route (perhaps your daily exercise route?), then please do let us know via a new post (again on the "${name} Litter Network" group) the route / area you've cleaned so others know it may not need doing again for a while (or that it may need checking again soon!)`,
       "If you are interested in taking part, we recommend you have at least a picker/grabber, hi-vis, strong gloves, and bin bags - safety first every time. For entry-level kit, Home Bargains and B&M Bargains are always worth a look, as is Amazon online (other suppliers are available - these are just a few handy examples). For pro-quality kit, check out industry-standard HH Environmental online. We at times have free kit available also, so it is well worth asking!",
-      `For more information about us, including important Safety Advice, please browse to our web page: https://litternetworks.org/network/${row.uniqueId}`,
+      `For more information about us, including important Safety Advice, please browse to our web page: https://litternetworks.org/network/${safeUniqueId}`,
       "Happy Picking!"
     ]
   ].map((paragraphs) =>
@@ -95,7 +105,7 @@ export default function NetworksPage() {
     if (!changes || Object.keys(changes).length === 0) return;
     setRowStatus((prev) => ({ ...prev, [uniqueId]: "processing" }));
     try {
-      await window.appApi.updateNetworkRow?.({ uniqueId, changes });
+      await window.appApi.updateNetworkRow({ uniqueId, changes });
       setRowStatus((prev) => ({ ...prev, [uniqueId]: "success" }));
       setModified((prev) => {
         const next = { ...prev };
@@ -118,7 +128,7 @@ export default function NetworksPage() {
     if (requiredFields.some((field) => !payload[field]?.trim())) return;
     setAddingStatus("processing");
     try {
-      await window.appApi.addNetworkRow?.({ uniqueId: payload.uniqueId, newRow: payload });
+      await window.appApi.addNetworkRow({ uniqueId: payload.uniqueId, newRow: payload });
       setAddingStatus("success");
       setNewRow(baseRow);
       await refresh();
@@ -264,7 +274,7 @@ export default function NetworksPage() {
                                 if (!window.confirm(confirmText)) return;
                                 setMenuOpenId(null);
                                 try {
-                                  await window.appApi.deleteNetworkRow?.(row.uniqueId);
+                                  await window.appApi.deleteNetworkRow(row.uniqueId);
                                   await refresh();
                                 } catch (error) {
                                   console.error("Failed to delete network", error);

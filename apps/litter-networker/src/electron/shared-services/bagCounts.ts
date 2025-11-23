@@ -113,6 +113,9 @@ export class BagCountService {
     if (payload.bagCount < 0) {
       throw new Error("Bag count cannot be negative.");
     }
+    if (!Number.isFinite(payload.bagCount)) {
+      throw new Error("Bag count must be a non-negative finite number.");
+    }
 
     if (this.mode === BagMode.Mock) {
       this.recordMockEntry(payload);
@@ -136,15 +139,16 @@ export class BagCountService {
   }
 
   async getStats(networkId: string) {
-    const config = MODE_CONFIG[this.mode as Exclude<BagMode, BagMode.Mock>];
-    if (!config.countsTable) {
-      throw new Error("Counts table not configured.");
-    }
     if (this.mode === BagMode.Mock) {
       return {
         all: { total: 0, session: 0, lastUpdated: undefined },
         network: { total: 0, session: 0, lastUpdated: undefined }
       };
+    }
+
+    const config = MODE_CONFIG[this.mode as Exclude<BagMode, BagMode.Mock>];
+    if (!config.countsTable) {
+      throw new Error("Counts table not configured.");
     }
 
     const [allItem, networkItem] = await Promise.all([

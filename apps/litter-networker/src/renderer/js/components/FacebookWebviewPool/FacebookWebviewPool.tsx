@@ -196,7 +196,7 @@ export default function FacebookWebviewPool({
       <div className={styles.webviewStack}>
         {slots.map((slot) => {
           const isActive = slot.networkId === active.networkId;
-          const src = slot.url;
+          const src = isActive ? active.url ?? slot.url : slot.url;
 
           return (
             <webview

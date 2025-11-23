@@ -17,7 +17,7 @@ const api = {
     ipcRenderer.on("hotkey:navigate", handler);
     return () => ipcRenderer.removeListener("hotkey:navigate", handler);
   },
-  setArrowLock: (enabled: boolean) => ipcRenderer.invoke("nav:setLock", enabled),
+  setArrowLock: (enabled: boolean) => ipcRenderer.invoke("nav:setLock", enabled) as Promise<void>,
   getMockStatus: () => ipcRenderer.invoke("mock:getStatus") as Promise<{ enabled: boolean; url: string | null }>,
   setMockEnabled: (enabled: boolean) =>
     ipcRenderer.invoke("mock:setEnabled", enabled) as Promise<{ enabled: boolean; url: string | null }>,
@@ -37,7 +37,7 @@ const api = {
   deleteNetworkRow: (uniqueId: string) => ipcRenderer.invoke("networks:delete", uniqueId) as Promise<void>,
   runContentJob: (payload: { networkId?: string; force?: boolean }) =>
     ipcRenderer.invoke("content:run", payload) as Promise<{ ok: true }>,
-  stopContentJob: () => ipcRenderer.invoke("content:stop"),
+  stopContentJob: () => ipcRenderer.invoke("content:stop") as Promise<{ stopped: boolean }>,
   subscribeContentProgress: () => ipcRenderer.send("content:subscribe"),
   onContentProgress: (callback: (payload: { type: string; message?: string; detail?: any }) => void) => {
     const handler = (_event: Electron.IpcRendererEvent, payload: { type: string; message?: string; detail?: any }) => {

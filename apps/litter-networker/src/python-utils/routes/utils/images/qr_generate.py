@@ -1,8 +1,10 @@
 import requests
+from requests import RequestException
 from PIL import Image
 from io import BytesIO
 import boto3
 from botocore.exceptions import ClientError
+from urllib.parse import quote_plus
 
 from routes.utils.info.network_info import get_network_info, get_all_network_ids
 from routes.utils.images.image_utils import save_image_to_s3, image_exists_on_s3
@@ -30,21 +32,24 @@ def generate_qr(network, no_background=False, force_generate=False):
         if image_exists_on_s3(s3_key):
             return
 
-    # Retrieve network information (dummy data here, replace with real logic if needed)
-    selected_network_info = get_network_info(network)
-    selected_network_short_name = selected_network_info["shortId"]
+    selected_network_short_name = None
+    if not is_all:
+        selected_network_info = get_network_info(network)
+        selected_network_short_name = selected_network_info["shortId"]
 
     # Construct the QR code image URL
-    image_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=http%3A%2F%2Fwww.litternetworks.org"
-    
-    if not is_all:
-        image_url += "/" + selected_network_short_name
+    base_data_url = "https://www.litternetworks.org"
+    if not is_all and selected_network_short_name:
+        base_data_url = f"{base_data_url}/{selected_network_short_name}"
+    image_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={quote_plus(base_data_url)}"
 
     # Fetch the QR code image
-    response = requests.get(image_url)
-    if response.status_code != 200:
-        raise Exception(f"Error fetching image: {response.status_code}")
-    
+    try:
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+    except RequestException as exc:
+        raise RuntimeError(f"Failed to fetch QR image for network '{network}'") from exc
+
     image = Image.open(BytesIO(response.content))
     
     # If no background flag is set, remove the background
@@ -70,7 +75,7 @@ def remove_background(image):
     # Loop through each pixel and make non-black pixels transparent
     for y in range(height):
         for x in range(width):
-            r, g, b, a = image.getpixel((x, y))
+            r, g, b, _ = image.getpixel((x, y))
             if r != 0 or g != 0 or b != 0:
                 image.putpixel((x, y), (0, 0, 0, 0))  # Make pixel fully transparent
     
@@ -94,7 +99,7 @@ def main():
         from tqdm import tqdm
         
         # Loop over each uniqueId and perform the desired action
-        for unique_id in tqdm(unique_ids, desc="Processing Flyer Images"):
+        for unique_id in tqdm(unique_ids, desc="Processing QR Images"):
             generate_qr(unique_id, no_background=False)
             generate_qr(unique_id, no_background=True)
 
