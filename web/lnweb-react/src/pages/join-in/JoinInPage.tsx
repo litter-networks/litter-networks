@@ -21,6 +21,7 @@ export function JoinInPage() {
     let cancelled = false;
     if (!network?.districtId) {
       setLocalInfo(null);
+      setLoading(false);
       return;
     }
 
@@ -31,6 +32,13 @@ export function JoinInPage() {
         if (!cancelled) {
           setLocalInfo(info);
         }
+      })
+      .catch((error) => {
+        if (controller.signal.aborted || cancelled) {
+          return;
+        }
+        console.error('Failed to load district local info', error);
+        setLocalInfo(null);
       })
       .finally(() => {
         if (!cancelled) {

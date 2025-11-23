@@ -22,7 +22,7 @@ export async function fetchDistrictLocalInfo(districtId: string, signal?: AbortS
       signal,
     });
   } catch (error) {
-    console.error('Failed to load district local info', error);
+    console.error(`Failed to load district local info for ${districtId}`, error);
     return null;
   }
 }

@@ -27,6 +27,9 @@ export function NewsPage() {
 
     try {
       const data = await fetchNewsItems(lastIdRef.current, signal);
+      if (!isMountedRef.current) {
+        return;
+      }
       setItems((prev) => {
         const next = [...prev, ...data];
         lastIdRef.current = next[next.length - 1]?.uniqueId;

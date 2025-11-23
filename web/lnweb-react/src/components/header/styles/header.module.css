@@ -239,8 +239,7 @@
   width: 92%;
   margin: 0 auto;
   margin-top: -6px;
-  padding-top: 10px;
-  padding: 2px 8px 6px;
+  padding: 10px 8px 6px;
   background-color: var(--join-in-color-subheader);
   transition: background-color 0.4s ease;
   border-bottom-left-radius: 15px;

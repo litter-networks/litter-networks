@@ -267,6 +267,11 @@ function sanitizeKnowledgeHtml(html: string | undefined, linkBase: string) {
   }
 
   const updatedLinks = updateInternalLinks(html, linkBase);
+  // This project renders exclusively on the client (no SSR). The DOMPurify instance requires
+  // real browser globals, so when the guard triggers (e.g. unit tests or tooling that evaluates
+  // modules without a DOM) we skip sanitisation only because the HTML will never be injected in
+  // that environment. If SSR support is added, replace this early return with a server-side DOM
+  // implementation such as jsdom so the content remains sanitised.
   if (typeof window === 'undefined' || typeof document === 'undefined') {
     return updatedLinks;
   }

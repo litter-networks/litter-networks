@@ -155,7 +155,7 @@ function FilterMenuTrigger({
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <a className={styles.navbarBrandLink} href={buildPath('')}>
+      <Link className={styles.navbarBrandLink} to={buildPath('')}>
         <img className={styles.navbarBrandLogo} src="/brand/logo-only.svg" alt="Litter Networks logo" />
         <ul className={styles.brandList}>
           <li>{displayName}</li>
@@ -169,7 +169,7 @@ function FilterMenuTrigger({
             setOpen((state) => !state);
           }}
         />
-      </a>
+      </Link>
       <FilterMenu
         open={open}
         onRequestClose={() => setOpen(false)}
@@ -277,7 +277,8 @@ function FilterMenu({
                 onClick={onRequestClose}
               >
                 <img className={styles.navbarBrandLogo} src="/brand/logo-only.svg" alt="Litter Networks logo" />
-                {nearby.fullName ?? nearby.uniqueId} ({nearby.roundedDistance ? `${nearby.roundedDistance} miles` : null})
+                {nearby.fullName ?? nearby.uniqueId}
+                {nearby.roundedDistance != null ? ` (${nearby.roundedDistance} miles)` : ''}
               </Link>
             </li>
           ))}
