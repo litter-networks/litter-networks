@@ -1,6 +1,6 @@
-const NodeCache = require("node-cache");
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, ScanCommand } = require("@aws-sdk/lib-dynamodb");
+import NodeCache from "node-cache";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, ScanCommand, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
 
 const cache = new NodeCache({ stdTTL: 5 * 60 });
 const dynamoDb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: "eu-west-2" }));
@@ -12,7 +12,7 @@ const dynamoDb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: "eu-we
  * @param {string} targetDistrictId - District ID to check for.
  * @returns {boolean} `true` if `targetDistrictId` is present in `networkDistrictId`, `false` otherwise.
  */
-function isNetworkInDistrict(networkDistrictId, targetDistrictId) {
+function isNetworkInDistrict(networkDistrictId: string | null | undefined, targetDistrictId: string): boolean {
     if (typeof networkDistrictId !== "string" || !targetDistrictId) {
         return false;
     }
@@ -29,18 +29,18 @@ function isNetworkInDistrict(networkDistrictId, targetDistrictId) {
  * @param {string} tableName - The name of the DynamoDB table to scan.
  * @returns {Promise<Array<Object>>} Promise resolving to the array of items from the table, or an empty array if none are found.
  */
-async function fetchTable(tableName) {
-    const items = [];
-    let lastEvaluatedKey = undefined;
+async function fetchTable<T = any>(tableName: string): Promise<T[]> {
+    const items: T[] = [];
+    let lastEvaluatedKey: Record<string, any> | undefined;
 
     do {
-        const params = {
+        const params: ScanCommandInput = {
             TableName: tableName,
             ExclusiveStartKey: lastEvaluatedKey,
         };
         const data = await dynamoDb.send(new ScanCommand(params));
         if (Array.isArray(data.Items)) {
-            items.push(...data.Items);
+            items.push(...(data.Items as T[]));
         }
         lastEvaluatedKey = data.LastEvaluatedKey;
     } while (lastEvaluatedKey);
@@ -64,17 +64,48 @@ async function fetchTable(tableName) {
  *      - mapSource: string ('custom' if not provided)
  *      - mapFile: string|null
  */
-async function getAreaInfo() {
-    const cached = cache.get("areaInfo");
+type DistrictRecord = {
+  uniqueId: string;
+  fullName: string;
+  mapStyle?: string;
+};
+
+type NetworkRecord = {
+  uniqueId: string;
+  fullName: string;
+  districtId?: string;
+};
+
+type NetworkMapRecord = {
+  uniqueId: string;
+  mapSource?: string;
+  mapFile?: string | null;
+};
+
+type DistrictAreaInfo = {
+  mapName: string;
+  mapStyle: string;
+  uniqueId: string;
+  fullName: string;
+  networks: Array<{
+    uniqueId: string;
+    fullName: string;
+    mapSource: string;
+    mapFile: string | null;
+  }>;
+};
+
+async function getAreaInfo(): Promise<DistrictAreaInfo[]> {
+    const cached = cache.get("areaInfo") as DistrictAreaInfo[] | undefined;
     if (cached) {
         return cached;
     }
 
     try {
         const [districts, networks, networkMaps] = await Promise.all([
-            fetchTable("LN-DistrictsInfo"),
-            fetchTable("LN-NetworksInfo"),
-            fetchTable("LN-NetworksMapInfo"),
+            fetchTable<DistrictRecord>("LN-DistrictsInfo"),
+            fetchTable<NetworkRecord>("LN-NetworksInfo"),
+            fetchTable<NetworkMapRecord>("LN-NetworksMapInfo"),
         ]);
 
         const mapInfoByNetwork = new Map(networkMaps.map((item) => [item.uniqueId, item]));
@@ -83,7 +114,7 @@ async function getAreaInfo() {
             const districtNetworks = networks.filter((network) => isNetworkInDistrict(network.districtId, district.uniqueId));
 
             const networkEntries = districtNetworks.map((network) => {
-                const mapInfo = mapInfoByNetwork.get(network.uniqueId) || {};
+                const mapInfo: NetworkMapRecord | undefined = mapInfoByNetwork.get(network.uniqueId);
                 return {
                     uniqueId: network.uniqueId,
                     fullName: network.fullName,
@@ -113,7 +144,7 @@ async function getAreaInfo() {
     }
 }
 
-function resetCache() {
+function resetCache(): void {
     cache.flushAll();
 }
 
