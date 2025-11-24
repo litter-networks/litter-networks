@@ -1,5 +1,5 @@
 {
-  "jest.rootPath": "web/lnweb-api",
+  "jest.rootPath": "web/lnweb-api/dist",
   "jest.jestCommandLine": "npm test --",
   "jest.nodeEnv": {
     "NODE_PATH": "./node_modules:./lambda-layer/nodejs/node_modules"
