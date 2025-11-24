@@ -18,6 +18,8 @@ jest.mock('../../../utils/networks-info.js', () => ({
   ])
 }));
 
+const NetworksInfo = require('../../../utils/networks-info.js');
+
 describe('Network Info Controller', () => {
   let req;
   let res;
@@ -42,6 +44,27 @@ describe('Network Info Controller', () => {
       );
       expect(res.send).toHaveBeenCalled();
     });
+
+    it('injects overrides for known networks and escapes fields', async () => {
+      NetworksInfo.getAllNetworks.mockResolvedValueOnce([
+        { uniqueId: 'croftlitter', fullName: 'Croft "Litter"', extra: 'Value' },
+        { uniqueId: 'plain', fullName: 'Plain' }
+      ]);
+
+      await networkInfoController.getNetworksCsv(req, res);
+
+      const csv = res.send.mock.calls[0][0];
+      expect(csv).toContain('"contactEmail"');
+      expect(csv).toContain('croft@litternetworks.org');
+      expect(csv).toContain('""Litter""'); // quotes escaped
+    });
+
+    it('handles errors from NetworksInfo', async () => {
+      NetworksInfo.getAllNetworks.mockRejectedValueOnce(new Error('boom'));
+      await networkInfoController.getNetworksCsv(req, res);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith(expect.stringContaining('Error generating CSV'));
+    });
   });
 
   describe('getDistrictsCsv', () => {
@@ -55,6 +78,13 @@ describe('Network Info Controller', () => {
       );
       expect(res.send).toHaveBeenCalled();
     });
+
+    it('returns 500 when getAllDistricts fails', async () => {
+      NetworksInfo.getAllDistricts.mockRejectedValueOnce(new Error('fail'));
+      await networkInfoController.getDistrictsCsv(req, res);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith('Internal server error generating CSV');
+    });
   });
 
   describe('getDistrictsLocalInfoCsv', () => {
@@ -67,6 +97,13 @@ describe('Network Info Controller', () => {
         'attachment; filename="districts-local-info.csv"'
       );
       expect(res.send).toHaveBeenCalled();
+    });
+
+    it('returns 500 when getAllDistrictLocalInfos fails', async () => {
+      NetworksInfo.getAllDistrictLocalInfos.mockRejectedValueOnce(new Error('bad'));
+      await networkInfoController.getDistrictsLocalInfoCsv(req, res);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith(expect.stringContaining('Error generating CSV'));
     });
   });
 

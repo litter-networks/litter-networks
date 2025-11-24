@@ -61,4 +61,10 @@ describe('News Controller', () => {
     await newsController.fetchNextNewsItems(2, null, 'https://cdn.test');
     expect(mockSend).toHaveBeenCalledTimes(1);
   });
+
+  it('returns null when Dynamo query fails', async () => {
+    mockSend.mockRejectedValueOnce(new Error('dynamo down'));
+    const result = await newsController.fetchNextNewsItems(2, null, 'https://cdn.test');
+    expect(result).toBeNull();
+  });
 });
