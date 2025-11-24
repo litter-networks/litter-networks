@@ -8,6 +8,10 @@ const GOLDEN_DIR = path.join(ROOT, 'goldens');
 const OUTPUT_DIR = path.join(ROOT, 'latest-responses');
 const API_BASE = process.env.API_BASE_URL ?? 'https://aws.litternetworks.org/api';
 const UPDATE = process.argv.includes('--update');
+const SUPPORTS_COLOR = process.stdout.isTTY;
+const COLOR_GREEN = '\u001b[32m';
+const COLOR_RED = '\u001b[31m';
+const COLOR_RESET = '\u001b[0m';
 
 async function loadConfig() {
   const payload = await fs.readFile(CONFIG_PATH, 'utf8');
@@ -73,14 +77,14 @@ async function run() {
       const normalizedBody = normalizeBody(body, entry);
       const normalizedExisting = normalizeBody(existing, entry);
       if (normalizedExisting !== normalizedBody) {
-        console.log('✗ mismatch');
+        console.log(colorize('✗ mismatch', COLOR_RED));
         console.error(`  ${printLabel} did not match golden file.`);
         failed = true;
       } else {
-        console.log('OK');
+        console.log(colorize('OK', COLOR_GREEN));
       }
     } catch (error) {
-      console.log('✗ error');
+      console.log(colorize('✗ error', COLOR_RED));
       console.error(`  ${printLabel} failed: ${error.message}`);
       failed = true;
     }
@@ -91,8 +95,16 @@ async function run() {
   }
 }
 
+function colorize(text, color) {
+  if (!SUPPORTS_COLOR) {
+    return text;
+  }
+  return `${color}${text}${COLOR_RESET}`;
+}
+
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
-if (process.argv[1] === SCRIPT_PATH) {
+const CALLER_PATH = process.argv[1] ? path.resolve(process.cwd(), process.argv[1]) : null;
+if (CALLER_PATH === SCRIPT_PATH) {
   run().catch((error) => {
     console.error(error);
     process.exit(1);
