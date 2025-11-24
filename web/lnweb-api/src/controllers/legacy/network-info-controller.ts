@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import NetworksInfo from "../../utils/networks-info.js";
+const NetworksInfo = require("../../utils/networks-info.js");
 
 
 /**
