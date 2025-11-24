@@ -57,7 +57,9 @@ async function run() {
       }
 
       const existing = await fs.readFile(targetFile, 'utf8');
-      if (existing !== body) {
+      const normalizedBody = normalizeBody(body, entry);
+      const normalizedExisting = normalizeBody(existing, entry);
+      if (normalizedExisting !== normalizedBody) {
         console.log('✗ mismatch');
         console.error(`  ${printLabel} did not match golden file.`);
         failed = true;
@@ -82,4 +84,131 @@ if (process.argv[1] === SCRIPT_PATH) {
     console.error(error);
     process.exit(1);
   });
+}
+
+function normalizeBody(payload, entry) {
+  const type = entry.type ?? 'text';
+  if (type === 'json') {
+    return normalizeJson(payload, entry.rules?.json ?? {});
+  }
+  return normalizeText(payload, entry.rules?.text ?? {});
+}
+
+function normalizeJson(payload, rules = {}) {
+  let parsed;
+  try {
+    parsed = JSON.parse(payload);
+  } catch (error) {
+    throw new Error(`JSON response was invalid: ${error.message}`);
+  }
+
+  const ignorePaths = Array.isArray(rules.ignorePaths) ? rules.ignorePaths : [];
+  for (const path of ignorePaths) {
+    removeJsonPath(parsed, path);
+  }
+
+  const canonical = canonicalizeJson(parsed);
+  return JSON.stringify(canonical);
+}
+
+function removeJsonPath(target, rawPath) {
+  if (!rawPath) {
+    return;
+  }
+  const parts = rawPath.split('.');
+  removePathParts(target, parts);
+}
+
+function removePathParts(current, parts) {
+  if (!parts.length || current == null) {
+    return;
+  }
+  const [rawKey, ...rest] = parts;
+  const isArray = rawKey.endsWith('[]');
+  const key = isArray ? rawKey.slice(0, -2) : rawKey;
+
+  if (!key) {
+    return;
+  }
+
+  if (rest.length === 0) {
+    if (isArray && Array.isArray(current[key])) {
+      delete current[key];
+    } else if (Object.prototype.hasOwnProperty.call(current, key)) {
+      delete current[key];
+    }
+    return;
+  }
+
+  const next = current[key];
+  if (next == null) {
+    return;
+  }
+
+  if (isArray && Array.isArray(next)) {
+    for (const item of next) {
+      removePathParts(item, rest);
+    }
+  } else if (!isArray) {
+    removePathParts(next, rest);
+  }
+}
+
+function canonicalizeJson(value) {
+  if (Array.isArray(value)) {
+    return value.map(canonicalizeJson);
+  }
+  if (isPlainObject(value)) {
+    const sorted = {};
+    const keys = Object.keys(value).sort();
+    for (const key of keys) {
+      sorted[key] = canonicalizeJson(value[key]);
+    }
+    return sorted;
+  }
+  return value;
+}
+
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && value.constructor === Object;
+}
+
+function normalizeText(payload, rules = {}) {
+  const shouldNormalizeNewlines = rules.normalizeNewlines ?? true;
+  const lineNormalized = shouldNormalizeNewlines
+    ? payload.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+    : payload;
+  const hasTrailingNewline = lineNormalized.endsWith('\n');
+  if (!rules || Object.keys(rules).length === 0) {
+    return lineNormalized;
+  }
+
+  let lines = lineNormalized.split('\n');
+  if (!rules.keepTrailingEmptyLine && hasTrailingNewline && lines[lines.length - 1] === '') {
+    lines.pop();
+  }
+
+  if (rules.trimLines) {
+    lines = lines.map((line) => line.trim());
+  }
+
+  if (rules.skipEmptyLines) {
+    lines = lines.filter((line) => line.length > 0);
+  }
+
+  let header;
+  if (rules.skipHeader && lines.length) {
+    header = lines.shift();
+  }
+
+  if (rules.sortRows) {
+    lines.sort();
+  }
+
+  const normalizedRows = header !== undefined ? [header, ...lines] : lines;
+  let result = normalizedRows.join('\n');
+  if (hasTrailingNewline) {
+    result += '\n';
+  }
+  return result;
 }

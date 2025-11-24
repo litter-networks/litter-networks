@@ -9,19 +9,43 @@
     "name": "districts-csv",
     "path": "/info/get-districts-csv",
     "type": "text",
-    "extension": ".golden.csv"
+    "extension": ".golden.csv",
+    "rules": {
+      "text": {
+        "normalizeNewlines": true,
+        "sortRows": true,
+        "skipHeader": true,
+        "skipEmptyLines": true
+      }
+    }
   },
   {
     "name": "districts-localinfo-csv",
     "path": "/info/get-districts-localinfo-csv",
     "type": "text",
-    "extension": ".golden.csv"
+    "extension": ".golden.csv",
+    "rules": {
+      "text": {
+        "normalizeNewlines": true,
+        "sortRows": true,
+        "skipHeader": true,
+        "skipEmptyLines": true
+      }
+    }
   },
   {
     "name": "networks-csv",
     "path": "/info/get-networks-csv",
     "type": "text",
-    "extension": ".golden.csv"
+    "extension": ".golden.csv",
+    "rules": {
+      "text": {
+        "normalizeNewlines": true,
+        "sortRows": true,
+        "skipHeader": true,
+        "skipEmptyLines": true
+      }
+    }
   },
   {
     "name": "networks-info",
@@ -45,7 +69,15 @@
     "name": "news-csv",
     "path": "/news/get-press-cuttings-csv",
     "type": "text",
-    "extension": ".golden.csv"
+    "extension": ".golden.csv",
+    "rules": {
+      "text": {
+        "normalizeNewlines": true,
+        "sortRows": true,
+        "skipHeader": true,
+        "skipEmptyLines": true
+      }
+    }
   },
   {
     "name": "stats-bags-info-anfield",
