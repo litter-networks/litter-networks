@@ -1,4 +1,5 @@
-const NetworksInfo = require("../../utils/networks-info.js");
+import { Request, Response } from "express";
+import NetworksInfo from "../../utils/networks-info.js";
 
 
 /**
@@ -7,11 +8,11 @@ const NetworksInfo = require("../../utils/networks-info.js");
  * @param {Array<Array<any>>} rows - Array of rows, each row being an array of field values corresponding to headers.
  * @returns {string} The CSV content where each field is wrapped in double quotes and internal double quotes are escaped. 
  */
-function generateCsv(headers, rows) {
+function generateCsv(headers: string[], rows: string[][]): string {
     const csvBuilder = [];
     
     // Function to wrap each field with quotes and escape quotes inside the field
-    const wrapWithQuotes = (field) => {
+    const wrapWithQuotes = (field: any) => {
         return `"${String(field).replace(/"/g, '""')}"`;
     };
 
@@ -31,8 +32,8 @@ function generateCsv(headers, rows) {
  * @param {Object[]} records - Array of objects to extract keys from.
  * @returns {string[]} Array of unique header names found across all records.
  */
-function gatherHeaders(records) {
-    const headersSet = new Set();
+function gatherHeaders(records: Record<string, unknown>[]): string[] {
+    const headersSet = new Set<string>();
     records.forEach(record => {
         Object.keys(record).forEach(key => {
             headersSet.add(key); // Add all unique headers
@@ -46,15 +47,17 @@ function gatherHeaders(records) {
  *
  * Retrieves all districts, constructs a CSV with dynamically gathered headers and rows, and sends it with Content-Type `text/csv`. On failure sends HTTP 500 with the error message.
  */
-async function getDistrictsCsv(req, res) {
+async function getDistrictsCsv(_req: Request, res: Response) {
     try {
         const districts = await NetworksInfo.getAllDistricts();
 
         // Gather all unique headers dynamically from all the objects' attribute names
-        const headers = gatherHeaders(districts);
+        const headers = gatherHeaders(districts as Record<string, unknown>[]);
 
         // Prepare rows for CSV based on the headers
-        const rows = districts.map(district => headers.map(header => district[header] || ''));
+        const rows = districts.map((district: Record<string, any>) =>
+            headers.map(header => String(district[header] ?? ''))
+        );
 
         // Generate CSV content
         const csvContent = generateCsv(headers, rows);
@@ -76,15 +79,17 @@ async function getDistrictsCsv(req, res) {
  * generates CSV rows aligned to those headers, sets Content-Type to `text/csv`, and sends the CSV.
  * On error responds with HTTP 500 and an error message.
  */
-async function getDistrictsLocalInfoCsv(req, res) {
+async function getDistrictsLocalInfoCsv(_req: Request, res: Response) {
     try {
         const districtsLocalInfos = await NetworksInfo.getAllDistrictLocalInfos();
 
         // Gather all unique headers dynamically from all the objects' attribute names
-        const headers = gatherHeaders(districtsLocalInfos);
+        const headers = gatherHeaders(districtsLocalInfos as Record<string, unknown>[]);
 
         // Prepare rows for CSV based on the headers
-        const rows = districtsLocalInfos.map(info => headers.map(header => info[header] || ''));
+        const rows = districtsLocalInfos.map((info: Record<string, any>) =>
+            headers.map(header => String(info[header] ?? ''))
+        );
 
         // Generate CSV content
         const csvContent = generateCsv(headers, rows);
@@ -107,7 +112,7 @@ async function getDistrictsLocalInfoCsv(req, res) {
  *
  * On failure, responds with HTTP 500 and an error message.
  */
-async function getNetworksCsv(req, res) {
+async function getNetworksCsv(_req: Request, res: Response) {
     try {
         const networks = await NetworksInfo.getAllNetworks();
 
@@ -123,9 +128,9 @@ async function getNetworksCsv(req, res) {
         }
 
         // Prepare rows for CSV based on the headers
-        const rows = networks.map(network => {
+        const rows = networks.map((network: Record<string, any>) => {
             // Initialize the row with values based on headers
-            const row = headers.map(header => network[header] || '');
+            const row = headers.map(header => String(network[header] ?? ''));
 
             row[headers.indexOf('contactEmail')] = '';
             row[headers.indexOf('aboutText')] = '';
