@@ -1,8 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = path.resolve(ROOT, '..');
 const CONFIG_PATH = path.join(ROOT, 'endpoint-config.json');
 const GOLDEN_DIR = path.join(ROOT, 'goldens');
 const OUTPUT_DIR = path.join(ROOT, 'latest-responses');
@@ -50,6 +52,7 @@ async function requestEndpoint(entry) {
 }
 
 async function run() {
+  await ensureTypeScriptBuild();
   const config = await loadConfig();
   await ensureGoldenDir();
   await resetOutputDir();
@@ -93,6 +96,27 @@ async function run() {
   if (failed && !UPDATE) {
     throw new Error('One or more endpoint checks failed');
   }
+}
+
+async function ensureTypeScriptBuild() {
+  if (process.env.SKIP_TS_BUILD === 'true') {
+    return;
+  }
+  await runCommand('npm', ['run', 'build'], { cwd: PROJECT_ROOT });
+}
+
+function runCommand(command, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { stdio: 'inherit', ...options });
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`${command} ${args.join(' ')} exited with code ${code}`));
+      }
+    });
+    child.on('error', reject);
+  });
 }
 
 function colorize(text, color) {
