@@ -13,6 +13,7 @@
 ## Testing
 - Jest suites under `src/__tests__/unit` mock controllers/services, while `src/__tests__/integration` boots the real Express app with mocked AWS clients to verify middleware, caching headers, and error handling.
 - Keep `NODE_PATH` configured as in `package.json` so both the app’s and layer’s node_modules are resolvable during tests.
+- Deployment smoke tests live in `deployment-tests/check-deployed-endpoints.mjs`. Use `node deployment-tests/check-deployed-endpoints.mjs --update` to refresh the golden fixtures located in `deployment-tests/goldens/`, or run the script without `--update` as a quick post-deploy health check.
 
 ## Deployment notes
 - Local testing uses `run_local_server.sh` or `test-lambda.js`; deployment is coordinated via `template.yaml` + `sync_lambda.sh`.
