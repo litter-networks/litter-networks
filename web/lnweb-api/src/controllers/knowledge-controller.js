@@ -132,7 +132,17 @@ async function getChildPages(path) {
     return childPages;
 }
 
+function resetCachesForTests() {
+    childPagesCache.flushAll();
+    pageCache.flushAll();
+}
+
 module.exports = {
     getChildPages,
     getKnowledgePage,
+    // Export utility functions for targeted unit tests
+    normalizePath,
+    extractMetadata,
+    extractBodyContent,
+    __resetCaches: resetCachesForTests,
 };

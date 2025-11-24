@@ -21,28 +21,6 @@
     "node": ">=18.0.0"
   },
   "eslintConfig": {},
-  "jest": {
-    "testEnvironment": "node",
-    "collectCoverage": false,
-    "coverageDirectory": "coverage",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/"
-    ],
-    "modulePaths": [
-      "<rootDir>/node_modules",
-      "<rootDir>/lambda-layer/nodejs/node_modules"
-    ],
-    "moduleDirectories": [
-      "<rootDir>/node_modules",
-      "<rootDir>/lambda-layer/nodejs/node_modules"
-    ],
-    "globals": {
-      "process.env.NODE_PATH": "<rootDir>/node_modules:<rootDir>/lambda-layer/nodejs/node_modules"
-    },
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
-    ]
-  },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.936.0",
     "@aws-sdk/client-ssm": "^3.936.0",

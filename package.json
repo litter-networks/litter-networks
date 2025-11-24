@@ -1,0 +1,10 @@
+{
+  "name": "litter-networks-monorepo",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:api && npm run test:react && npm run test:networker",
+    "test:api": "npm --prefix web/lnweb-api test",
+    "test:react": "npm --prefix web/lnweb-react test",
+    "test:networker": "npm --prefix apps/litter-networker test"
+  }
+}

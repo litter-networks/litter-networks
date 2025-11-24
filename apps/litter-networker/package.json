@@ -4,6 +4,7 @@
   "private": true,
   "main": "dist/electron/main/main.js",
   "scripts": {
+    "test": "npm run typecheck",
     "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\" \"npm:start:electron\"",
     "dev:background": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
     "dev:renderer": "vite dev --host",
