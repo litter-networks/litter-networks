@@ -198,4 +198,49 @@ describe('NetworksInfo utilities', () => {
     const count = await networksInfo.getCurrentMemberCount('net-missing');
     expect(count).toBeNull();
   });
+
+  it('returns districts and caches them', async () => {
+    mockDynamoSend.mockImplementation(async (command) => {
+      if (command.input?.TableName === 'LN-DistrictsInfo') {
+        return { Items: [{ uniqueId: 'district1', fullName: 'District One' }] };
+      }
+      return { Items: [] };
+    });
+
+    const districts = await networksInfo.getAllDistricts();
+    expect(districts[0].uniqueId).toBe('district1');
+    expect(mockDynamoSend).toHaveBeenCalledTimes(1);
+
+    await networksInfo.getAllDistricts();
+    expect(mockDynamoSend).toHaveBeenCalledTimes(1);
+
+    const found = await networksInfo.findDistrictById('district1');
+    expect(found.fullName).toBe('District One');
+  });
+
+  it('returns district local infos and caches them', async () => {
+    mockDynamoSend.mockImplementation(async (command) => {
+      if (command.input?.TableName === 'LN-DistrictsLocalInfo') {
+        return { Items: [{ uniqueId: 'district1', info: 'x' }] };
+      }
+      return { Items: [] };
+    });
+
+    const infos = await networksInfo.getAllDistrictLocalInfos();
+    expect(infos).toHaveLength(1);
+    await networksInfo.getAllDistrictLocalInfos();
+    expect(mockDynamoSend).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles errors when fetching districts', async () => {
+    mockDynamoSend.mockRejectedValueOnce(new Error('boom'));
+    const districts = await networksInfo.fetchAllDistricts();
+    expect(districts).toEqual([]);
+  });
+
+  it('handles errors when fetching district local infos', async () => {
+    mockDynamoSend.mockRejectedValueOnce(new Error('boom'));
+    const infos = await networksInfo.fetchAllDistrictLocalInfos();
+    expect(infos).toEqual([]);
+  });
 });

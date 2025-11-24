@@ -76,7 +76,7 @@ describe('maps-area-controller', () => {
 
       mockSend.mockClear();
       const cached = await getAreaInfo();
-      expect(cached).toBe(first);
+      expect(cached).toEqual(first);
       expect(mockSend).not.toHaveBeenCalled();
     });
 
