@@ -21,7 +21,8 @@ describe('NavDataProvider', () => {
   });
 
   it('provides context derived from the selected network and fetches nearby networks', async () => {
-    const { NavDataProvider, useNavData } = await import('../NavDataContext');
+    const { NavDataProvider } = await import('../NavDataContext');
+    const { useNavData } = await import('../useNavData');
 
     const network = {
       uniqueId: 'test-net',
@@ -69,7 +70,7 @@ describe('NavDataProvider', () => {
 
 describe('useNavData', () => {
   it('throws when used outside NavDataProvider', async () => {
-    const { useNavData } = await import('../NavDataContext');
+    const { useNavData } = await import('../useNavData');
     expect(() => renderHook(() => useNavData())).toThrow(
       'useNavData must be used within NavDataProvider',
     );

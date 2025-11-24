@@ -64,10 +64,11 @@ export function MapAreaPage() {
       setMapError('Sorry, the map could not be loaded right now.');
     });
 
+    const rootElement = mapRootRef.current;
     return () => {
       cancelled = true;
       controller.abort();
-      mapRootRef.current?.replaceChildren();
+      rootElement?.replaceChildren();
     };
   }, [mode]);
 

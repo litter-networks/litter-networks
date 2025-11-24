@@ -1,7 +1,7 @@
 import type { MouseEvent, ReactNode } from 'react';
 import { useMemo } from 'react';
 import { appEnv } from '@/config/env';
-import { useNavData } from '@/features/nav/NavDataContext';
+import { useNavData } from '@/features/nav/useNavData';
 import { usePageTitle } from '@/shared/usePageTitle';
 import styles from './styles/join-in-resources.module.css';
 

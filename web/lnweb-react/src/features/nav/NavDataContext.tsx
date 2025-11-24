@@ -1,19 +1,7 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchNearbyNetworks, useNetworks, type Network, type NearbyNetwork } from '@/data-sources/networks';
-
-interface NavData {
-  filterString: string;
-  network?: Network;
-  displayName: string;
-  facebookLink: string;
-  buildPath: (path?: string) => string;
-  networks: Network[];
-  loading: boolean;
-  nearbyNetworks: NearbyNetwork[];
-}
-
-const NavDataContext = createContext<NavData | undefined>(undefined);
+import { fetchNearbyNetworks, useNetworks, type Network } from '@/data-sources/networks';
+import { NavDataContext, type NavData } from './NavDataContextBase';
 
 interface ProviderProps {
   filterStringParam?: string;
@@ -131,20 +119,6 @@ export function NavDataProvider({ filterStringParam, children }: ProviderProps) 
  *
  * @returns The NavData context value containing navigation state and helpers.
  * @throws Error if called outside of a NavDataProvider.
- */
-export function useNavData() {
-  const context = useContext(NavDataContext);
-  if (!context) {
-    throw new Error('useNavData must be used within NavDataProvider');
-  }
-  return context;
-}
-
-/**
- * Computes a human-readable display name for a network used in navigation headers.
- *
- * @param network - The network object to derive the display name from.
- * @returns The resolved display name: `'Litter Networks'` if neither `fullName` nor `uniqueId` exist; otherwise the available name, with `' Litter Network'` appended when that base name is shorter than 18 characters.
  */
 function buildDisplayName(network: Network) {
   const baseName = network.fullName ?? network.uniqueId ?? '';

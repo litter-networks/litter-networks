@@ -5,7 +5,7 @@ import {
   sanitizeKnowledgeHtml,
   isSafeHref,
   normalizeIframeSrc,
-} from '../KnowledgePage';
+} from '../knowledge-helpers';
 
 vi.mock('dompurify', () => ({
   default: {

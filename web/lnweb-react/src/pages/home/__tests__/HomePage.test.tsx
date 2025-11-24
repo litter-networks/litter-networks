@@ -3,7 +3,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 const mockUseNavData = vi.fn();
 
-vi.mock('@/features/nav/NavDataContext', () => ({
+vi.mock('@/features/nav/useNavData', () => ({
   useNavData: () => mockUseNavData(),
 }));
 

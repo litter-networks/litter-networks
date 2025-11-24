@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import styles from '../styles/header.module.css';
-import { getHeaderColorClass, getSearchColorClass, getPathSuffix } from '../Header';
+import { getHeaderColorClass, getPathSuffix, getSearchColorClass } from '../header-helpers';
 
 describe('Header helper functions', () => {
   it('returns the expected header color classes', () => {

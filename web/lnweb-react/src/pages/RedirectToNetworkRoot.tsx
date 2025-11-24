@@ -1,5 +1,5 @@
 import { Navigate, useParams } from 'react-router-dom';
-import { useNavData } from '@/features/nav/NavDataContext';
+import { useNavData } from '@/features/nav/useNavData';
 
 /**
  * Redirects to the network-aware root path using the current route parameter and navigation context.

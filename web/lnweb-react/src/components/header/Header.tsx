@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useNavData } from '@/features/nav/NavDataContext';
+import { useNavData } from '@/features/nav/useNavData';
 import { getSectionFromPath } from '@/shared/sections';
+import { getHeaderColorClass, getPathSuffix, getSearchColorClass } from './header-helpers';
 import styles from './styles/header.module.css';
 
 const navLinks = [
@@ -261,8 +262,11 @@ function FilterMenu({
 
   useEffect(() => {
     if (!open) {
-      setSearchTerm('');
+      return;
     }
+    return () => {
+      setSearchTerm('');
+    };
   }, [open]);
 
   const generalLinks: Array<{ label: string; to: string; preserveReturnPath?: boolean }> = [
@@ -333,53 +337,3 @@ function FilterMenu({
     </ul>
   );
 }
-
-/**
- * Selects the header color CSS class for a given site section.
- *
- * @param section - Site section identifier (for example `'news'`, `'knowledge'`, or other section names)
- * @returns The CSS module class name to apply to the header: `newsHeaderColor` for `'news'`, `knowledgeHeaderColor` for `'knowledge'`, and `joinInHeaderColor` for all other values
- */
-function getHeaderColorClass(section: ReturnType<typeof getSectionFromPath>) {
-  switch (section) {
-    case 'news':
-      return styles.newsHeaderColor;
-    case 'knowledge':
-      return styles.knowledgeHeaderColor;
-    default:
-      return styles.joinInHeaderColor;
-  }
-}
-
-/**
- * Selects the CSS class used for the header's search color based on the current section.
- *
- * @param section - Current section identifier returned by `getSectionFromPath` (e.g., `'news'`, `'knowledge'`, `'join-in'`).
- * @returns The CSS module class for the search color: `styles.newsHeaderSearchColor` for `'news'`, `styles.knowledgeHeaderSearchColor` for `'knowledge'`, and `styles.joinInHeaderSearchColor` otherwise.
- */
-function getSearchColorClass(section: ReturnType<typeof getSectionFromPath>) {
-  switch (section) {
-    case 'news':
-      return styles.newsHeaderSearchColor;
-    case 'knowledge':
-      return styles.knowledgeHeaderSearchColor;
-    default:
-      return styles.joinInHeaderSearchColor;
-  }
-}
-
-/**
- * Extracts the path portion after the first path segment.
- *
- * @param pathname - The full URL pathname (for example, "/network/item" or "/join-in").
- * @returns The suffix of `pathname` starting at the second segment (including the leading slash), or an empty string if `pathname` is empty or has no suffix.
- */
-function getPathSuffix(pathname: string) {
-  if (!pathname) {
-    return '';
-  }
-  const suffix = pathname.replace(/^\/[^/]+/, '');
-  return suffix === '/' ? '' : suffix;
-}
-
-export { getHeaderColorClass, getSearchColorClass, getPathSuffix };

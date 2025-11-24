@@ -34,19 +34,22 @@ describe('StatsBoardImage', () => {
 
   it('displays a placeholder and then renders the generated data URL', async () => {
     const placeholder = '/placeholder.png';
-    vi.spyOn(statsData, 'fetchBagsInfo').mockResolvedValue({
-      bagCounts: {},
-      thisMonthName: '',
-      thisMonth: 0,
-      lastMonthName: '',
-      lastMonth: 0,
-      thisYearName: '',
-      thisYear: 0,
-      lastYearName: '',
-      lastYear: 0,
-      allTime: 0,
-      memberCountAll: 0,
-    } as any);
+    const bagInfo: statsData.BagsInfo = {
+      bagCounts: {
+        thisMonthName: '',
+        thisMonth: 0,
+        lastMonthName: '',
+        lastMonth: 0,
+        thisYearName: '',
+        thisYear: 0,
+        lastYearName: '',
+        lastYear: 0,
+        allTime: 0,
+      },
+      networkName: 'Example Network',
+      districtName: 'Example District',
+    };
+    vi.spyOn(statsData, 'fetchBagsInfo').mockResolvedValue(bagInfo);
 
     const renderSpy = vi
       .spyOn(renderStatsBoardModule, 'renderStatsBoard')
