@@ -1,30 +1,33 @@
-const { DynamoDBClient, QueryCommand } = require("@aws-sdk/client-dynamodb");
-const { createHash } = require("crypto");
-const NodeCache = require("node-cache");
+import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { createHash } from "crypto";
+import NodeCache from "node-cache";
 
 // Initialize the DynamoDB client
 const dynamoDBClient = new DynamoDBClient({ region: 'eu-west-2' });
 
-const cacheForNews = new NodeCache({ stdTTL: 5 * 60 }); /**
- * Produce a short, deterministic identifier for an image URL.
- *
- * @param {string} url - The input URL to hash.
- * @returns {string} The first 16 hexadecimal characters of the SHA-256 hash of the input URL.
- */
+type NewsItem = {
+  [key: string]: string;
+};
 
-function hashImageUrl(url) {
+const cacheForNews = new NodeCache({ stdTTL: 5 * 60 });
+
+function hashImageUrl(url: string): string {
     return createHash('sha256').update(url).digest('hex').slice(0, 16);
 }
 
-const fetchNextNewsItems = async (maxNumItems, prevUniqueId, cdnHost) => {
+const fetchNextNewsItems = async (
+    maxNumItems: number | string,
+    prevUniqueId: string | null,
+    cdnHost: string
+): Promise<NewsItem[] | null> => {
     const cacheKey = `${maxNumItems}|${prevUniqueId}`;
-    const cachedNewsItems = cacheForNews.get(cacheKey);
+    const cachedNewsItems = cacheForNews.get(cacheKey) as NewsItem[] | undefined;
     if (cachedNewsItems) {
         return cachedNewsItems;
     }
 
     let keyConditionExpression = 'zero = :v_zero';
-    let expressionAttributeValues = {
+    let expressionAttributeValues: Record<string, { S: string }> = {
         ':v_zero': { S: '0' } // constant partition key
     };
 
@@ -40,19 +43,19 @@ const fetchNextNewsItems = async (maxNumItems, prevUniqueId, cdnHost) => {
             IndexName: 'GlobalIndex',
             KeyConditionExpression: keyConditionExpression,
             ExpressionAttributeValues: expressionAttributeValues,
-            Limit: parseInt(maxNumItems),
+            Limit: typeof maxNumItems === 'string' ? parseInt(maxNumItems, 10) : maxNumItems,
             ScanIndexForward: false
         });
 
         const queryResponse = await dynamoDBClient.send(queryCommand);
-        const items = queryResponse.Items.map(item => {
-            const dictionary = {};
+        const items: NewsItem[] = (queryResponse.Items ?? []).map(item => {
+            const dictionary: NewsItem = {};
             for (const key in item) {
                 if (key === 'imageUrl') {
-                    const imageUrl = item[key].S;
-                    dictionary[key] = cdnHost + "/proc/images/news/" + hashImageUrl(imageUrl || '') + ".jpg";
+                    const imageUrl = item[key]?.S ?? '';
+                    dictionary[key] = cdnHost + "/proc/images/news/" + hashImageUrl(imageUrl) + ".jpg";
                 } else {
-                    dictionary[key] = item[key].S || item[key].N || "";
+                    dictionary[key] = item[key]?.S ?? item[key]?.N ?? "";
                 }
             }
             return dictionary;

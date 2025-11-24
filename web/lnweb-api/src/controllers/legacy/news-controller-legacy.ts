@@ -1,21 +1,39 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, QueryCommand, ScanCommand } = require("@aws-sdk/lib-dynamodb");
-const { format } = require("@fast-csv/format");
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  QueryCommand,
+  ScanCommand,
+  QueryCommandInput,
+  ScanCommandInput,
+} from "@aws-sdk/lib-dynamodb";
+import { format } from "@fast-csv/format";
+import type { Request, Response } from "express";
+
+type PressCutting = {
+  scope?: string;
+  scopeId?: string;
+  sourceUrl?: string;
+  title?: string;
+  description?: string;
+  imageUrl?: string;
+  siteName?: string;
+  articleDate?: string;
+};
 
 // Initialize the DynamoDB client
 const dynamoDBClient = new DynamoDBClient({ region: 'eu-west-2' });
 const docClient = DynamoDBDocumentClient.from(dynamoDBClient);
 
 
-const getPressCuttingsCsvDeprecated = async (req, res) => {
-    const scope = req.query.scope || null;
-    const scopeId = req.query.scopeId || null;
-    let documents = [];
+const getPressCuttingsCsvDeprecated = async (req: Request, res: Response) => {
+    const scope = (req.query.scope as string) || null;
+    const scopeId = (req.query.scopeId as string) || null;
+    let documents: PressCutting[] = [];
 
     try {
         if (!scope && !scopeId) {
             // Perform a table scan if no conditions are provided
-            let scanParams = {
+            let scanParams: ScanCommandInput = {
                 TableName: 'LN-PressCuttings'
             };
 
@@ -31,7 +49,7 @@ const getPressCuttingsCsvDeprecated = async (req, res) => {
             }
         } else {
             // Perform a query if scope and/or scopeId are provided
-            let queryParams = {
+            let queryParams: QueryCommandInput = {
                 TableName: 'LN-PressCuttings',
                 KeyConditionExpression: '',
                 ExpressionAttributeValues: {},
@@ -66,7 +84,7 @@ const getPressCuttingsCsvDeprecated = async (req, res) => {
         }
 
         // Sort documents by articleDate in descending order
-        documents.sort((a, b) => (b.articleDate > a.articleDate ? 1 : -1));
+        documents.sort((a, b) => (b.articleDate ?? '') > (a.articleDate ?? '') ? 1 : -1);
 
         // Stream CSV response
         const csvStream = format({ headers: ['scope', 'scopeId', 'sourceUrl', 'title', 'description', 'imageUrl', 'siteName', 'articleDate'] });
