@@ -15,10 +15,12 @@ async function startServer() {
         const app = await initializeApp();
         console.log('App successfully initialized');
 
+        const port = Number(process.env.PORT || 8080);
+
         // start http server - only listen on localhost:
-        app.listen(8080, '127.0.0.1', () => {
+        app.listen(port, '127.0.0.1', () => {
             console.timeEnd('App startup time');
-            console.log('App listening on http://local.litternetworks.org:8080');
+            console.log(`App listening on http://local.litternetworks.org:${port}`);
         });
 
     } catch (error) {
