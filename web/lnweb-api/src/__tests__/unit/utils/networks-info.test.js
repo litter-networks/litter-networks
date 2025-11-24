@@ -234,13 +234,13 @@ describe('NetworksInfo utilities', () => {
 
   it('handles errors when fetching districts', async () => {
     mockDynamoSend.mockRejectedValueOnce(new Error('boom'));
-    const districts = await networksInfo.fetchAllDistricts();
+    const districts = await networksInfo.getAllDistricts();
     expect(districts).toEqual([]);
   });
 
   it('handles errors when fetching district local infos', async () => {
     mockDynamoSend.mockRejectedValueOnce(new Error('boom'));
-    const infos = await networksInfo.fetchAllDistrictLocalInfos();
+    const infos = await networksInfo.getAllDistrictLocalInfos();
     expect(infos).toEqual([]);
   });
 });

@@ -3,7 +3,6 @@ jest.mock('@aws-sdk/client-dynamodb', () => {
   return {
     DynamoDBClient: jest.fn(() => ({ send: sendMock })),
     QueryCommand: jest.fn((input) => ({ input })),
-    BatchGetItemCommand: jest.fn(),
     __mockSend: sendMock
   };
 });
