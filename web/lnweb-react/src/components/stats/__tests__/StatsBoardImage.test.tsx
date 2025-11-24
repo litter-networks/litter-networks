@@ -1,0 +1,67 @@
+import { render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { StatsBoardImage } from '../StatsBoardImage';
+import * as statsData from '@/data-sources/stats';
+import * as renderStatsBoardModule from '../renderStatsBoard';
+
+class MockImage {
+  onload?: () => void;
+  onerror?: (event: Event) => void;
+  crossOrigin?: string;
+  src = '';
+
+  constructor() {
+    setTimeout(() => {
+      this.onload?.();
+    }, 0);
+  }
+}
+
+describe('StatsBoardImage', () => {
+  let originalImage: typeof Image;
+
+  beforeEach(() => {
+    originalImage = global.Image;
+    // @ts-expect-error monkey patch for tests
+    global.Image = MockImage as unknown as typeof Image;
+  });
+
+  afterEach(() => {
+    // @ts-expect-error restore
+    global.Image = originalImage;
+    vi.restoreAllMocks();
+  });
+
+  it('displays a placeholder and then renders the generated data URL', async () => {
+    const placeholder = '/placeholder.png';
+    vi.spyOn(statsData, 'fetchBagsInfo').mockResolvedValue({
+      bagCounts: {},
+      thisMonthName: '',
+      thisMonth: 0,
+      lastMonthName: '',
+      lastMonth: 0,
+      thisYearName: '',
+      thisYear: 0,
+      lastYearName: '',
+      lastYear: 0,
+      allTime: 0,
+      memberCountAll: 0,
+    } as any);
+
+    const renderSpy = vi
+      .spyOn(renderStatsBoardModule, 'renderStatsBoard')
+      .mockResolvedValue('data:image/png;base64,stats');
+
+    render(<StatsBoardImage uniqueId="test-id" placeholderSrc={placeholder} />);
+
+    const img = screen.getByAltText('');
+    expect(img).toHaveAttribute('src', placeholder);
+    expect(img).toHaveAttribute('aria-busy', 'true');
+
+    await waitFor(() => expect(renderSpy).toHaveBeenCalled());
+    await waitFor(() => {
+      expect(img).toHaveAttribute('src', 'data:image/png;base64,stats');
+      expect(img).toHaveAttribute('aria-busy', 'false');
+    });
+  });
+});

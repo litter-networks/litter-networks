@@ -381,3 +381,5 @@ function getPathSuffix(pathname: string) {
   const suffix = pathname.replace(/^\/[^/]+/, '');
   return suffix === '/' ? '' : suffix;
 }
+
+export { getHeaderColorClass, getSearchColorClass, getPathSuffix };
