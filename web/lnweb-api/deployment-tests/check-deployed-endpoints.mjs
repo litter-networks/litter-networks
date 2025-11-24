@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.join(ROOT, 'endpoint-config.json');
 const GOLDEN_DIR = path.join(ROOT, 'goldens');
+const OUTPUT_DIR = path.join(ROOT, 'latest-responses');
 const API_BASE = process.env.API_BASE_URL ?? 'https://aws.litternetworks.org/api';
 const UPDATE = process.argv.includes('--update');
 
@@ -19,6 +20,15 @@ async function ensureGoldenDir() {
   } catch (err) {
     // ignore
   }
+}
+
+async function resetOutputDir() {
+  try {
+    await fs.rm(OUTPUT_DIR, { recursive: true, force: true });
+  } catch (err) {
+    // ignore
+  }
+  await fs.mkdir(OUTPUT_DIR, { recursive: true });
 }
 
 async function requestEndpoint(entry) {
@@ -38,6 +48,7 @@ async function requestEndpoint(entry) {
 async function run() {
   const config = await loadConfig();
   await ensureGoldenDir();
+  await resetOutputDir();
   let failed = false;
 
   for (const entry of config) {
@@ -49,6 +60,8 @@ async function run() {
         entry.extension ??
         (entry.type === 'json' ? '.json' : entry.type === 'text' ? '.txt' : '.golden');
       const targetFile = path.join(GOLDEN_DIR, `${entry.name}${extension}`);
+      const outputFile = path.join(OUTPUT_DIR, `${entry.name}${extension}`);
+      await fs.writeFile(outputFile, body, 'utf8');
 
       if (UPDATE) {
         await fs.writeFile(targetFile, body, 'utf8');
