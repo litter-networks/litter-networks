@@ -65,7 +65,7 @@ current_stage="Local endpoint golden checks"
 echo ""
 echo "Running local endpoint golden checks... ========================="
 stage_start=$(date +%s)
-./run-local-endpoint-checks.sh
+(cd deployment-tests && ./run-local-endpoint-checks.sh)
 print_time_taken $stage_start "Local endpoint golden checks"
 
 # Deploy to Elastic Beanstalk (optional)
@@ -126,7 +126,7 @@ current_stage="Remote endpoint golden checks"
 echo ""
 echo "Running remote endpoint golden checks... ========================="
 stage_start=$(date +%s)
-./run-remote-endpoint-checks.sh
+(cd deployment-tests && ./run-remote-endpoint-checks.sh)
 print_time_taken $stage_start "Remote endpoint golden checks"
 
 # Total time taken

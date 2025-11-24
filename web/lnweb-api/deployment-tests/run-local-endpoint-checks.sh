@@ -3,7 +3,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_ROOT"
 
 if [ ! -d "node_modules" ]; then
   echo "Installing dependencies..."
@@ -11,12 +12,12 @@ if [ ! -d "node_modules" ]; then
 fi
 
 echo "Clearing previous latest responses..."
-rm -rf "$SCRIPT_DIR/deployment-tests/latest-responses"
+rm -rf "$REPO_ROOT/deployment-tests/latest-responses"
 
 echo "Building TypeScript bundle before local golden checks..."
 npm run build >/dev/null
 
-export NODE_PATH="$SCRIPT_DIR/lambda-layer/nodejs/node_modules:$SCRIPT_DIR/node_modules"
+export NODE_PATH="$REPO_ROOT/lambda-layer/nodejs/node_modules:$REPO_ROOT/node_modules"
 export PORT="${PORT:-18080}"
 export API_BASE_URL="${API_BASE_URL:-http://127.0.0.1:${PORT}}"
 export AWS_PROFILE="${AWS_PROFILE:-ln}"
@@ -48,4 +49,5 @@ if ! curl -fsS "$API_BASE_URL/" >/dev/null 2>&1; then
 fi
 
 echo "Running golden checks against $API_BASE_URL ..."
+cd "$REPO_ROOT/deployment-tests"
 SKIP_TS_BUILD=true API_BASE_URL="$API_BASE_URL" ./run-remote-endpoint-checks.sh
