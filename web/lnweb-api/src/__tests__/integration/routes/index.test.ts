@@ -1,7 +1,9 @@
-const request = require('supertest');
-const express = require('express');
-const app = express();
-const routesPromise = require('../../../routes/index');
+import request from 'supertest';
+import express from 'express';
+import type { Express, Router } from 'express';
+
+const app: Express = express();
+const routesPromise = require('../../../routes/index') as Router | Promise<Router>;
 
 beforeAll(async () => {
   const router = await routesPromise;

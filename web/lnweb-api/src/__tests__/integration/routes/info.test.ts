@@ -1,16 +1,19 @@
-const request = require('supertest');
-const express = require('express');
-const app = express();
+import request from 'supertest';
+import express from 'express';
+import type { Express, Request, Response, Router } from 'express';
+
+const app: Express = express();
 
 // Mock the network info controller
 jest.mock('../../../controllers/legacy/network-info-controller', () => ({
-  getNetworksCsv: jest.fn((req, res) => res.status(200).send('networks csv mock')),
-  getDistrictsCsv: jest.fn((req, res) => res.status(200).send('districts csv mock')),
-  getDistrictsLocalInfoCsv: jest.fn((req, res) => res.status(200).send('districts local info csv mock'))
+  getNetworksCsv: jest.fn((req: Request, res: Response) => res.status(200).send('networks csv mock')),
+  getDistrictsCsv: jest.fn((req: Request, res: Response) => res.status(200).send('districts csv mock')),
+  getDistrictsLocalInfoCsv: jest.fn((req: Request, res: Response) => res.status(200).send('districts local info csv mock'))
 }));
 
 // Use the actual routes
-app.use('/info', require('../../../routes/info'));
+const infoRouter = require('../../../routes/info') as Router;
+app.use('/info', infoRouter);
 
 describe('Info Routes', () => {
   it('GET /info/get-networks-csv should return networks CSV data', async () => {

@@ -1,11 +1,11 @@
-const {
+import {
   sendRequest,
   getJson,
   resetMocks,
   getAreaInfo,
   mockSsmSend,
   mockFetch,
-} = require('./helpers/appFixture');
+} from './helpers/appFixture';
 
 describe('Maps routes', () => {
   beforeEach(resetMocks);

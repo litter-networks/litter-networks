@@ -1,4 +1,4 @@
-const { sendRequest, getJson, newsController, resetMocks } = require('./helpers/appFixture');
+import { sendRequest, getJson, newsController, resetMocks } from './helpers/appFixture';
 
 describe('News routes', () => {
   beforeEach(resetMocks);

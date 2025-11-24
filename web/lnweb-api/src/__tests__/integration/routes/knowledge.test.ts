@@ -1,20 +1,28 @@
-const request = require('supertest');
-const express = require('express');
+import request from 'supertest';
+import express from 'express';
+import type { Express, Router } from 'express';
 
 jest.mock('../../../controllers/knowledge-controller', () => ({
   getKnowledgePage: jest.fn(),
   getChildPages: jest.fn(),
 }));
 
-const controller = require('../../../controllers/knowledge-controller');
+type KnowledgeControllerMock = {
+  getKnowledgePage: jest.Mock;
+  getChildPages: jest.Mock;
+};
+
+const controller = require('../../../controllers/knowledge-controller') as KnowledgeControllerMock;
 
 describe('Knowledge Routes', () => {
-  let app;
+  let app: Express;
+  let knowledgeRouter: Router;
 
   beforeEach(() => {
     jest.clearAllMocks();
     app = express();
-    app.use('/knowledge', require('../../../routes/knowledge'));
+    knowledgeRouter = require('../../../routes/knowledge') as Router;
+    app.use('/knowledge', knowledgeRouter);
   });
 
   it('returns page data from the controller', async () => {

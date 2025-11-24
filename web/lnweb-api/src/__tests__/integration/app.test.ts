@@ -1,18 +1,19 @@
-const request = require('supertest');
+import request from 'supertest';
+import type { Application, Request, Response } from 'express';
 
 jest.mock('../../routes/index', () => {
   const express = require('express');
   const router = express.Router();
-  router.get('/test-route', (req, res) => {
+  router.get('/test-route', (req: Request, res: Response) => {
     res.status(200).json({ message: 'Test route' });
   });
-  router.get('/error-route', (req, res, next) => next(new Error('Test error')));
+  router.get('/error-route', (req: Request, res: Response, next: (err?: Error) => void) => next(new Error('Test error')));
   return router;
 });
 
 // Import app initializer after mocking dependencies
-const initializeApp = require('../../app');
-let app;
+const initializeApp = require('../../app') as () => Promise<Application>;
+let app: Application;
 
 beforeAll(async () => {
   app = await initializeApp();

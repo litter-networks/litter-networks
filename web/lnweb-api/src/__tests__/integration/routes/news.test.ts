@@ -1,6 +1,8 @@
-const request = require('supertest');
-const express = require('express');
-const app = express();
+import request from 'supertest';
+import express from 'express';
+import type { Express, Router } from 'express';
+
+const app: Express = express();
 
 // Mock the news controller
 jest.mock('../../../controllers/news-controller', () => ({
@@ -12,7 +14,8 @@ jest.mock('../../../controllers/news-controller', () => ({
 
 // Use the actual routes
 app.use(express.json());
-app.use('/news', require('../../../routes/news'));
+const newsRouter = require('../../../routes/news') as Router;
+app.use('/news', newsRouter);
 
 describe('News Routes', () => {
   describe('GET /news/get-press-cuttings-json', () => {

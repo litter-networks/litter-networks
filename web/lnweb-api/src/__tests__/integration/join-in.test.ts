@@ -1,4 +1,4 @@
-const { sendRequest, getJson, resetMocks, mockNetworksInfo } = require('./helpers/appFixture');
+import { sendRequest, getJson, resetMocks, mockNetworksInfo } from './helpers/appFixture';
 
 describe('Join-in routes', () => {
   beforeEach(resetMocks);
