@@ -4,6 +4,8 @@ set -e  # Exit immediately if a command exits with a non-zero status
 
 clear
 
+export AWS_PROFILE="${AWS_PROFILE:-ln}"
+
 # on_error prints an error message indicating which `current_stage` failed and notifies that the script is exiting.
 function on_error() {
     echo "Error: The script failed during the '$current_stage' stage. Exiting..."
@@ -26,12 +28,12 @@ function print_time_taken() {
 }
 
 # Run ESLint
-# current_stage="ESLint"
-# echo ""
-# echo "Running ESLint... ========================="
-# stage_start=$(date +%s)
-# npx eslint src --ignore-pattern "src/public/leaflet/" --ignore-pattern "src/public/js/3rd-party" --max-warnings=0
-# print_time_taken $stage_start "ESLint"
+current_stage="ESLint"
+echo ""
+echo "Running ESLint... ========================="
+stage_start=$(date +%s)
+npx eslint src --ignore-pattern "src/public/leaflet/" --ignore-pattern "src/public/js/3rd-party" --max-warnings=0
+print_time_taken $stage_start "ESLint"
 
 # Run npm audit with a low severity threshold
 current_stage="npm audit"
@@ -39,16 +41,16 @@ echo ""
 echo "Running npm audit... ========================="
 stage_start=$(date +%s)
 npm audit --prefix ./lambda-layer/nodejs/ --audit-level=low
-npm audit --prefix ./src/ --audit-level=low
+npm audit --prefix ./ --audit-level=low
 print_time_taken $stage_start "npm audit"
 
 # Run npm test with coverage
-# current_stage="Jest tests"
-# echo ""
-# echo "Running Jest tests... ========================="
-# stage_start=$(date +%s)
-# npm test
-# print_time_taken $stage_start "Jest tests"
+current_stage="Jest tests"
+echo ""
+echo "Running Jest tests... ========================="
+stage_start=$(date +%s)
+npm test
+print_time_taken $stage_start "Jest tests"
 
 # Deploy to Elastic Beanstalk (optional)
 if [ "$LAMBDA_DEPLOY" = true ]; then
@@ -63,19 +65,53 @@ if [ "$LAMBDA_DEPLOY" = true ]; then
     echo ""
     echo "SAM Deploy... ========================="
     stage_start=$(date +%s)
-    sam deploy
+    should_invalidate=true
+    set +e
+    deploy_output=$(sam deploy 2>&1)
+    deploy_status=$?
+    set -e
+    echo "$deploy_output"
     print_time_taken $stage_start "SAM Lambda deploy"
+    if [ $deploy_status -ne 0 ]; then
+        if echo "$deploy_output" | grep -qi "No changes to deploy"; then
+            echo "SAM deploy reported no changes; continuing deployment steps."
+            should_invalidate=false
+        else
+            current_stage="SAM Lambda deploy"
+            echo "Error: SAM deploy failed."
+            exit $deploy_status
+        fi
+    fi
     
-    current_stage="Cloudfront Invalidation for Website"
-    echo ""
-    echo "Cloudfront Invalidation for Website-API... ========================="
-    stage_start=$(date +%s)
-    aws cloudfront create-invalidation --distribution-id E38XGOGM7XNRC5 --paths "/api/*" > /dev/null 2>&1
-    print_time_taken $stage_start "Cloudfront Invalidation for Website-API"  
+    if [ "$should_invalidate" = true ]; then
+        current_stage="Cloudfront Invalidation for Website"
+        echo ""
+        echo "Cloudfront Invalidation for Website-API... ========================="
+        stage_start=$(date +%s)
+        invalidation_id=$(aws cloudfront create-invalidation \
+            --distribution-id E38XGOGM7XNRC5 \
+            --paths "/api/*" \
+            --query "Invalidation.Id" \
+            --output text)
+        aws cloudfront wait invalidation-completed \
+            --distribution-id E38XGOGM7XNRC5 \
+            --id "$invalidation_id" > /dev/null 2>&1
+        print_time_taken $stage_start "Cloudfront Invalidation for Website-API"
+    else
+        echo ""
+        echo "Skipping Cloudfront invalidation because no changes were deployed."
+    fi
 else
     echo ""
     echo "Skipping SAM Lambda deploy. ========================="
 fi
+
+current_stage="Golden endpoint checks"
+echo ""
+echo "Running endpoint golden checks... ========================="
+stage_start=$(date +%s)
+./run-endpoint-checks.sh
+print_time_taken $stage_start "Endpoint golden checks"
 
 # Total time taken
 total_end_time=$(date +%s)

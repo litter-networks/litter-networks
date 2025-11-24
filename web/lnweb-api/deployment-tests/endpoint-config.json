@@ -1,0 +1,124 @@
+[
+  {
+    "name": "root",
+    "path": "/",
+    "type": "json",
+    "extension": ".golden.json"
+  },
+  {
+    "name": "districts-csv",
+    "path": "/info/get-districts-csv",
+    "type": "text",
+    "extension": ".golden.csv",
+    "rules": {
+      "text": {
+        "normalizeNewlines": true,
+        "sortRows": true,
+        "skipHeader": true,
+        "skipEmptyLines": true
+      }
+    }
+  },
+  {
+    "name": "districts-localinfo-csv",
+    "path": "/info/get-districts-localinfo-csv",
+    "type": "text",
+    "extension": ".golden.csv",
+    "rules": {
+      "text": {
+        "normalizeNewlines": true,
+        "sortRows": true,
+        "skipHeader": true,
+        "skipEmptyLines": true
+      }
+    }
+  },
+  {
+    "name": "networks-csv",
+    "path": "/info/get-networks-csv",
+    "type": "text",
+    "extension": ".golden.csv",
+    "rules": {
+      "text": {
+        "normalizeNewlines": true,
+        "sortRows": true,
+        "skipHeader": true,
+        "skipEmptyLines": true
+      }
+    }
+  },
+  {
+    "name": "networks-info",
+    "path": "/info/networks",
+    "type": "json",
+    "extension": ".golden.json"
+  },
+  {
+    "name": "networks-nearby-anfield",
+    "path": "/info/networks/anfieldlitter/nearby",
+    "type": "json",
+    "extension": ".golden.json"
+  },
+  {
+    "name": "news-json",
+    "path": "/news/get-press-cuttings-json",
+    "type": "json",
+    "extension": ".golden.json"
+  },
+  {
+    "name": "news-csv",
+    "path": "/news/get-press-cuttings-csv",
+    "type": "text",
+    "extension": ".golden.csv",
+    "rules": {
+      "text": {
+        "normalizeNewlines": true,
+        "sortRows": true,
+        "skipHeader": true,
+        "skipEmptyLines": true
+      }
+    }
+  },
+  {
+    "name": "stats-bags-info-anfield",
+    "path": "/stats/get-bags-info/anfieldlitter",
+    "type": "json",
+    "extension": ".golden.json"
+  },
+  {
+    "name": "stats-summary",
+    "path": "/stats/summary",
+    "type": "json",
+    "extension": ".golden.json"
+  },
+  {
+    "name": "stats-bag-stats-json",
+    "path": "/stats/get-bag-stats-json/anfieldlitter",
+    "type": "json",
+    "extension": ".golden.json"
+  },
+  {
+    "name": "joinin-district-info-liverpool",
+    "path": "/join-in/districts/liverpool/local-info",
+    "type": "json",
+    "extension": ".golden.json"
+  },
+  {
+    "name": "knowledge-page-how-it-works",
+    "path": "/knowledge/page?path=knowledge/getting-started/how-it-works",
+    "type": "json",
+    "extension": ".golden.json"
+  },
+  {
+    "name": "knowledge-child-pages",
+    "path": "/knowledge/child-pages?path=knowledge",
+    "type": "json",
+    "extension": ".golden.json"
+  },
+  {
+    "name": "maps-area-info",
+    "path": "/maps/area-info",
+    "type": "json",
+    "extension": ".golden.json"
+  }
+]

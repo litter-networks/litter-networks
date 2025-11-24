@@ -39,8 +39,9 @@ exports.lambdaHandler = async (event, context) => {
             isBase64Encoded: event.isBase64Encoded || false
         };
     
-        // Proxy the transformed event to the Express server.
-        const response = awsServerlessExpress.proxy(server, transformedEvent, context);
+        // Proxy the transformed event to the Express server using the PROMISE mode so we can await the API Gateway response.
+        const proxyResult = awsServerlessExpress.proxy(server, transformedEvent, context, 'PROMISE');
+        const response = await proxyResult.promise;
 
         // Debug log the response before returning it
         console.log(`Lambda Response [from Path: ${path}, Method: ${method}]:`, JSON.stringify(response, null, 2));

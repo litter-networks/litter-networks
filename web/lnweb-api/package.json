@@ -14,36 +14,19 @@
   },
   "scripts": {
     "start": "node src/app.js",
-    "test": "NODE_PATH=./lambda-layer/nodejs/node_modules:./node_modules jest",
+    "test": "NODE_PATH=./node_modules:./lambda-layer/nodejs/node_modules jest",
     "test:watch": "jest --watch"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "eslintConfig": {},
-  "jest": {
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/src"
-    ],
-    "testMatch": [
-      "src/__tests__/**/*.test.js"
-    ],
-    "collectCoverage": false,
-    "coverageDirectory": "coverage",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/"
-    ],
-    "modulePaths": [
-      "<rootDir>/node_modules",
-      "<rootDir>/lambda-layer/nodejs/node_modules"
-    ],
-    "moduleDirectories": [
-      "<rootDir>/node_modules",
-      "<rootDir>/lambda-layer/nodejs/node_modules"
-    ],
-    "globals": {
-      "process.env.NODE_PATH": "<rootDir>/lambda-layer/nodejs/node_modules:./node_modules"
-    }
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.936.0",
+    "@aws-sdk/client-ssm": "^3.936.0",
+    "@aws-sdk/core": "^3.936.0",
+    "@aws-sdk/lib-dynamodb": "^3.936.0",
+    "@fast-csv/format": "^5.0.5",
+    "node-cache": "^5.1.2"
   }
 }

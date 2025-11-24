@@ -113,6 +113,13 @@ async function getAreaInfo() {
     }
 }
 
+function resetCache() {
+    cache.flushAll();
+}
+
 module.exports = {
     getAreaInfo,
+    isNetworkInDistrict,
+    fetchTable,
+    __resetCache: resetCache,
 };

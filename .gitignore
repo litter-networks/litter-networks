@@ -18,3 +18,6 @@
 .env.production.local
 .envrc
 .env.*.local
+**/coverage/
+TODO.txt
+web/lnweb-api/deployment-tests/latest-responses/

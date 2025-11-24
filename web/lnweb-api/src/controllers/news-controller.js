@@ -1,4 +1,4 @@
-const { DynamoDBClient, QueryCommand, BatchGetItemCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, QueryCommand } = require("@aws-sdk/client-dynamodb");
 const { createHash } = require("crypto");
 const NodeCache = require("node-cache");
 

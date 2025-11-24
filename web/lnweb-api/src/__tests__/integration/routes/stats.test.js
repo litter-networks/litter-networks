@@ -1,29 +1,44 @@
 const request = require('supertest');
 const express = require('express');
+
+jest.mock('../../../utils/networks-info.js', () => ({
+  getBagsInfo: jest.fn(async (uniqueId) => ({
+    networkName: `Network ${uniqueId}`,
+    bagCounts: { thisMonth: 5, lastMonth: 3 }
+  })),
+  getAllNetworks: jest.fn(async () => [
+    { uniqueId: 'net-1', districtId: 'dist-1' },
+    { uniqueId: 'net-2', districtId: 'dist-1' }
+  ]),
+  getCurrentMemberCount: jest.fn(async () => 10),
+  findNetworkById: jest.fn(async (uniqueId) => uniqueId === 'net-1' ? { uniqueId: 'net-1', districtId: 'dist-1' } : null),
+  findNetworkByShortId: jest.fn(async () => null),
+  findDistrictById: jest.fn(async () => ({ fullName: 'District 1' }))
+}));
+
 const app = express();
-
-// Mock any controllers used by stats
-jest.mock('../../../controllers/stats-controller', () => ({
-  getStats: jest.fn((req, res) => res.status(200).json({
-    totalUsers: 100,
-    activeNetworks: 25,
-    totalLitterPicks: 500
-  }))
-}), { virtual: true });
-
-// Use the actual routes
 app.use(express.json());
 app.use('/stats', require('../../../routes/stats'));
 
 describe('Stats Routes', () => {
-  describe('GET /stats', () => {
-    it('should return statistics data', async () => {
-      const res = await request(app).get('/stats');
-      
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty('totalUsers');
-      expect(res.body).toHaveProperty('activeNetworks');
-      expect(res.body).toHaveProperty('totalLitterPicks');
-    });
+  it('GET /stats/get-bags-info/:id returns bag info', async () => {
+    const res = await request(app).get('/stats/get-bags-info/net-1');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('networkName', 'Network net-1');
+    expect(res.body.bagCounts).toHaveProperty('thisMonth', 5);
+  });
+
+  it('GET /stats/summary/:networkId returns summary data', async () => {
+    const res = await request(app).get('/stats/summary/net-1');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('memberCountNetwork');
+    expect(res.body).toHaveProperty('numNetworksInDistrict', 2);
+    expect(res.body).toHaveProperty('districtName', 'District 1');
+  });
+
+  it('GET /stats/get-bag-stats-json/:id returns bag counts only', async () => {
+    const res = await request(app).get('/stats/get-bag-stats-json/net-1');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual(expect.objectContaining({ thisMonth: 5 }));
   });
 });

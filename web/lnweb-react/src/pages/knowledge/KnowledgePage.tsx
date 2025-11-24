@@ -399,6 +399,14 @@ function normalizeIframeSrc(src: string | null) {
   return trimmed;
 }
 
+export {
+  getKnowledgePath,
+  updateInternalLinks,
+  sanitizeKnowledgeHtml,
+  isSafeHref,
+  normalizeIframeSrc,
+};
+
 /**
  * Determines whether an iframe source URL is allowed for embedding.
  *

@@ -1,24 +1,22 @@
 const request = require('supertest');
-const express = require('express');
-
-// Mock dependencies
-jest.mock('express-session', () => {
-  return jest.fn(() => (req, res, next) => {
-    req.session = {};
-    next();
-  });
-});
 
 jest.mock('../../routes/index', () => {
+  const express = require('express');
   const router = express.Router();
   router.get('/test-route', (req, res) => {
     res.status(200).json({ message: 'Test route' });
   });
+  router.get('/error-route', (req, res, next) => next(new Error('Test error')));
   return router;
 });
 
-// Import app after mocking dependencies
-const app = require('../../app');
+// Import app initializer after mocking dependencies
+const initializeApp = require('../../app');
+let app;
+
+beforeAll(async () => {
+  app = await initializeApp();
+});
 
 describe('Express App', () => {
   it('should handle CORS', async () => {
@@ -39,27 +37,6 @@ describe('Express App', () => {
   });
 
   it('should handle server errors', async () => {
-    // Create a route that throws an error
-    app._router.stack.push({
-      route: {
-        path: '/error-route',
-        stack: [{
-          method: 'get',
-          handle: (req, res, next) => {
-            next(new Error('Test error'));
-          }
-        }]
-      },
-      handle: (req, res, next) => {
-        if (req.path === '/error-route' && req.method === 'GET') {
-          req.route = { stack: [{ method: 'get' }] };
-          app._router.handle(req, res, next);
-        } else {
-          next();
-        }
-      }
-    });
-
     const res = await request(app)
       .get('/error-route')
       .set('Origin', 'https://local.litternetworks.org');

@@ -380,4 +380,22 @@ class NetworksInfo {
 
 // Exporting the singleton instance
 var instance = new NetworksInfo();
+function resetCachesForTests() {
+    [
+        'cacheNetworks',
+        'cacheNetworksByShortId',
+        'cacheDistricts',
+        'cacheDistrictLocalInfos',
+        'cacheNearbyNetworks',
+        'cacheBagsInfo',
+        'cacheCurrentMemberCounts',
+    ].forEach((cacheKey) => {
+        const cache = instance[cacheKey];
+        if (cache && typeof cache.flushAll === 'function') {
+            cache.flushAll();
+        }
+    });
+}
+
 module.exports = instance;
+module.exports.__resetCachesForTests = resetCachesForTests;

@@ -54,15 +54,14 @@ async function getDistrictsCsv(req, res) {
         const headers = gatherHeaders(districts);
 
         // Prepare rows for CSV based on the headers
-        // eslint-disable-next-line security/detect-object-injection
         const rows = districts.map(district => headers.map(header => district[header] || ''));
 
         // Generate CSV content
         const csvContent = generateCsv(headers, rows);
 
         // Return CSV
-        res.header('Content-Type', 'text/csv');
-        res.header('Content-Disposition', 'attachment; filename="network-info.csv"');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="districts.csv"');
         res.send(csvContent);
     } catch (err) {
         console.error('Error generating districts CSV:', err);
@@ -85,14 +84,14 @@ async function getDistrictsLocalInfoCsv(req, res) {
         const headers = gatherHeaders(districtsLocalInfos);
 
         // Prepare rows for CSV based on the headers
-        // eslint-disable-next-line security/detect-object-injection
         const rows = districtsLocalInfos.map(info => headers.map(header => info[header] || ''));
 
         // Generate CSV content
         const csvContent = generateCsv(headers, rows);
 
         // Return CSV
-        res.header('Content-Type', 'text/csv');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="districts-local-info.csv"');
         res.send(csvContent);
     } catch (err) {
         res.status(500).send('Error generating CSV: ' + err.message);
@@ -126,7 +125,6 @@ async function getNetworksCsv(req, res) {
         // Prepare rows for CSV based on the headers
         const rows = networks.map(network => {
             // Initialize the row with values based on headers
-            // eslint-disable-next-line security/detect-object-injection
             const row = headers.map(header => network[header] || '');
 
             row[headers.indexOf('contactEmail')] = '';
@@ -167,7 +165,8 @@ async function getNetworksCsv(req, res) {
         const csvContent = generateCsv(headers, rows);
 
         // Return CSV
-        res.header('Content-Type', 'text/csv');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="networks.csv"');
         res.send(csvContent);
     } catch (err) {
         res.status(500).send('Error generating CSV: ' + err.message);

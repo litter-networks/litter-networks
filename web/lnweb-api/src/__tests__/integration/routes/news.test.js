@@ -4,10 +4,10 @@ const app = express();
 
 // Mock the news controller
 jest.mock('../../../controllers/news-controller', () => ({
-  getNews: jest.fn((req, res) => res.status(200).json({ items: [
+  fetchNextNewsItems: jest.fn().mockResolvedValue([
     { id: 1, title: 'Test News 1', content: 'Content 1' },
     { id: 2, title: 'Test News 2', content: 'Content 2' }
-  ]}))
+  ])
 }));
 
 // Use the actual routes
@@ -15,14 +15,13 @@ app.use(express.json());
 app.use('/news', require('../../../routes/news'));
 
 describe('News Routes', () => {
-  describe('GET /news', () => {
+  describe('GET /news/get-press-cuttings-json', () => {
     it('should return news data', async () => {
-      const res = await request(app).get('/news');
+      const res = await request(app).get('/news/get-press-cuttings-json');
       
       expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty('items');
-      expect(res.body.items).toHaveLength(2);
-      expect(res.body.items[0]).toHaveProperty('title', 'Test News 1');
+      expect(res.body).toHaveLength(2);
+      expect(res.body[0]).toHaveProperty('title', 'Test News 1');
     });
   });
 });

@@ -28,14 +28,13 @@ async function getParameterFromStore(parameterName) {
 /**
  * Create and configure an Express router exposing map-related endpoints.
  *
- * Registers POST /snap-route (uses auth validation, lazily loads the OpenRouteService API key from AWS Parameter Store on first use, and proxies requests to the OpenRouteService snap endpoint) and GET /area-info (returns area information from the maps-area-controller).
+ * Registers POST /snap-route (lazily loads the OpenRouteService API key from AWS Parameter Store on first use,
+ * and proxies requests to the OpenRouteService snap endpoint) and GET /area-info (returns area information from the maps-area-controller).
  * @returns {import('express').Router} The configured Express router.
  */
 function initializeRoutes() {
 
-    const { validateAuthToken } = require("../auth");
-
-    router.post('/snap-route', validateAuthToken, async (req, res) => {
+    router.post('/snap-route', async (req, res) => {
         try {
             if (!OPENROUTE_API_KEY) {
                 OPENROUTE_API_KEY = await getParameterFromStore("/LNWeb-API/OPENROUTE_API_KEY");
@@ -81,3 +80,6 @@ function initializeRoutes() {
 }
 
 module.exports = initializeRoutes();
+module.exports.resetOpenRouteKey = function resetOpenRouteKey() {
+    OPENROUTE_API_KEY = undefined;
+};

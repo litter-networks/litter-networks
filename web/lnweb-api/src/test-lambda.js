@@ -10,7 +10,7 @@ async function testLambda() {
     // Simulated API Gateway event
     const event = {
         httpMethod: 'GET', // Change to POST, PUT, etc., as needed
-        rawPath: '/user/login', // Adjust to match the route you want to test
+        rawPath: '/info/networks', // Adjust to match the route you want to test
         headers: {
             'Content-Type': 'application/json'
         },
