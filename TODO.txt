@@ -3,8 +3,11 @@
 - ✅ Write integration tests that boot the real Express app (no route mocks) and exercise `/info`, `/stats`, `/join-in`, `/knowledge`, and `/maps` endpoints with mocked AWS clients to verify middleware, cache headers, and error handling.
 - ✅ Expand `networks-info` unit coverage (flattenItem, caching layers, nearby network parsing, bag/member aggregation, "all" fallback) using fake Dynamo/DocumentClient adapters.
 - ✅ Strengthen controller tests for bag/news CSV endpoints and error branches, ensuring custom overrides are asserted.
-- Add integration tests for `/news` routes (JSON feed + legacy CSV) to confirm caching/error handling.
-- Add tests for the `/maps/snap-route` proxy to verify Parameter Store fallback and OpenRoute errors are surfaced cleanly.
+- ✅ Add integration tests for `/news` routes (JSON feed + legacy CSV) to confirm caching/error handling.
+- ✅ Add tests for the `/maps/snap-route` proxy to verify Parameter Store fallback and OpenRoute errors are surfaced cleanly.
+- Add unit tests for `maps-area-controller` to exercise the Dynamo scans/joins, cache refresh paths, and failure logging so that low coverage region is covered.
+- Add targeted tests for `controllers/legacy/news-controller-legacy.js` to hit the streamed CSV output and pagination branches.
+- Expand `networks-info` tests to cover the remaining Dynamo helpers (retrying fetches, `fetchCurrentMemberCount` failures, nearby cache eviction) and the unexercised branches in `cache-control.js`.
 
 # lnweb-react
 - Set up Vitest + RTL and add tests for `NavDataProvider`/`useNavData` (network selection, redirects, nearby networks) plus shared helpers (`getSectionFromPath`, `getPrimaryDistrictId`, sanitizers in `KnowledgePage`).

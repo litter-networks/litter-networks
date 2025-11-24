@@ -18,3 +18,4 @@
 .env.production.local
 .envrc
 .env.*.local
+**/coverage/

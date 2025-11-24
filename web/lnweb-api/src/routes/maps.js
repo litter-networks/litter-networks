@@ -80,3 +80,6 @@ function initializeRoutes() {
 }
 
 module.exports = initializeRoutes();
+module.exports.resetOpenRouteKey = function resetOpenRouteKey() {
+    OPENROUTE_API_KEY = undefined;
+};
