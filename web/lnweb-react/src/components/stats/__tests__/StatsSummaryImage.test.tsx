@@ -16,21 +16,23 @@ const summaryData = {
 };
 
 describe('StatsSummaryImage', () => {
+  let originalPixelRatio: number | undefined;
+
   beforeEach(() => {
     const loadHtml2CanvasMock = vi.mocked(loadHtml2Canvas);
     loadHtml2CanvasMock.mockResolvedValue(undefined);
-    // @ts-expect-error html2canvas global
     window.html2canvas = vi.fn(() =>
       Promise.resolve({
         toDataURL: () => 'data:image/png;base64,summary',
       } as unknown as HTMLCanvasElement),
     );
+    originalPixelRatio = window.devicePixelRatio;
     window.devicePixelRatio = 2;
   });
 
   afterEach(() => {
-    delete window.html2canvas;
-    delete window.devicePixelRatio;
+    window.html2canvas = undefined;
+    window.devicePixelRatio = originalPixelRatio ?? window.devicePixelRatio;
     vi.restoreAllMocks();
   });
 

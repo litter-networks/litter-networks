@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import mimetypes
 import os
 import sys
@@ -10,6 +11,10 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
+import time
+from urllib import request as urllib_request
+from urllib.error import URLError
+from urllib.parse import urljoin
 
 import boto3
 from botocore.exceptions import ClientError
@@ -39,6 +44,8 @@ SOURCE_DIR = Path(os.environ.get("SOURCE_DIR", "./dist")).resolve()
 ASSET_CACHE_CONTROL = os.environ.get("ASSET_CACHE_CONTROL", "public, max-age=3600, immutable")
 HTML_CACHE_CONTROL = os.environ.get("HTML_CACHE_CONTROL", "public, max-age=60, must-revalidate")
 CONTENT_DISPOSITION = os.environ.get("CONTENT_DISPOSITION", "inline")
+BUILD_INFO_JSON = os.environ.get("BUILD_INFO_JSON")
+SMOKE_TEST_URL = os.environ.get("SMOKE_TEST_URL")
 
 if not BUCKET_NAME:
     print("DEPLOY_BUCKET environment variable is required.", file=sys.stderr)
@@ -187,7 +194,7 @@ def _invalidate_cloudfront() -> None:
             DistributionId=DISTRIBUTION_ID,
             InvalidationBatch={
                 "Paths": {"Quantity": len(sorted_paths), "Items": sorted_paths},
-                "CallerReference": f"lnweb-react-{datetime.utcnow().timestamp()}",
+                "CallerReference": f"lnweb-react-{datetime.now(timezone.utc).timestamp()}",
             },
         )
         invalidation_id = invalidation["Invalidation"]["Id"]
@@ -196,6 +203,89 @@ def _invalidate_cloudfront() -> None:
         print(f"[cf] invalidation {invalidation_id} completed")
     except ClientError as exc:  # pragma: no cover - network failure
         print(f"[cf] invalidation failed: {exc}")
+
+
+def upload_build_info() -> None:
+    if not BUILD_INFO_JSON:
+        return
+    try:
+        s3_client.put_object(
+            Bucket=BUCKET_NAME,
+            Key="build-info.json",
+            Body=BUILD_INFO_JSON.encode("utf-8"),
+            ContentType="application/json",
+            CacheControl="public, max-age=60, must-revalidate",
+            ContentDisposition="inline",
+        )
+        print(f"[upload] build info -> s3://{BUCKET_NAME}/build-info.json")
+        _track_invalidation("build-info.json")
+    except ClientError as exc:
+        print(f"[upload] failed for build info: {exc}")
+
+
+def fetch_url(url: str) -> str:
+    response = urllib_request.urlopen(url, timeout=30)
+    charset = response.headers.get_content_charset() or "utf-8"
+    body = response.read().decode(charset, errors="ignore")
+    return body
+
+
+def verify_spa_shell():
+    if not SMOKE_TEST_URL:
+        print("[smoke] skipping SPA shell check (no SMOKE_TEST_URL provided).")
+        return
+    print(f"[smoke] Verifying SPA shell at {SMOKE_TEST_URL}...")
+    marker = 'x-ln-app" content="lnweb-react-spa"'
+    for attempt in range(3):
+        try:
+            body = fetch_url(SMOKE_TEST_URL)
+        except URLError as exc:
+            if attempt == 2:
+                raise RuntimeError(f"Failed to fetch {SMOKE_TEST_URL}: {exc}") from exc
+            time.sleep(5)
+            continue
+        if marker in body:
+            print("[smoke] SPA shell marker found. \033[32mOK\033[0m")
+            return
+        time.sleep(5)
+    raise RuntimeError(f"SPA marker not found in {SMOKE_TEST_URL}")
+
+
+def verify_build_info():
+    if not (SMOKE_TEST_URL and BUILD_INFO_JSON):
+        print("[smoke] Skipping build-info check (missing SMOKE_TEST_URL or BUILD_INFO_JSON).")
+        return
+    expected = json.loads(BUILD_INFO_JSON)
+    info_url = urljoin(SMOKE_TEST_URL.rstrip("/") + "/", "build-info.json")
+    print(f"[smoke] Verifying build info at {info_url}...")
+    try:
+        body = fetch_url(info_url)
+        actual = json.loads(body)
+    except URLError as exc:
+        raise RuntimeError(f"Failed to fetch {info_url}: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Invalid JSON returned from {info_url}: {exc}") from exc
+
+    if actual != expected:
+        raise RuntimeError(f"Build info mismatch.\nExpected: {expected}\nActual:   {actual}")
+    print("[smoke] Build info matches latest upload. \033[32mOK\033[0m")
+
+
+def run_smoke_tests():
+    print("\nSmoke tests --------------")
+    if not SMOKE_TEST_URL:
+        print("[smoke] Skipping smoke tests (SMOKE_TEST_URL not set).")
+        return
+    try:
+        verify_spa_shell()
+    except RuntimeError as exc:
+        print(f"[smoke] SPA shell check failed. \033[31mFAIL\033[0m\n{exc}")
+        raise
+    try:
+        verify_build_info()
+    except RuntimeError as exc:
+        print(f"[smoke] Build info check failed. \033[31mFAIL\033[0m\n{exc}")
+        raise
 
 
 def main() -> int:
@@ -207,10 +297,12 @@ def main() -> int:
     with ThreadPoolExecutor(max_workers=min(32, len(files))) as executor:
         list(executor.map(_sync_file, files))
 
+    upload_build_info()
     _invalidate_cloudfront()
 
     result = "changed" if files_uploaded or modified_paths else "unchanged"
     print(f"SYNC_RESULT:{result}")
+    run_smoke_tests()
     return 0
 
 

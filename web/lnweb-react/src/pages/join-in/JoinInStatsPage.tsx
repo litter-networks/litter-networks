@@ -76,7 +76,7 @@ export function JoinInStatsPage() {
       targets.push({
         id: 'district',
         uniqueId: districtUniqueId,
-        caption: `${network.districtFullName ?? 'Local'} Area`,
+        caption: `${network?.districtFullName ?? 'Local'} Area`,
       });
     }
     targets.push({

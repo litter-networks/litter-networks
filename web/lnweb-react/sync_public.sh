@@ -2,14 +2,15 @@
 
 set -euo pipefail
 
+export TERM="${TERM:-xterm}"
+
 clear
 
 export AWS_PROFILE="${AWS_PROFILE:-ln}"
-
-if [[ -z "${DEPLOY_BUCKET:-}" ]]; then
-  echo "DEPLOY_BUCKET environment variable is required." >&2
-  exit 1
-fi
+export DEPLOY_BUCKET="lnweb-public"
+export DISTRIBUTION_ID="${DISTRIBUTION_ID:-E38XGOGM7XNRC5}"
+export SMOKE_TEST_URL="${SMOKE_TEST_URL:-https://aws.litternetworks.org}"
+export BUILD_INFO_JSON="$(jq -n --arg ts "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" --arg sha "$(git rev-parse --short HEAD)" '{buildTime:$ts, commit:$sha}')"
 
 current_stage="initialisation"
 
@@ -51,14 +52,6 @@ run_stage "Vite build" npm run build
 
 run_stage "S3 sync + metadata" \
   python3 scripts/sync_s3_with_metadata.py
-
-if [[ -n "${SMOKE_TEST_URL:-}" ]]; then
-  run_stage "Smoke test (${SMOKE_TEST_URL})" \
-    bash -c "curl -fsSL \"${SMOKE_TEST_URL}\" >/dev/null"
-else
-  echo ""
-  echo "Skipping smoke test: SMOKE_TEST_URL not provided. ========================="
-fi
 
 total_end_time=$(date +%s)
 total_elapsed=$(( total_end_time - start_time ))

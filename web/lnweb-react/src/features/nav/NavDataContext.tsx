@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchNearbyNetworks, useNetworks, type Network } from '@/data-sources/networks';
+import { fetchNearbyNetworks, useNetworks, type Network, type NearbyNetwork } from '@/data-sources/networks';
 import { NavDataContext, type NavData } from './NavDataContextBase';
 
 interface ProviderProps {

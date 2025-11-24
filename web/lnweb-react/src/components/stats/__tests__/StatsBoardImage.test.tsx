@@ -21,14 +21,12 @@ describe('StatsBoardImage', () => {
   let originalImage: typeof Image;
 
   beforeEach(() => {
-    originalImage = global.Image;
-    // @ts-expect-error monkey patch for tests
-    global.Image = MockImage as unknown as typeof Image;
+    originalImage = globalThis.Image;
+    globalThis.Image = MockImage as unknown as typeof Image;
   });
 
   afterEach(() => {
-    // @ts-expect-error restore
-    global.Image = originalImage;
+    globalThis.Image = originalImage;
     vi.restoreAllMocks();
   });
 

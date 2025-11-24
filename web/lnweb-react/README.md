@@ -19,7 +19,7 @@
 - New helpers or context logic should update this README if they blur the `features` vs `data-sources` distinction.
 
 ## Deployment
-- `npm run deploy` executes `scripts/sync_public.sh`, which lints, typechecks, runs Vitest, audits dependencies, builds the SPA, and then uploads `dist/` to S3 with metadata enforcement and targeted CloudFront invalidations (via `scripts/sync_s3_with_metadata.py`).
+- `npm run deploy` executes `sync_public.sh`, which lints, typechecks, runs Vitest, audits dependencies, builds the SPA, and then uploads `dist/` to S3 with metadata enforcement and targeted CloudFront invalidations (via `scripts/sync_s3_with_metadata.py`).
 - Required environment variables:
   - `DEPLOY_BUCKET`: target bucket for the static assets (e.g., `lnweb-public`).
   - `AWS_PROFILE`: defaults to `ln` if unset.
