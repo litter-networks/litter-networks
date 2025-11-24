@@ -19,3 +19,4 @@
 .envrc
 .env.*.local
 **/coverage/
+TODO.txt
