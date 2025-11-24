@@ -54,7 +54,6 @@ async function getDistrictsCsv(req, res) {
         const headers = gatherHeaders(districts);
 
         // Prepare rows for CSV based on the headers
-        // eslint-disable-next-line security/detect-object-injection
         const rows = districts.map(district => headers.map(header => district[header] || ''));
 
         // Generate CSV content
@@ -85,7 +84,6 @@ async function getDistrictsLocalInfoCsv(req, res) {
         const headers = gatherHeaders(districtsLocalInfos);
 
         // Prepare rows for CSV based on the headers
-        // eslint-disable-next-line security/detect-object-injection
         const rows = districtsLocalInfos.map(info => headers.map(header => info[header] || ''));
 
         // Generate CSV content
@@ -127,7 +125,6 @@ async function getNetworksCsv(req, res) {
         // Prepare rows for CSV based on the headers
         const rows = networks.map(network => {
             // Initialize the row with values based on headers
-            // eslint-disable-next-line security/detect-object-injection
             const row = headers.map(header => network[header] || '');
 
             row[headers.indexOf('contactEmail')] = '';

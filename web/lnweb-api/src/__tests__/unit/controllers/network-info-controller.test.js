@@ -117,9 +117,9 @@ describe('Network Info Controller', () => {
         { id: '2', name: 'Test 2' }
       ];
       
-      // The generateCsv function is private, so we test it indirectly
-      // We're testing that the CSV generation works through the exported functions
-      expect(true).toBe(true);
+      // The generateCsv function is private, so this is a lightweight smoke check
+      expect(headers).toEqual(['id', 'name']);
+      expect(rows).toHaveLength(2);
     });
   });
 });

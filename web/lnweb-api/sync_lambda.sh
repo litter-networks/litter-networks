@@ -4,6 +4,8 @@ set -e  # Exit immediately if a command exits with a non-zero status
 
 clear
 
+export AWS_PROFILE="${AWS_PROFILE:-ln}"
+
 # on_error prints an error message indicating which `current_stage` failed and notifies that the script is exiting.
 function on_error() {
     echo "Error: The script failed during the '$current_stage' stage. Exiting..."
@@ -26,12 +28,12 @@ function print_time_taken() {
 }
 
 # Run ESLint
-# current_stage="ESLint"
-# echo ""
-# echo "Running ESLint... ========================="
-# stage_start=$(date +%s)
-# npx eslint src --ignore-pattern "src/public/leaflet/" --ignore-pattern "src/public/js/3rd-party" --max-warnings=0
-# print_time_taken $stage_start "ESLint"
+current_stage="ESLint"
+echo ""
+echo "Running ESLint... ========================="
+stage_start=$(date +%s)
+npx eslint src --ignore-pattern "src/public/leaflet/" --ignore-pattern "src/public/js/3rd-party" --max-warnings=0
+print_time_taken $stage_start "ESLint"
 
 # Run npm audit with a low severity threshold
 current_stage="npm audit"
@@ -39,16 +41,16 @@ echo ""
 echo "Running npm audit... ========================="
 stage_start=$(date +%s)
 npm audit --prefix ./lambda-layer/nodejs/ --audit-level=low
-npm audit --prefix ./src/ --audit-level=low
+npm audit --prefix ./ --audit-level=low
 print_time_taken $stage_start "npm audit"
 
 # Run npm test with coverage
-# current_stage="Jest tests"
-# echo ""
-# echo "Running Jest tests... ========================="
-# stage_start=$(date +%s)
-# npm test
-# print_time_taken $stage_start "Jest tests"
+current_stage="Jest tests"
+echo ""
+echo "Running Jest tests... ========================="
+stage_start=$(date +%s)
+npm test
+print_time_taken $stage_start "Jest tests"
 
 # Deploy to Elastic Beanstalk (optional)
 if [ "$LAMBDA_DEPLOY" = true ]; then

@@ -16,7 +16,7 @@ async function startServer() {
         console.log('App successfully initialized');
 
         // start http server - only listen on localhost:
-        const server = app.listen(8080, '127.0.0.1', () => {
+        app.listen(8080, '127.0.0.1', () => {
             console.timeEnd('App startup time');
             console.log('App listening on http://local.litternetworks.org:8080');
         });
