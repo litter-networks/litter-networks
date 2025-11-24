@@ -1,19 +1,20 @@
 # lnweb-api
-
-3. Expand `networks-info` unit coverage (flattenItem, caching layers, nearby network parsing, bag/member aggregation, "all" fallback) using fake Dynamo/DocumentClient adapters.
-4. Strengthen controller tests for bag/news CSV endpoints and CloudFront invalidation paths, ensuring custom overrides and error branches are asserted.
-5. Plan a lightweight API contract/e2e test that runs against a deployed stage (or msw-mocked instance) to verify Dynamo schemas and caching headers stay compatible with lnweb-react.
+- ✅ Add Jest unit tests for `knowledge-controller` (normalizePath, metadata extraction, cache hit/miss, error propagation) and `/knowledge` routes by mocking `fetch`/Dynamo so CDN/SSM failures are covered.
+- ✅ Write integration tests that boot the real Express app (no route mocks) and exercise `/info`, `/stats`, `/join-in`, `/knowledge`, and `/maps` endpoints with mocked AWS clients to verify middleware, cache headers, and error handling.
+- Expand `networks-info` unit coverage (flattenItem, caching layers, nearby network parsing, bag/member aggregation, "all" fallback) using fake Dynamo/DocumentClient adapters.
+- Strengthen controller tests for bag/news CSV endpoints and CloudFront invalidation paths, ensuring custom overrides and error branches are asserted.
+- Plan a lightweight API contract/e2e test that runs against a deployed stage (or msw-mocked instance) to verify Dynamo schemas and caching headers stay compatible with lnweb-react.
 
 # lnweb-react
-1. Set up Vitest + RTL and add tests for `NavDataProvider`/`useNavData` (network selection, redirects, nearby networks) plus shared helpers (`getSectionFromPath`, `getPrimaryDistrictId`, sanitizers in `KnowledgePage`).
-2. Cover data-source hooks (`useAppSnapshot`, `useContentJob`, stats/news/knowledge fetchers) with mocked `window.appApi`/`fetch` so URL building, AbortSignal handling, and friendly errors are verified.
-3. Add component tests for content-heavy pages (HomePage block builder, Join-In blocks, Join-In Stats summary text, KnowledgePage rendering) to lock down conditional layouts.
-4. Test canvas/chart utilities (`StatsBoardImage`, `StatsSummaryImage`) by mocking canvas/image APIs to ensure rendering fallback behaviour and accessibility text stay correct.
-5. Prototype a Playwright smoke suite (fake API via MSW) that walks the main flows: switch networks, open Knowledge article, scroll News infinite list, use Join-In map chooser, and verify stats boards load.
+- Set up Vitest + RTL and add tests for `NavDataProvider`/`useNavData` (network selection, redirects, nearby networks) plus shared helpers (`getSectionFromPath`, `getPrimaryDistrictId`, sanitizers in `KnowledgePage`).
+- Cover data-source hooks (`useAppSnapshot`, `useContentJob`, stats/news/knowledge fetchers) with mocked `window.appApi`/`fetch` so URL building, AbortSignal handling, and friendly errors are verified.
+- Add component tests for content-heavy pages (HomePage block builder, Join-In blocks, Join-In Stats summary text, KnowledgePage rendering) to lock down conditional layouts.
+- Test canvas/chart utilities (`StatsBoardImage`, `StatsSummaryImage`) by mocking canvas/image APIs to ensure rendering fallback behaviour and accessibility text stay correct.
+- Prototype a Playwright smoke suite (fake API via MSW) that walks the main flows: switch networks, open Knowledge article, scroll News infinite list, use Join-In map chooser, and verify stats boards load.
 
 # litter-networker
-1. Introduce unit tests for shared services: `BagCountService` (input validation, mock mode, Dynamo writes, aggregate rebuild boundaries), `CostService` (cache fallback, FX fetch failure), and `NetworksService` (header merging, update/add/delete flows with table routing).
-2. Add integration-style tests for the Electron main process APIs (mock IPC + services) to ensure menu/context hooks, mock-server toggles, and hotkey routing don’t regress.
-3. Test renderer data-source hooks (`useAppSnapshot`, `useContentJob`, `useNetworksData`, costs reports) with mocked `window.appApi` streams to validate log buffering, subscription cleanup, and error messaging.
-4. Create end-to-end automation (Spectron/Playwright with Electron) that boots the app against mocked AWS/profile data to verify pane layout persistence, tab navigation, and bag-count entry workflows.
-5. Document and test the Python utility orchestration path (scripts/copy-python-utils.mjs + `ContentService`) so dependency install failures and stop requests surface clear status codes in the UI.
+- Introduce unit tests for shared services: `BagCountService` (input validation, mock mode, Dynamo writes, aggregate rebuild boundaries), `CostService` (cache fallback, FX fetch failure), and `NetworksService` (header merging, update/add/delete flows with table routing).
+- Add integration-style tests for the Electron main process APIs (mock IPC + services) to ensure menu/context hooks, mock-server toggles, and hotkey routing don’t regress.
+- Test renderer data-source hooks (`useAppSnapshot`, `useContentJob`, `useNetworksData`, costs reports) with mocked `window.appApi` streams to validate log buffering, subscription cleanup, and error messaging.
+- Create end-to-end automation (Spectron/Playwright with Electron) that boots the app against mocked AWS/profile data to verify pane layout persistence, tab navigation, and bag-count entry workflows.
+- Document and test the Python utility orchestration path (scripts/copy-python-utils.mjs + `ContentService`) so dependency install failures and stop requests surface clear status codes in the UI.
