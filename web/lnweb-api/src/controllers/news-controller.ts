@@ -27,7 +27,7 @@ const fetchNextNewsItems = async (
     }
 
     let keyConditionExpression = 'zero = :v_zero';
-    let expressionAttributeValues: Record<string, { S: string }> = {
+    const expressionAttributeValues: Record<string, { S: string }> = {
         ':v_zero': { S: '0' } // constant partition key
     };
 

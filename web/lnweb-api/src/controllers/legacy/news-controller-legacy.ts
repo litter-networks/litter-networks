@@ -33,11 +33,11 @@ const getPressCuttingsCsvDeprecated = async (req: Request, res: Response) => {
     try {
         if (!scope && !scopeId) {
             // Perform a table scan if no conditions are provided
-            let scanParams: ScanCommandInput = {
+            const scanParams: ScanCommandInput = {
                 TableName: 'LN-PressCuttings'
             };
 
-            let scanCommand = new ScanCommand(scanParams);
+            const scanCommand = new ScanCommand(scanParams);
             let data = await docClient.send(scanCommand);
             documents = data.Items || [];
 
@@ -49,7 +49,7 @@ const getPressCuttingsCsvDeprecated = async (req: Request, res: Response) => {
             }
         } else {
             // Perform a query if scope and/or scopeId are provided
-            let queryParams: QueryCommandInput = {
+            const queryParams: QueryCommandInput = {
                 TableName: 'LN-PressCuttings',
                 KeyConditionExpression: '',
                 ExpressionAttributeValues: {},
@@ -71,7 +71,7 @@ const getPressCuttingsCsvDeprecated = async (req: Request, res: Response) => {
                 queryParams.ExpressionAttributeNames['#scope'] = 'scope';
             }
 
-            let queryCommand = new QueryCommand(queryParams);
+            const queryCommand = new QueryCommand(queryParams);
             let data = await docClient.send(queryCommand);
             documents = data.Items || [];
 

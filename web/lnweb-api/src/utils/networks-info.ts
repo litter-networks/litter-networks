@@ -1,11 +1,8 @@
 import {
   DynamoDBClient,
   GetItemCommand,
-  GetItemCommandOutput,
   QueryCommand,
   ScanCommand,
-  ScanCommandOutput,
-  QueryCommandOutput,
 } from "@aws-sdk/client-dynamodb";
 import { GetCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import NodeCache from "node-cache";
@@ -181,7 +178,7 @@ class NetworksInfo {
 
   async getNearbyNetworks(networkId: string) {
         // Check if the full dataset is cached
-    let cachedNearbyNetworks = this.cacheNearbyNetworks.get(networkId);
+    const cachedNearbyNetworks = this.cacheNearbyNetworks.get(networkId);
     if (cachedNearbyNetworks) {
       return cachedNearbyNetworks;
     }
