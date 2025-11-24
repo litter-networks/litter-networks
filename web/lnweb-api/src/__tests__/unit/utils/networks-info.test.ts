@@ -1,9 +1,11 @@
+export {};
+
 const mockDynamoSend = jest.fn();
 const mockDocSend = jest.fn();
 
 jest.mock('@aws-sdk/client-dynamodb', () => {
   class BaseCommand {
-    constructor(input) {
+    constructor(public input: any) {
       this.input = input;
     }
   }
@@ -20,7 +22,7 @@ jest.mock('@aws-sdk/lib-dynamodb', () => ({
     from: jest.fn(() => ({ send: mockDocSend })),
   },
   GetCommand: class {
-    constructor(input) {
+    constructor(public input: any) {
       this.input = input;
     }
   },
@@ -54,7 +56,8 @@ describe('NetworksInfo utilities', () => {
 
   it('returns sorted networks and caches lookups', async () => {
     mockDynamoSend.mockImplementation(async (command) => {
-      if (command.input?.TableName === 'LN-NetworksInfo') {
+      const input = (command as any).input;
+      if (input?.TableName === 'LN-NetworksInfo') {
         return {
           Items: [
             { uniqueId: { S: 'net-b' }, shortId: { S: 'b' }, fullName: { S: 'Beta' } },
@@ -62,7 +65,7 @@ describe('NetworksInfo utilities', () => {
           ],
         };
       }
-      throw new Error(`Unexpected table ${command.input?.TableName}`);
+      throw new Error(`Unexpected table ${input?.TableName}`);
     });
 
     const networks = await networksInfo.getAllNetworks();
@@ -201,7 +204,8 @@ describe('NetworksInfo utilities', () => {
 
   it('returns districts and caches them', async () => {
     mockDynamoSend.mockImplementation(async (command) => {
-      if (command.input?.TableName === 'LN-DistrictsInfo') {
+      const input = (command as any).input;
+      if (input?.TableName === 'LN-DistrictsInfo') {
         return { Items: [{ uniqueId: 'district1', fullName: 'District One' }] };
       }
       return { Items: [] };
@@ -220,7 +224,8 @@ describe('NetworksInfo utilities', () => {
 
   it('returns district local infos and caches them', async () => {
     mockDynamoSend.mockImplementation(async (command) => {
-      if (command.input?.TableName === 'LN-DistrictsLocalInfo') {
+      const input = (command as any).input;
+      if (input?.TableName === 'LN-DistrictsLocalInfo') {
         return { Items: [{ uniqueId: 'district1', info: 'x' }] };
       }
       return { Items: [] };

@@ -1,3 +1,5 @@
+export {};
+
 const mockCreateServer = jest.fn();
 const mockProxy = jest.fn();
 const mockInitializeApp = jest.fn();
@@ -15,6 +17,7 @@ describe('lambdaHandler', () => {
     });
 
     it('returns the HTTP response resolved from aws-serverless-express proxy promise', async () => {
+        const { lambdaHandler } = require('../../lambda');
         const fakeApp = { name: 'fake-app' };
         const fakeServer = Symbol('server');
         const requestBody = JSON.stringify({ foo: 'bar' });
@@ -30,8 +33,6 @@ describe('lambdaHandler', () => {
         mockInitializeApp.mockResolvedValue(fakeApp);
         mockCreateServer.mockReturnValue(fakeServer);
         mockProxy.mockReturnValue(fakeProxyResult);
-
-        const { lambdaHandler } = require('../../lambda');
 
         const event = {
             rawPath: '/api/test-path',

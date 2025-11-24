@@ -1,3 +1,5 @@
+export {};
+
 jest.mock('@aws-sdk/client-dynamodb', () => {
   const sendMock = jest.fn();
   return {

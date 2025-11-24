@@ -16,14 +16,25 @@ type LambdaContext = {
   callbackWaitsForEmptyEventLoop: boolean;
 };
 
-const serverInitialization = initializeApp().then((app: any) => awsServerlessExpress.createServer(app));
+let serverPromise: Promise<any> | null = null;
 let server: any = null;
+
+const ensureServer = async () => {
+  if (server) {
+    return server;
+  }
+
+  if (!serverPromise) {
+    serverPromise = initializeApp().then((app: any) => awsServerlessExpress.createServer(app));
+  }
+
+  server = await serverPromise;
+  return server;
+};
 
 export const lambdaHandler = async (event: LambdaEvent, context: LambdaContext) => {
   try {
-    if (!server) {
-      server = await serverInitialization;
-    }
+    await ensureServer();
 
     context.callbackWaitsForEmptyEventLoop = false;
 

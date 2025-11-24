@@ -1,3 +1,5 @@
+export {};
+
 const networkInfoController = require('../../../controllers/legacy/network-info-controller');
 const mockResponse = require('node-mocks-http').createResponse;
 const mockRequest = require('node-mocks-http').createRequest;

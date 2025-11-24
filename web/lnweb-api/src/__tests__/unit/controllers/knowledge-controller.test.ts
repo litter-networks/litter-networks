@@ -1,3 +1,5 @@
+export {};
+
 const mockDynamoSend = jest.fn();
 
 jest.mock('@aws-sdk/client-dynamodb', () => ({
@@ -15,11 +17,11 @@ const {
 } = require('../../../controllers/knowledge-controller');
 
 describe('knowledge-controller utilities', () => {
-  beforeEach(() => {
-    mockDynamoSend.mockReset();
-    __resetCaches();
-    global.fetch = jest.fn();
-  });
+beforeEach(() => {
+  mockDynamoSend.mockReset();
+  __resetCaches();
+  (global as any).fetch = jest.fn();
+});
 
   afterAll(() => {
     delete global.fetch;
@@ -62,7 +64,8 @@ describe('knowledge-controller utilities', () => {
         </head>
         <body><h1>Hello</h1></body>
       </html>`;
-    global.fetch.mockResolvedValue({
+    const fetchMock = global.fetch as jest.Mock;
+    fetchMock.mockResolvedValue({
       ok: true,
       text: async () => html,
     });
@@ -80,7 +83,8 @@ describe('knowledge-controller utilities', () => {
   });
 
   it('throws when CDN fetch fails', async () => {
-    global.fetch.mockResolvedValue({
+    const fetchMock = global.fetch as jest.Mock;
+    fetchMock.mockResolvedValue({
       ok: false,
       text: async () => '',
     });

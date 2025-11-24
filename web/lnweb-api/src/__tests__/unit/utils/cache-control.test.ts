@@ -1,3 +1,5 @@
+export {};
+
 const { createRequest, createResponse } = require('node-mocks-http');
 const { setCacheControl, setNoCache } = require('../../../utils/cache-control');
 
