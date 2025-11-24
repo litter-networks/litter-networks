@@ -37,8 +37,7 @@ async function resetOutputDir() {
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 }
 
-async function requestEndpoint(entry) {
-  const url = `${API_BASE}${entry.path}`;
+async function requestEndpoint(url, entry) {
   const response = await fetch(url, {
     method: entry.method ?? 'GET',
     headers: entry.headers ?? { Accept: entry.type === 'json' ? 'application/json' : '*/*' },
@@ -59,10 +58,10 @@ async function run() {
   let failed = false;
 
   for (const entry of config) {
-    const printLabel = `${entry.name} (${entry.path})`;
-    process.stdout.write(`Checking ${printLabel} ... `);
+    const url = `${API_BASE}${entry.path}`;
+    process.stdout.write(`Checking [${url}] ... `);
     try {
-      const body = await requestEndpoint(entry);
+      const body = await requestEndpoint(url, entry);
       const extension =
         entry.extension ??
         (entry.type === 'json' ? '.json' : entry.type === 'text' ? '.txt' : '.golden');
@@ -81,14 +80,14 @@ async function run() {
       const normalizedExisting = normalizeBody(existing, entry);
       if (normalizedExisting !== normalizedBody) {
         console.log(colorize('✗ mismatch', COLOR_RED));
-        console.error(`  ${printLabel} did not match golden file.`);
+        console.error(`  ${entry.name} (${entry.path}) did not match golden file.`);
         failed = true;
       } else {
         console.log(colorize('OK', COLOR_GREEN));
       }
     } catch (error) {
       console.log(colorize('✗ error', COLOR_RED));
-      console.error(`  ${printLabel} failed: ${error.message}`);
+      console.error(`  ${entry.name} (${entry.path}) failed: ${error.message}`);
       failed = true;
     }
   }
