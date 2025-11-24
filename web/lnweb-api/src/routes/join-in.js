@@ -10,7 +10,7 @@ const networksInfo = require("../utils/networks-info");
  *
  * @returns {import('express').Router} The configured Express router.
  */
-async function initializeRoutes() {
+function initializeRoutes() {
     router.get("/districts/:districtId/local-info", async (req, res) => {
         try {
             const { districtId } = req.params;

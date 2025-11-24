@@ -61,8 +61,8 @@ async function getDistrictsCsv(req, res) {
         const csvContent = generateCsv(headers, rows);
 
         // Return CSV
-        res.header('Content-Type', 'text/csv');
-        res.header('Content-Disposition', 'attachment; filename="network-info.csv"');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="districts.csv"');
         res.send(csvContent);
     } catch (err) {
         console.error('Error generating districts CSV:', err);
@@ -92,7 +92,8 @@ async function getDistrictsLocalInfoCsv(req, res) {
         const csvContent = generateCsv(headers, rows);
 
         // Return CSV
-        res.header('Content-Type', 'text/csv');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="districts-local-info.csv"');
         res.send(csvContent);
     } catch (err) {
         res.status(500).send('Error generating CSV: ' + err.message);
@@ -167,7 +168,8 @@ async function getNetworksCsv(req, res) {
         const csvContent = generateCsv(headers, rows);
 
         // Return CSV
-        res.header('Content-Type', 'text/csv');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="networks.csv"');
         res.send(csvContent);
     } catch (err) {
         res.status(500).send('Error generating CSV: ' + err.message);

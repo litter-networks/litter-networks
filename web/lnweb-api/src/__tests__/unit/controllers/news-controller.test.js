@@ -1,53 +1,64 @@
-const newsController = require('../../../controllers/news-controller');
-const mockResponse = require('node-mocks-http').createResponse;
-const mockRequest = require('node-mocks-http').createRequest;
+jest.mock('@aws-sdk/client-dynamodb', () => {
+  const sendMock = jest.fn();
+  return {
+    DynamoDBClient: jest.fn(() => ({ send: sendMock })),
+    QueryCommand: jest.fn((input) => ({ input })),
+    BatchGetItemCommand: jest.fn(),
+    __mockSend: sendMock
+  };
+});
 
-// Mock any external dependencies
-jest.mock('fs', () => ({
-  promises: {
-    readFile: jest.fn().mockResolvedValue(JSON.stringify({
-      items: [
-        { id: 1, title: 'Test News 1', content: 'Content 1', date: '2023-01-01' },
-        { id: 2, title: 'Test News 2', content: 'Content 2', date: '2023-01-02' }
-      ]
-    }))
-  }
-}));
+jest.mock('node-cache', () => {
+  return jest.fn().mockImplementation(() => {
+    const store = new Map();
+    return {
+      get: jest.fn((key) => store.get(key)),
+      set: jest.fn((key, value) => {
+        store.set(key, value);
+        return true;
+      })
+    };
+  });
+});
 
 describe('News Controller', () => {
-  let req;
-  let res;
+  let newsController;
+  let mockSend;
 
   beforeEach(() => {
-    req = mockRequest();
-    res = mockResponse();
-    res.status = jest.fn().mockReturnThis();
-    res.json = jest.fn().mockReturnThis();
+    jest.resetModules();
+    const dynamoModule = require('@aws-sdk/client-dynamodb');
+    mockSend = dynamoModule.__mockSend;
+    newsController = require('../../../controllers/news-controller');
   });
 
-  describe('getNews', () => {
-    it('should return news items sorted by date', async () => {
-      await newsController.getNews(req, res);
-      
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalled();
-      
-      // Verify that the news items were returned
-      const responseData = res.json.mock.calls[0][0];
-      expect(responseData).toHaveProperty('items');
-      expect(responseData.items).toBeInstanceOf(Array);
+  it('fetchNextNewsItems should map DynamoDB items to plain objects', async () => {
+    mockSend.mockResolvedValueOnce({
+      Items: [
+        {
+          uniqueId: { S: 'abc' },
+          zero: { S: '0' },
+          title: { S: 'Story' },
+          imageUrl: { S: 'https://example.com/img.png' }
+        }
+      ]
     });
 
-    it('should handle errors gracefully', async () => {
-      // Mock readFile to throw an error for this test
-      require('fs').promises.readFile.mockRejectedValueOnce(new Error('File not found'));
-      
-      await newsController.getNews(req, res);
-      
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-        error: expect.any(String)
-      }));
+    const result = await newsController.fetchNextNewsItems(5, null, 'https://cdn.test');
+
+    expect(mockSend).toHaveBeenCalled();
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      uniqueId: 'abc',
+      title: 'Story'
     });
+    expect(result[0].imageUrl).toContain('https://cdn.test/proc/images/news/');
+  });
+
+  it('should return cached results on subsequent calls with same arguments', async () => {
+    mockSend.mockResolvedValueOnce({ Items: [] });
+    await newsController.fetchNextNewsItems(2, null, 'https://cdn.test');
+    await newsController.fetchNextNewsItems(2, null, 'https://cdn.test');
+    expect(mockSend).toHaveBeenCalledTimes(1);
   });
 });

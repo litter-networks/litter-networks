@@ -10,7 +10,7 @@ const router = express.Router();
  *
  * @returns {import('express').Router} The configured Express router instance.
  */
-async function initializeRoutes() {
+function initializeRoutes() {
 
     // ===========================================================================================
     // Legacy API: (remove once we've deleted old website)

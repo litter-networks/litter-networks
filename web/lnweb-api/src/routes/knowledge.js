@@ -12,7 +12,7 @@ const knowledgeController = require("../controllers/knowledge-controller");
  *
  * @returns {import('express').Router} The configured Express router.
  */
-async function initializeRoutes() {
+function initializeRoutes() {
     router.get("/child-pages", async (req, res) => {
         const path = typeof req.query.path === "string" ? req.query.path : "";
         try {

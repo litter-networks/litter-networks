@@ -4,17 +4,17 @@ const mockRequest = require('node-mocks-http').createRequest;
 
 // Mock the NetworksInfo module
 jest.mock('../../../utils/networks-info.js', () => ({
-  getNetworksCsvData: jest.fn().mockResolvedValue([
-    { id: 'network1', name: 'Test Network 1', district: 'District 1' },
-    { id: 'network2', name: 'Test Network 2', district: 'District 2' }
+  getAllNetworks: jest.fn().mockResolvedValue([
+    { uniqueId: 'network1', fullName: 'Test Network 1', district: 'District 1' },
+    { uniqueId: 'network2', fullName: 'Test Network 2', district: 'District 2' }
   ]),
-  getDistrictsCsvData: jest.fn().mockResolvedValue([
-    { id: 'district1', name: 'District 1' },
-    { id: 'district2', name: 'District 2' }
+  getAllDistricts: jest.fn().mockResolvedValue([
+    { uniqueId: 'district1', name: 'District 1' },
+    { uniqueId: 'district2', name: 'District 2' }
   ]),
-  getDistrictsLocalInfoCsvData: jest.fn().mockResolvedValue([
-    { id: 'district1', name: 'District 1', localInfo: 'Info 1' },
-    { id: 'district2', name: 'District 2', localInfo: 'Info 2' }
+  getAllDistrictLocalInfos: jest.fn().mockResolvedValue([
+    { uniqueId: 'district1', name: 'District 1', localInfo: 'Info 1' },
+    { uniqueId: 'district2', name: 'District 2', localInfo: 'Info 2' }
   ])
 }));
 

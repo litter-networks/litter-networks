@@ -1,5 +1,4 @@
 const express = require("express");
-const cookieParser = require('cookie-parser');
 
 console.log(`LNWeb-API - Running Node.js version: ${process.version}`);
 
@@ -29,15 +28,13 @@ function debugListRoutes(layer, prefix = "") {
 /**
  * Configure middleware, routing, and error handling on the shared Express `app` instance.
  *
- * Applies cookie parsing, CORS restricted to origins under `litternetworks.org`, JSON body parsing,
+ * Applies CORS restricted to origins under `litternetworks.org`, JSON body parsing,
  * a request logging middleware, mounts routes from `./routes/index` at `/`, adds a 404 fallback
  * for unmatched routes, and a terminal error-handling middleware that logs and responds with a 500.
  */
 async function setupMiddleware() {
 
     console.log("Setting up middleware...");
-
-    app.use(cookieParser());
 
     const cors = require('cors');
 
