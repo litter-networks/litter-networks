@@ -4,7 +4,9 @@ set -euo pipefail
 
 export TERM="${TERM:-xterm}"
 
-clear
+if command -v tput >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != "dumb" ]; then
+  clear
+fi
 
 export AWS_PROFILE="${AWS_PROFILE:-ln}"
 export DEPLOY_BUCKET="lnweb-public"
