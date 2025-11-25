@@ -3,6 +3,7 @@
   top: 0;
   z-index: 3000;
   background: transparent;
+  --brand-scale: 1;
 }
 
 .navbar {
@@ -20,10 +21,11 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  width: min(1220px, 95vw);
-  margin: 0 auto;
-  padding: 0 16px;
+  width: 100%;
+  margin: 0;
+  padding: 0 clamp(12px, 3vw, 40px);
   border-radius: 18px;
+  box-sizing: border-box;
 }
 
 .joinInHeaderColor {
@@ -95,6 +97,9 @@
   padding: 6px 8px;
   min-width: max-content;
   position: relative;
+  transform: scale(var(--brand-scale));
+  transform-origin: center;
+  transition: transform 0.2s ease;
 }
 
 .navbarBrandOpen {
@@ -110,8 +115,8 @@
 }
 
 .navbarBrandLogo {
-  height: 25px;
-  margin: 0 8px 0 10px;
+  height: calc(25px * var(--brand-scale));
+  margin: 0 calc(8px * var(--brand-scale)) 0 calc(10px * var(--brand-scale));
 }
 
 .brandList {
@@ -121,9 +126,9 @@
 }
 
 .dropdownArrow {
-  height: 16px;
-  margin-left: 15px;
-  margin-right: 5px;
+  height: calc(16px * var(--brand-scale));
+  margin-left: calc(15px * var(--brand-scale));
+  margin-right: calc(5px * var(--brand-scale));
   opacity: 0.6;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
@@ -404,4 +409,23 @@
     padding: 10px 8px;
     font-size: 14px;
   }
+
+  .joinInSubMenuList .navItemLink {
+      font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    --brand-scale: 0.82;
+  }
+}
+
+@media (max-width: 400px) {
+  .header {
+    --brand-scale: 0.76;
+  }
+}
+.brandList li {
+  white-space: nowrap;
 }
