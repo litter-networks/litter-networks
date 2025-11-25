@@ -155,6 +155,10 @@ function normalizeJson(payload, rules = {}) {
     removeJsonPath(parsed, path);
   }
 
+  if (rules.onlyKeys) {
+    parsed = replaceValuesWithPlaceholders(parsed);
+  }
+
   const canonical = canonicalizeJson(parsed);
   return JSON.stringify(canonical);
 }
@@ -259,4 +263,18 @@ function normalizeText(payload, rules = {}) {
     result += '\n';
   }
   return result;
+}
+
+function replaceValuesWithPlaceholders(value) {
+  if (Array.isArray(value)) {
+    return value.map(replaceValuesWithPlaceholders);
+  }
+  if (isPlainObject(value)) {
+    const result = {};
+    for (const key of Object.keys(value)) {
+      result[key] = replaceValuesWithPlaceholders(value[key]);
+    }
+    return result;
+  }
+  return null;
 }
