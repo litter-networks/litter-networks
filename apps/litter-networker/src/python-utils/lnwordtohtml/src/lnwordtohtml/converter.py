@@ -73,21 +73,8 @@ class DocxConverter:
 
         html_body = "\n".join(fragment for fragment in body_fragments if fragment)
         shell_class = self.registry.shell_class()
-        head_html = self._build_head(title, subtitle)
-        body_html = (
-            f"<body>\n"
-            f'<div class="{shell_class}">\n{html_body}\n</div>\n'
-            f"</body>"
-        )
-        document_html = "\n".join(
-            [
-                "<!doctype html>",
-                "<html>",
-                head_html,
-                body_html,
-                "</html>",
-            ]
-        )
+        body_html = f'<div class="{shell_class}">\n{html_body}\n</div>'
+        document_html = body_html
         bundle = CssBundle(name="knowledge", rules=self.registry.rules())
         return ConvertedDocument(
             source=source,
@@ -97,16 +84,6 @@ class DocxConverter:
             subtitle=subtitle,
             css_bundle=bundle,
             assets=list(self._asset_uploads),
-        )
-
-    def _build_head(self, title: str, subtitle: str) -> str:
-        safe_title = escape(title or "")
-        safe_desc = escape(subtitle or "")
-        return (
-            "<head>\n"
-            f'<meta property="og:title" content="{safe_title}"/>\n'
-            f'<meta property="og:description" content="{safe_desc}"/>\n'
-            "</head>"
         )
 
     def _convert_heading(self, text: str, level: int) -> str:

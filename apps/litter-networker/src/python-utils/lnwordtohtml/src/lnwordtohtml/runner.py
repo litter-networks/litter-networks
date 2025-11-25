@@ -67,14 +67,20 @@ class Runner:
             html_path.parent.mkdir(parents=True, exist_ok=True)
             html_path.write_text(doc.html, encoding="utf-8")
             for asset in doc.assets:
-                local = base / asset.key
+                local = self._asset_dump_path(base, asset.key)
                 local.parent.mkdir(parents=True, exist_ok=True)
                 local.write_bytes(asset.body)
         if css_bundle:
-            css_path = base / f"assets/{css_bundle.name}.css"
+            css_path = base / "styles" / f"{css_bundle.name}.css"
             css_path.parent.mkdir(parents=True, exist_ok=True)
             css_path.write_text(css_bundle.to_text(), encoding="utf-8")
         logger.info("Dumped HTML/assets to %s", base)
+
+    def _asset_dump_path(self, base: Path, key: str) -> Path:
+        if key.startswith("docs/images/"):
+            rel = key[len("docs/images/") :]
+            return base / "images" / rel
+        return base / key
 
 
 __all__ = ["Runner"]

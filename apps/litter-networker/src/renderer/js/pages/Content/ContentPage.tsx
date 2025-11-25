@@ -39,7 +39,7 @@ export default function ContentPage() {
         <header className={styles.header}>
           <div>
             <p className={styles.pageTitle}>Content Generator</p>
-            <p className={styles.pageSubtitle}>Run the LNUtils generation jobs.</p>
+            <p className={styles.pageSubtitle}>Run the LNUtils generation jobs or sync knowledge docs.</p>
           </div>
         </header>
         <section className={styles.formRow}>
@@ -82,6 +82,14 @@ export default function ContentPage() {
             disabled={!running}
           >
             Cancel
+          </button>
+          <button
+            type="button"
+            className={`${styles.secondaryButton} ${running ? styles.disabledButton : ""}`}
+            disabled={running}
+            onClick={() => run({ job: "docs" })}
+          >
+            Sync Knowledge Docs
           </button>
         </section>
         <section className={styles.logs}>

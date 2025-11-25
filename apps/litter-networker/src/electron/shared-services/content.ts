@@ -4,9 +4,13 @@ import path from "node:path";
 import { existsSync } from "node:fs";
 import { app, WebContents } from "electron";
 
+export type ContentJobKind = "legacy" | "docs";
+
 export type ContentJobParams = {
+  job?: ContentJobKind;
   networkId?: string;
   force?: boolean;
+  dryRun?: boolean;
 };
 
 export type ContentJobStatus = {
@@ -34,7 +38,10 @@ export class ContentService extends EventEmitter {
     return path.join(this.venvPath, process.platform === "win32" ? "Scripts/python.exe" : "bin/python3");
   }
 
-  private buildScriptPath() {
+  private buildScriptPath(job: ContentJobKind) {
+    if (job === "docs") {
+      return path.join(this.pythonUtilsRoot, "routes/utils/docs/sync_lnwordtohtml.py");
+    }
     return path.join(this.pythonUtilsRoot, "routes/utils/batch/create_missing_networks_items.py");
   }
 
@@ -62,7 +69,8 @@ export class ContentService extends EventEmitter {
     }
     await new Promise<void>((resolve, reject) => {
       const installer = spawn(this.venvPython, ["-m", "pip", "install", "-r", this.requirementsPath()], {
-        stdio: ["ignore", "pipe", "pipe"]
+        stdio: ["ignore", "pipe", "pipe"],
+        cwd: this.pythonUtilsRoot
       });
       installer.stdout.on("data", (chunk) => {
         this.emitStatus({ type: "log", message: chunk.toString() });
@@ -93,16 +101,23 @@ export class ContentService extends EventEmitter {
       this.emitStatus({ type: "done", detail: { code: "deps_failed" }, message: error instanceof Error ? error.message : String(error) });
       throw error;
     }
-    const args = [this.buildScriptPath()];
-    if (params.networkId) {
-      args.push("--network", params.networkId);
+    const job: ContentJobKind = params.job ?? "legacy";
+    const scriptPath = this.buildScriptPath(job);
+    const args = [scriptPath];
+    if (job === "legacy") {
+      if (params.networkId) {
+        args.push("--network", params.networkId);
+      }
+      if (params.force) {
+        args.push("--force");
+      }
+    } else {
+      args.push(params.dryRun ? "--dry-run" : "--no-dry-run");
     }
-    if (params.force) {
-      args.push("--force");
-    }
-    const env = { ...process.env, PYTHONPATH: this.pythonUtilsRoot };
+    const repoRoot = path.resolve(this.pythonUtilsRoot, "..", "..", "..", "..");
+    const env = { ...process.env, PYTHONPATH: this.pythonUtilsRoot, LN_REPO_ROOT: repoRoot };
     const proc = spawn(this.venvPython, args, {
-      cwd: path.dirname(this.buildScriptPath()),
+      cwd: path.dirname(scriptPath),
       env
     });
     this.process = proc;

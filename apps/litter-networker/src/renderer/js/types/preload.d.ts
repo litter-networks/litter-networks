@@ -26,7 +26,7 @@ declare global {
       updateNetworkRow: (payload: { uniqueId: string; changes: Record<string, string> }) => Promise<void>;
       addNetworkRow: (payload: { uniqueId: string; newRow: Record<string, string> }) => Promise<void>;
       deleteNetworkRow: (uniqueId: string) => Promise<void>;
-      runContentJob: (payload: { networkId?: string; force?: boolean }) => Promise<{ ok: true }>;
+      runContentJob: (payload: { job?: "legacy" | "docs"; networkId?: string; force?: boolean; dryRun?: boolean }) => Promise<{ ok: true }>;
       stopContentJob: () => Promise<{ stopped: boolean }>;
       subscribeContentProgress: () => void;
       onContentProgress: (callback: (payload: { type: string; message?: string; detail?: any }) => void) => () => void;
