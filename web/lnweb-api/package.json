@@ -29,12 +29,5 @@
     "node": ">=18.0.0"
   },
   "eslintConfig": {},
-  "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.936.0",
-    "@aws-sdk/client-ssm": "^3.936.0",
-    "@aws-sdk/core": "^3.936.0",
-    "@aws-sdk/lib-dynamodb": "^3.936.0",
-    "@fast-csv/format": "^5.0.5",
-    "node-cache": "^5.1.2"
-  }
+  "dependencies": {}
 }

@@ -4,6 +4,7 @@ const SAFE_IFRAME_HOSTS = new Set(['www.youtube.com', 'youtube.com', 'www.youtub
 
 const SANITIZE_CONFIG = {
   USE_PROFILES: { html: true },
+  ADD_TAGS: ["iframe"],
   ALLOWED_TAGS: [
     'a',
     'b',

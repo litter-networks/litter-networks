@@ -117,18 +117,20 @@ class CloudfrontInvalidator:
             logger.info("No CloudFront distribution configured; skipping invalidation.")
             return
 
+        if self.dry_run:
+            for target in targets:
+                logger.info(
+                    "[dry-run] would invalidate %s paths on distribution %s",
+                    target.paths or ["/docs/*"],
+                    target.distribution_id,
+                )
+            return
+
+        invalidation_promises = []
         for target in targets:
             distribution_id = target.distribution_id
             paths = target.paths or ["/docs/*"]
             caller_reference = f"lnwordtohtml-{int(time.time())}"
-            if self.dry_run:
-                logger.info(
-                    "[dry-run] would invalidate %s paths on distribution %s",
-                    paths,
-                    distribution_id,
-                )
-                continue
-
             logger.info(
                 "Requesting invalidation %s for %s (paths %s)",
                 caller_reference,
@@ -143,10 +145,15 @@ class CloudfrontInvalidator:
                 },
             )
             invalidation_id = response["Invalidation"]["Id"]
-            logger.info("Waiting for invalidation %s to complete...", invalidation_id)
             waiter = self.aws.cloudfront.get_waiter("invalidation_completed")
+            invalidation_promises.append(
+                (distribution_id, invalidation_id, waiter)
+            )
+
+        for distribution_id, invalidation_id, waiter in invalidation_promises:
+            logger.info("Waiting for invalidation %s on %s to complete...", invalidation_id, distribution_id)
             waiter.wait(DistributionId=distribution_id, Id=invalidation_id)
-            logger.info("CloudFront invalidation %s complete", invalidation_id)
+            logger.info("CloudFront invalidation %s complete for %s", invalidation_id, distribution_id)
 
 
 __all__ = ["S3Sync", "DynamoSync", "CloudfrontInvalidator"]

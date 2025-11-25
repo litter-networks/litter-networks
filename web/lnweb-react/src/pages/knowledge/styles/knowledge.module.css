@@ -50,9 +50,41 @@
   display: block;
 }
 
+.knowledgeMain :global(.video-container) {
+  margin: 1rem auto;
+  width: 100%;
+}
+
+.knowledgeMain :global(.video-container iframe) {
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+}
+
+.knowledgeMain :global(.ln-shell) {
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.knowledgeMain :global(.ln-align-justify) {
+  text-align: justify;
+}
+
+.knowledgeMain :global(.ln-align-left) {
+  text-align: left;
+}
+
+.knowledgeMain :global(.ln-align-right) {
+  text-align: right;
+}
+
+.knowledgeMain :global(.ln-align-center) {
+  text-align: center;
+}
+
 .knowledgeMain :global(iframe) {
   width: 80%;
-  height: 500px;
+  height: 650px;
   border: none;
   border-radius: 8px;
 }

@@ -1,4 +1,5 @@
 const { DynamoDBClient, GetItemCommand } = require("@aws-sdk/client-dynamodb");
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const NodeCache = require("node-cache");
 
 type KnowledgeMetadata = Record<string, string>;
@@ -19,6 +20,7 @@ type ChildPageRef = {
 };
 
 const dynamoDbClient = new DynamoDBClient({ region: "eu-west-2" });
+const s3Client = new S3Client({ region: "eu-west-2" });
 const childPagesCache: InstanceType<typeof NodeCache> = new NodeCache({
   stdTTL: 5 * 60,
   checkperiod: 120,
@@ -28,7 +30,7 @@ const pageCache: InstanceType<typeof NodeCache> = new NodeCache({
   checkperiod: 120,
 });
 const TABLE_NAME = "LN-Knowledge";
-const CDN_BASE_URL = "https://cdn.litternetworks.org";
+const S3_BUCKET_NAME = "lnweb-docs";
 
 /**
  * Normalize an input into a canonical knowledge page path.
@@ -75,10 +77,30 @@ function extractBodyContent(htmlContent: string): string {
     return match ? match[1] : htmlContent;
 }
 
+async function streamToString(body: unknown): Promise<string> {
+    if (!body) {
+        return "";
+    }
+    if (typeof (body as any).transformToString === "function") {
+        return (body as any).transformToString("utf-8");
+    }
+    if (typeof body === "string") {
+        return body;
+    }
+    if (Buffer.isBuffer(body)) {
+        return body.toString("utf-8");
+    }
+    const chunks: Buffer[] = [];
+    for await (const chunk of body as AsyncIterable<Uint8Array> | Iterable<Uint8Array>) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks).toString("utf-8");
+}
+
 /**
- * Retrieve a knowledge page's HTML body and its metadata, using CDN fetch with in-memory caching.
+ * Retrieve a knowledge page's HTML body and its metadata, using S3 fetch with in-memory caching.
  *
- * @throws {Error} When the CDN fetch fails (non-OK response).
+ * @throws {Error} When the S3 fetch fails.
  */
 async function getKnowledgePage(path?: string): Promise<KnowledgePage> {
     const normalizedPath = normalizePath(path);
@@ -88,12 +110,16 @@ async function getKnowledgePage(path?: string): Promise<KnowledgePage> {
         return cached;
     }
 
-    const url = `${CDN_BASE_URL}/docs/${normalizedPath}.html`;
-    const response = await fetch(url);
-    if (!response.ok) {
+    const key = `docs/${normalizedPath}.html`;
+    const command = new GetObjectCommand({
+        Bucket: S3_BUCKET_NAME,
+        Key: key,
+    });
+    const response = await s3Client.send(command);
+    if (!response.Body) {
         throw new Error(`Failed to fetch knowledge page: ${normalizedPath}`);
     }
-    const html = await response.text();
+    const html = await streamToString(response.Body);
     const metadata = extractMetadata(html);
     const bodyContent = extractBodyContent(html);
 
