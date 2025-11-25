@@ -25,6 +25,10 @@ const childPagesCache: InstanceType<typeof NodeCache> = new NodeCache({
   stdTTL: 5 * 60,
   checkperiod: 120,
 });
+const metadataCache: InstanceType<typeof NodeCache> = new NodeCache({
+  stdTTL: 5 * 60,
+  checkperiod: 120,
+});
 const pageCache: InstanceType<typeof NodeCache> = new NodeCache({
   stdTTL: 5 * 60,
   checkperiod: 120,
@@ -53,22 +57,6 @@ function normalizePath(path?: string): string {
 /**
  * Extracts meta tag properties from the document head and returns them as a key/value map.
  */
-function extractMetadata(htmlContent: string): KnowledgeMetadata {
-    const metadata: KnowledgeMetadata = {};
-    const headContent = htmlContent.match(/<head[^>]*>[\s\S]*?<\/head>/i);
-    if (headContent) {
-        const metaTags = headContent[0].match(/<meta[^>]+>/gi) || [];
-        metaTags.forEach((tag) => {
-            const propertyMatch = tag.match(/property="([^"]+)"/i);
-            const contentMatch = tag.match(/content="([^"]+)"/i);
-            if (propertyMatch && contentMatch) {
-                metadata[propertyMatch[1]] = contentMatch[1];
-            }
-        });
-    }
-    return metadata;
-}
-
 /**
  * Extracts the inner HTML of the document's <body> element.
  */
@@ -120,15 +108,15 @@ async function getKnowledgePage(path?: string): Promise<KnowledgePage> {
         throw new Error(`Failed to fetch knowledge page: ${normalizedPath}`);
     }
     const html = await streamToString(response.Body);
-    const metadata = extractMetadata(html);
+    const metadataFromDynamo = await fetchMetadata(normalizedPath);
     const bodyContent = extractBodyContent(html);
 
     const result: KnowledgePage = {
-        bodyContent,
-        metadata: {
-            title: metadata["og:title"] || "Knowledge",
-            description: metadata["og:description"] || "",
-        },
+      bodyContent,
+      metadata: {
+        title: metadataFromDynamo.title || "Knowledge",
+        description: metadataFromDynamo.description || "",
+      },
     };
 
     pageCache.set(cacheKey, result);
@@ -138,41 +126,76 @@ async function getKnowledgePage(path?: string): Promise<KnowledgePage> {
 /**
  * Retrieve the child page references for a knowledge page.
  */
+function cacheMetadata(normalizedPath: string, title?: string, description?: string): void {
+  const cacheKey = `knowledge-meta:${normalizedPath}`;
+  const metadata = metadataCache.get(cacheKey) as KnowledgeMetadata | undefined;
+  const next: KnowledgeMetadata = {
+    ...(metadata ?? {}),
+    ...(title ? { title } : {}),
+    ...(description ? { description } : {}),
+  };
+  metadataCache.set(cacheKey, next);
+}
+
+async function fetchMetadata(normalizedPath: string): Promise<KnowledgeMetadata> {
+  const cacheKey = `knowledge-meta:${normalizedPath}`;
+  const cached = metadataCache.get(cacheKey) as KnowledgeMetadata | undefined;
+  if (cached) {
+    return cached;
+  }
+
+  const command = new GetItemCommand({
+    TableName: TABLE_NAME,
+    Key: {
+      uniqueId: { S: `docs/${normalizedPath}` },
+    },
+    ProjectionExpression: "title, description",
+  });
+  const data = await dynamoDbClient.send(command);
+  const title = data.Item?.title?.S;
+  const description = data.Item?.description?.S;
+  cacheMetadata(normalizedPath, title, description);
+  return metadataCache.get(cacheKey) as KnowledgeMetadata;
+}
+
 async function getChildPages(path?: string): Promise<ChildPageRef[]> {
-    const normalizedPath = normalizePath(path);
-    const cacheKey = `child-pages:${normalizedPath}`;
-    const cached = childPagesCache.get(cacheKey) as ChildPageRef[] | undefined;
-    if (cached) {
-        return cached;
-    }
+  const normalizedPath = normalizePath(path);
+  const cacheKey = `child-pages:${normalizedPath}`;
+  const cached = childPagesCache.get(cacheKey) as ChildPageRef[] | undefined;
+  if (cached) {
+    return cached;
+  }
 
     const command = new GetItemCommand({
-        TableName: TABLE_NAME,
-        Key: {
-            uniqueId: { S: `docs/${normalizedPath}` },
-        },
-        ProjectionExpression: "childPages",
+      TableName: TABLE_NAME,
+      Key: {
+        uniqueId: { S: `docs/${normalizedPath}` },
+      },
+    ProjectionExpression: "childPages, title, description",
     });
 
     const data = await dynamoDbClient.send(command);
     let childPages: ChildPageRef[] = [];
 
     if (data.Item?.childPages?.S) {
-        try {
-            const normalizedJson = data.Item.childPages.S.replace(/docs\//g, "");
-            childPages = JSON.parse(normalizedJson) as ChildPageRef[];
-        } catch (error: any) {
-            console.error("Failed to parse knowledge child pages:", error);
-            childPages = [];
-        }
+      try {
+        const normalizedJson = data.Item.childPages.S.replace(/docs\//g, "");
+        childPages = JSON.parse(normalizedJson) as ChildPageRef[];
+      } catch (error: any) {
+        console.error("Failed to parse knowledge child pages:", error);
+        childPages = [];
+      }
     }
+
+    cacheMetadata(normalizedPath, data.Item?.title?.S, data.Item?.description?.S);
 
     childPagesCache.set(cacheKey, childPages);
     return childPages;
-}
+  }
 
 function resetCachesForTests(): void {
     childPagesCache.flushAll();
+    metadataCache.flushAll();
     pageCache.flushAll();
 }
 
@@ -181,7 +204,6 @@ module.exports = {
     getKnowledgePage,
     // Export utility functions for targeted unit tests
     normalizePath,
-    extractMetadata,
     extractBodyContent,
     __resetCaches: resetCachesForTests,
 };

@@ -1,17 +1,21 @@
 export {};
 
 const mockDynamoSend = jest.fn();
+const mockS3Send = jest.fn();
 
 jest.mock('@aws-sdk/client-dynamodb', () => ({
   DynamoDBClient: jest.fn(() => ({ send: mockDynamoSend })),
   GetItemCommand: jest.fn((input) => input),
+}));
+jest.mock('@aws-sdk/client-s3', () => ({
+  S3Client: jest.fn(() => ({ send: mockS3Send })),
+  GetObjectCommand: jest.fn((input) => input),
 }));
 
 const {
   getKnowledgePage,
   getChildPages,
   normalizePath,
-  extractMetadata,
   extractBodyContent,
   __resetCaches,
 } = require('../../../controllers/knowledge-controller');
@@ -19,13 +23,9 @@ const {
 describe('knowledge-controller utilities', () => {
 beforeEach(() => {
   mockDynamoSend.mockReset();
+  mockS3Send.mockReset();
   __resetCaches();
-  (global as any).fetch = jest.fn();
 });
-
-  afterAll(() => {
-    delete global.fetch;
-  });
 
   it('normalizes knowledge paths consistently', () => {
     expect(normalizePath()).toBe('knowledge');
@@ -34,40 +34,22 @@ beforeEach(() => {
     expect(normalizePath('knowledge')).toBe('knowledge');
   });
 
-  it('extracts metadata from head tags', () => {
-    const html = `
-      <html>
-        <head>
-          <meta property="og:title" content="Custom Title" />
-          <meta property="og:description" content="Custom description." />
-        </head>
-        <body><p>Body</p></body>
-      </html>`;
-    expect(extractMetadata(html)).toEqual({
-      'og:title': 'Custom Title',
-      'og:description': 'Custom description.',
-    });
-  });
-
   it('extracts body content between body tags', () => {
     const html = '<html><body><section>Content</section></body></html>';
     expect(extractBodyContent(html)).toBe('<section>Content</section>');
     expect(extractBodyContent('<div>No body tags</div>')).toBe('<div>No body tags</div>');
   });
 
-  it('fetches and caches knowledge pages', async () => {
-    const html = `
-      <html>
-        <head>
-          <meta property="og:title" content="FAQ" />
-          <meta property="og:description" content="Desc" />
-        </head>
-        <body><h1>Hello</h1></body>
-      </html>`;
-    const fetchMock = global.fetch as jest.Mock;
-    fetchMock.mockResolvedValue({
-      ok: true,
-      text: async () => html,
+  it('fetches and caches knowledge pages with Dynamo metadata', async () => {
+    const html = '<html><body><h1>Hello</h1></body></html>';
+    mockS3Send.mockResolvedValue({
+      Body: Buffer.from(html, 'utf-8'),
+    });
+    mockDynamoSend.mockResolvedValue({
+      Item: {
+        title: { S: 'FAQ' },
+        description: { S: 'Desc' },
+      },
     });
 
     const first = await getKnowledgePage('/faq/');
@@ -75,19 +57,16 @@ beforeEach(() => {
       bodyContent: '<h1>Hello</h1>',
       metadata: { title: 'FAQ', description: 'Desc' },
     });
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(mockS3Send).toHaveBeenCalledTimes(1);
 
     const second = await getKnowledgePage('/faq/');
     expect(second).toEqual(first);
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(mockS3Send).toHaveBeenCalledTimes(1);
+    expect(mockDynamoSend).toHaveBeenCalledTimes(1);
   });
 
-  it('throws when CDN fetch fails', async () => {
-    const fetchMock = global.fetch as jest.Mock;
-    fetchMock.mockResolvedValue({
-      ok: false,
-      text: async () => '',
-    });
+  it('throws when S3 fetch fails', async () => {
+    mockS3Send.mockResolvedValue({ Body: undefined });
     await expect(getKnowledgePage('missing')).rejects.toThrow('Failed to fetch knowledge page: knowledge/missing');
   });
 
