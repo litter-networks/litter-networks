@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Optional, Set
 
-from .artifacts import ConvertedDocument, CssBundle
+from .artifacts import ConvertedDocument
 from .aws_clients import AwsContext
 from .config import Config
+from .hierarchy import build_hierarchy, serialize_child_pages
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,7 @@ class S3Sync:
     aws: AwsContext
     dry_run: bool = True
 
-    def sync_documents(self, documents: Iterable[ConvertedDocument], css: Optional[CssBundle]) -> None:
+    def sync_documents(self, documents: Iterable[ConvertedDocument]) -> None:
         uploaded_assets: Set[str] = set()
         for doc in documents:
             for asset in doc.assets:
@@ -42,6 +44,22 @@ class S3Sync:
                 uploaded_assets.add(asset.key)
 
         for doc in documents:
+            if doc.css_bundle:
+                css_key = f"docs/styles/{doc.css_bundle.name}.css"
+                css_body = doc.css_bundle.to_text().encode("utf-8")
+                if self.dry_run:
+                    logger.info("[dry-run] would upload CSS %s", css_key)
+                else:
+                    self.aws.s3.put_object(
+                        Bucket=self.config.aws.s3_bucket,
+                        Key=css_key,
+                        Body=css_body,
+                        ContentType="text/css; charset=utf-8",
+                        CacheControl="public, max-age=3600, immutable",
+                    )
+                    logger.info("Uploaded %s", css_key)
+
+        for doc in documents:
             key = self._html_key(doc.relative_path)
             if self.dry_run:
                 logger.info("[dry-run] would upload %s (%s bytes)", key, len(doc.html))
@@ -56,20 +74,6 @@ class S3Sync:
             )
             logger.info("Uploaded %s", key)
 
-        if css:
-            css_key = f"docs/assets/{css.name}.css"
-            css_body = css.to_text().encode("utf-8")
-            if self.dry_run:
-                logger.info("[dry-run] would upload CSS %s", css_key)
-            else:
-                self.aws.s3.put_object(
-                    Bucket=self.config.aws.s3_bucket,
-                    Key=css_key,
-                    Body=css_body,
-                    ContentType="text/css; charset=utf-8",
-                    CacheControl="public, max-age=3600, immutable",
-                )
-                logger.info("Uploaded %s", css_key)
 
     def _html_key(self, relative_path: Path) -> str:
         html_path = relative_path.with_suffix(".html")
@@ -83,19 +87,55 @@ class DynamoSync:
     dry_run: bool = True
 
     def update_documents(self, documents: Iterable[ConvertedDocument]) -> None:
+        hierarchy = build_hierarchy(documents)
         table = None if self.dry_run else self.aws.dynamodb.Table(self.config.aws.dynamodb_table)
 
-        for doc in documents:
+        for unique_id, node in hierarchy.items():
             item = {
-                "uniqueId": f"docs/{doc.relative_path.with_suffix('').as_posix()}",
-                "title": doc.title or "",
-                "description": doc.subtitle or "",
+                "uniqueId": unique_id,
+                "title": node.page_title or "",
+                "description": node.page_description or "",
             }
+            if node.child_pages:
+                item["childPages"] = serialize_child_pages(node)
             if self.dry_run:
-                logger.info("[dry-run] would upsert DDB item %s", item["uniqueId"])
+                logger.info("[dry-run] would upsert DDB item %s", unique_id)
                 continue
             table.put_item(Item=item)
-            logger.info("Updated DynamoDB item %s", item["uniqueId"])
+            logger.info("Updated DynamoDB item %s", unique_id)
 
 
-__all__ = ["S3Sync", "DynamoSync"]
+@dataclass
+class CloudfrontInvalidator:
+    config: Config
+    aws: AwsContext
+    dry_run: bool = True
+    paths: Optional[list[str]] = None
+
+    def invalidate(self) -> None:
+        distribution_id = self.config.aws.cloudfront_distribution_id
+        if not distribution_id:
+            logger.info("No CloudFront distribution configured; skipping invalidation.")
+            return
+
+        paths = self.paths or ["/api/knowledge/*", "/docs/*"]
+        caller_reference = f"lnwordtohtml-{int(time.time())}"
+        if self.dry_run:
+            logger.info(
+                "[dry-run] would invalidate %s paths on distribution %s",
+                paths,
+                distribution_id,
+            )
+            return
+
+        self.aws.cloudfront.create_invalidation(
+            DistributionId=distribution_id,
+            InvalidationBatch={
+                "CallerReference": caller_reference,
+                "Paths": {"Quantity": len(paths), "Items": paths},
+            },
+        )
+        logger.info("Requested CloudFront invalidation %s for %s", caller_reference, distribution_id)
+
+
+__all__ = ["S3Sync", "DynamoSync", "CloudfrontInvalidator"]

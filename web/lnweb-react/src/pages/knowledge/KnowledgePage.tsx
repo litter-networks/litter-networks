@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { fetchKnowledgeChildPages, fetchKnowledgePage, type KnowledgeChildPage } from '@/data-sources/knowledge';
 import { usePageTitle } from '@/shared/usePageTitle';
 import { KnowledgeContents } from './components/KnowledgeContents';
-import { getKnowledgePath, sanitizeKnowledgeHtml, updateInternalLinks } from './knowledge-helpers';
+import { getKnowledgePath, sanitizeKnowledgeHtml, updateInternalLinks, getKnowledgeCssPath } from './knowledge-helpers';
 import styles from './styles/knowledge.module.css';
 
 const CONTENT_PLACEHOLDER = '{{knowledge-base-contents}}';
@@ -45,6 +45,25 @@ export function KnowledgePage() {
   usePageTitle(metadata.title || 'Knowledge');
 
   const breadcrumbs = useMemo(() => buildBreadcrumbs(filterString, knowledgePath), [filterString, knowledgePath]);
+
+  useEffect(() => {
+    const cssPath = getKnowledgeCssPath(knowledgePath);
+    let linkEl: HTMLLinkElement | null = null;
+
+    if (cssPath) {
+      linkEl = document.createElement('link');
+      linkEl.rel = 'stylesheet';
+      linkEl.href = cssPath;
+      linkEl.dataset.source = 'knowledge-css';
+      document.head.appendChild(linkEl);
+    }
+
+    return () => {
+      if (linkEl?.parentNode) {
+        linkEl.parentNode.removeChild(linkEl);
+      }
+    };
+  }, [knowledgePath]);
 
   useEffect(() => {
     let cancelled = false;

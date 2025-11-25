@@ -7,12 +7,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from .config import Config
 from .aws_clients import AwsContext
 from .converter import DocxConverter
 from .scanner import SourceScanner
-from .sync_targets import DynamoSync, S3Sync
+from .sync_targets import CloudfrontInvalidator, DynamoSync, S3Sync
 from .styles import StyleRegistry
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -36,28 +36,30 @@ class Runner:
 
         registry = StyleRegistry()
         converter = DocxConverter(registry=registry)
-        converted_docs = [
-            converter.convert(doc.path, doc.relative_path) for doc in documents
-        ]
+        converted_docs = []
+        for doc in tqdm(documents, desc="Converting", unit="doc"):
+            converted_docs.append(converter.convert(doc.path, doc.relative_path))
 
-        css_bundle = converted_docs[0].css_bundle if converted_docs else None
         logger.info("Converted %s documents", len(converted_docs))
 
         if self.dump_dir:
-            self._dump_artifacts(converted_docs, css_bundle)
+            self._dump_artifacts(converted_docs)
 
         aws = AwsContext(config=self.config.aws)
         s3_sync = S3Sync(config=self.config, aws=aws, dry_run=self.dry_run)
         dynamo_sync = DynamoSync(config=self.config, aws=aws, dry_run=self.dry_run)
+        invalidator = CloudfrontInvalidator(config=self.config, aws=aws, dry_run=self.dry_run)
 
-        s3_sync.sync_documents(converted_docs, css_bundle)
+        s3_sync.sync_documents(converted_docs)
         dynamo_sync.update_documents(converted_docs)
+        if not self.dry_run:
+            invalidator.invalidate()
 
         logger.info(
             "Dry run complete" if self.dry_run else "Sync complete",
         )
 
-    def _dump_artifacts(self, documents, css_bundle):
+    def _dump_artifacts(self, documents):
         base = self.dump_dir
         if not base:
             return
@@ -70,10 +72,10 @@ class Runner:
                 local = self._asset_dump_path(base, asset.key)
                 local.parent.mkdir(parents=True, exist_ok=True)
                 local.write_bytes(asset.body)
-        if css_bundle:
-            css_path = base / "styles" / f"{css_bundle.name}.css"
-            css_path.parent.mkdir(parents=True, exist_ok=True)
-            css_path.write_text(css_bundle.to_text(), encoding="utf-8")
+            if doc.css_bundle:
+                css_path = base / "styles" / f"{doc.css_bundle.name}.css"
+                css_path.parent.mkdir(parents=True, exist_ok=True)
+                css_path.write_text(doc.css_bundle.to_text(), encoding="utf-8")
         logger.info("Dumped HTML/assets to %s", base)
 
     def _asset_dump_path(self, base: Path, key: str) -> Path:

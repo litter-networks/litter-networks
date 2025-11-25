@@ -21,20 +21,33 @@ styles, and slot neatly into this repo.
 ## Getting Started
 ```bash
 # From repo root
-./convert-docs.sh --dry-run          # inspect upcoming uploads
-./convert-docs.sh --no-dry-run       # push changes live
+./convert-docs.sh --dry-run --dump-dir tmp/lnwordtohtml-new
+./convert-docs.sh --no-dry-run       # push changes live (includes CF invalidation)
 
 # Or run manually from python-utils
 cd apps/litter-networker/src/python-utils
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m lnwordtohtml.cli sync --dry-run
+.venv/bin/python -m lnwordtohtml.cli sync --dry-run --dump-dir tmp/lnwordtohtml-new
 ```
 
 Key CLI flags (usable via `convert-docs.sh` or the module directly):
 - `--config PATH` overrides bucket/table/profile defaults via YAML.
 - `--source PATH` can point to any DOCX tree (absolute or relative).
 - `--dry-run/--no-dry-run` toggles upload mode (defaults to real sync).
+- `--dump-dir PATH` writes the generated HTML/CSS/assets locally so you can diff
+  against S3 before uploading.
+
+## Typical Workflow
+1. Run `./convert-docs.sh --dry-run --dump-dir tmp/lnwordtohtml-new`.
+2. Compare `tmp/lnwordtohtml-new` with a golden snapshot from S3 (for example
+   by syncing `s3://lnweb-docs/docs` into `tmp/lnwordtohtml-golden`) and review
+   the diffs.
+3. Once satisfied, run `./convert-docs.sh --no-dry-run`. This uploads HTML,
+   CSS, assets, updates Dynamo, and automatically requests a CloudFront
+   invalidation for `/knowledge*` and `/docs/styles/*`.
+4. Spot-check `aws.litternetworks.org` (or the Content panel) after the
+   invalidation completes to confirm the changes are live.
 
 ## Source Inputs
 - OneDrive folder: `one-drive/Core Team Shared/Litter Networks/_web_docs`
@@ -43,10 +56,11 @@ Key CLI flags (usable via `convert-docs.sh` or the module directly):
   - Each `.docx` should become `docs/<same-structure>.html` in S3.
 
 ## Outputs
-- HTML files with `<head>` metadata and a `<body>` that references CSS classes
-  instead of inline styles.
-- A deterministic CSS bundle (or bundles) per run, uploaded alongside HTML (e.g.
-  `docs/assets/knowledge.css`).
+- HTML fragments that link to their scoped stylesheet via
+  `<link rel="stylesheet" href="https://cdn.litternetworks.org/docs/styles/<slug>.css">`
+  (no inline `style=` attributes).
+- One deterministic CSS file per document (`docs/styles/<slug>.css`), also
+  written to the dump directory when `--dump-dir` is used.
 - Asset uploads for embedded images (hashed filenames, existing CDN URLs kept).
 - Optional `build-manifest.json` describing generated files to help debugging.
 - DynamoDB items per `uniqueId` mirroring the legacy `HierarchyNode` shape.
@@ -77,17 +91,21 @@ Key CLI flags (usable via `convert-docs.sh` or the module directly):
    comparing timestamps or hashes with the cached state file.
 2. For changed files, converter produces HTML fragment + metadata + style usage,
    and registers any referenced assets.
-3. CSS generator writes/updates the shared stylesheet(s) before uploads.
+3. CSS generator writes/updates the per-page stylesheet(s) before uploads (and
+   stores them locally when `--dump-dir` is provided).
 4. Upload step pushes HTML, CSS, and assets to S3 and records checksums to avoid
    redundant uploads.
 5. Once uploads succeed, S3 listing feeds into the DynamoDB hierarchy updater.
-6. Script exits non-zero on any failed upload/DB write (so CI can react).
+6. After a successful non-dry run, the CloudFront distribution is invalidated so
+   the new pages/styles go live immediately.
+7. Script exits non-zero on any failed upload/DB write (so CI can react).
 
 ## Implementation Milestones
 - **Text & Metadata** – finish porting paragraph/run handling so headings,
   emphasis, links, and metadata tags render exactly like the C# output.
-- **Lists/Tables/CSS** – emit semantic classes for lists + tables, generate the
-  shared CSS bundle, and ensure every HTML page references it via `<link>`.
+- **Lists/Tables/CSS** – emit semantic classes for lists + tables, generate a
+  scoped CSS bundle per page, and ensure every HTML page references it via
+  `<link>`.
 - **Assets** – hash and upload embedded images/videos, reuse cached objects, and
   ensure the converter records required asset keys.
 - **Dynamo Hierarchy** – rebuild the `HierarchyNode` tree and cover it with
@@ -96,15 +114,11 @@ Key CLI flags (usable via `convert-docs.sh` or the module directly):
   content authors can run `sync_docs.sh` locally.
 
 ## Integration with Litter Networker
-Longer term we plan to host this package inside
-`apps/litter-networker/src/python-utils` so the Electron Content panel can
-trigger knowledge syncs the same way it runs other utilities. When that move
-happens we’ll:
-1. Relocate the package under `python-utils/lnwordtohtml` and update imports.
-2. Add a thin wrapper (Node script or IPC handler) that shells into the CLI and
-   streams logs back to the UI.
-3. Bundle the helper script with the rest of the python-utils assets so packaged
-   builds pick it up automatically.
+The desktop Content panel includes a **Sync Knowledge Docs** button. Use the Dry
+Run toggle to exercise a no-op deployment (the logs stream live in the panel),
+then uncheck it to perform the real sync + invalidation from the app. This is
+handy when you don’t want to run commands manually but still want to see the
+full output before promoting.
 
 ## Styling Strategy
 - Normalise paragraph alignment (`justify`, `center`, `right`) via classes.

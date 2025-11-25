@@ -51,17 +51,24 @@ def app(ctx: click.Context, config_path: Optional[Path]) -> None:
     default=None,
     help="Optional directory to write generated HTML/assets for comparison.",
 )
+@click.option(
+    "--dump-dir",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Optional directory to write generated HTML/assets for review.",
+)
 @click.pass_context
 def sync(ctx: click.Context, source: Path | None, dry_run: bool, dump_dir: Path | None) -> None:
     """Convert and synchronise docs to S3/DynamoDB."""
 
     config: Config = ctx.obj["config"]
     source_path = resolve_path(source or config.paths.source_root)
+    dump_path = resolve_path(dump_dir) if dump_dir else None
     runner = Runner(
         config=config,
         source_dir=source_path,
         dry_run=dry_run,
-        dump_dir=dump_dir,
+        dump_dir=dump_path,
     )
     runner.run()
 

@@ -16,6 +16,7 @@ class AwsConfig:
     region: Optional[str] = None
     s3_bucket: str = "lnweb-docs"
     dynamodb_table: str = "LN-Knowledge"
+    cloudfront_distribution_id: Optional[str] = "E38XGOGM7XNRC5"
 
 
 @dataclass(slots=True)

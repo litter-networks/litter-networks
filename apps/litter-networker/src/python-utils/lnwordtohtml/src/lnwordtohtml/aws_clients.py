@@ -30,5 +30,9 @@ class AwsContext:
     def dynamodb(self):  # type: ignore[override]
         return self.session.resource("dynamodb")
 
+    @cached_property
+    def cloudfront(self):  # type: ignore[override]
+        return self.session.client("cloudfront")
+
 
 __all__ = ["AwsContext"]

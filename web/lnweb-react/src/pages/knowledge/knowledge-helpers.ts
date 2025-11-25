@@ -70,6 +70,12 @@ export function getKnowledgePath(wildcard: string) {
   return trimmed.startsWith('knowledge') ? trimmed : `knowledge/${trimmed}`;
 }
 
+export function getKnowledgeCssPath(path: string) {
+  const normalized = getKnowledgePath(path);
+  const slug = normalized.replace(/^knowledge\/?/, 'knowledge').replace(/\//g, '-');
+  return `https://cdn.litternetworks.org/docs/styles/${slug}.css`;
+}
+
 export function updateInternalLinks(html: string, base: string) {
   return html.replace(/href="(\/[^"]*)"/g, (match, url) => {
     if (!url.startsWith('/') || url.startsWith(base) || url.startsWith('//') || /^https?:\/\//.test(url)) {

@@ -35,6 +35,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="Perform real uploads.",
     )
+    parser.add_argument(
+        "--dump-dir",
+        type=Path,
+        default=None,
+        help="Optional directory to write generated HTML/assets for review.",
+    )
     parser.set_defaults(dry_run=False)
     return parser
 
@@ -45,10 +51,12 @@ def main() -> None:
 
     config = Config.from_file(args.config) if args.config else Config()
     source_root = resolve_path(args.source or config.paths.source_root)
+    dump_dir = resolve_path(args.dump_dir) if args.dump_dir else None
     runner = Runner(
         config=config,
         source_dir=source_root.expanduser().resolve(),
         dry_run=args.dry_run,
+        dump_dir=dump_dir,
     )
     runner.run()
 

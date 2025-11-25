@@ -74,17 +74,25 @@ class DocxConverter:
         html_body = "\n".join(fragment for fragment in body_fragments if fragment)
         shell_class = self.registry.shell_class()
         body_html = f'<div class="{shell_class}">\n{html_body}\n</div>'
-        document_html = body_html
-        bundle = CssBundle(name="knowledge", rules=self.registry.rules())
+        css_bundle = CssBundle(name=self._css_name(relative_path), rules=self.registry.rules())
+        css_href = (
+            f"https://cdn.litternetworks.org/docs/styles/{css_bundle.name}.css"
+        )
+        head_fragment = f'<link rel="stylesheet" href="{css_href}"/>'
+        document_html = "\n".join([head_fragment, body_html])
         return ConvertedDocument(
             source=source,
             relative_path=relative_path,
             html=document_html,
             title=title,
             subtitle=subtitle,
-            css_bundle=bundle,
             assets=list(self._asset_uploads),
+            css_bundle=css_bundle,
         )
+
+    def _css_name(self, relative_path: Path) -> str:
+        tokens = list(relative_path.with_suffix("").parts)
+        return "-".join(tokens)
 
     def _convert_heading(self, text: str, level: int) -> str:
         stripped = text.strip()

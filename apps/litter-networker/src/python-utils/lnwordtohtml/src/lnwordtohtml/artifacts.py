@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 @dataclass(frozen=True)
@@ -30,8 +30,8 @@ class ConvertedDocument:
     html: str
     title: str
     subtitle: str
-    css_bundle: CssBundle
     assets: List[AssetUpload]
+    css_bundle: Optional[CssBundle] = None
 
 
 __all__ = ["ConvertedDocument", "CssBundle", "AssetUpload"]
