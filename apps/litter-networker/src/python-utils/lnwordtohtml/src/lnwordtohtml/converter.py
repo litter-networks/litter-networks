@@ -179,6 +179,7 @@ class DocxConverter:
             return "right"
         if alignment == WD_PARAGRAPH_ALIGNMENT.LEFT:
             return "left"
+        # Default to justified text for paragraphs without explicit alignment to match how DOCX renders.
         return "justify"
 
     def _heading_level(self, style_name: str) -> int:
@@ -246,6 +247,8 @@ class DocxConverter:
             return None
         num_id = props.numPr.numId.val
         level = props.numPr.ilvl.val if props.numPr.ilvl is not None else 0
+        # Known limitation: we currently treat all lists as unordered (<ul>) and ignore nested numbering rules.
+        # DOCX numbering.xml parsing would be needed to detect ordered/nested structures.
         return {"num_id": num_id, "level": level, "type": "ul"}
 
     def _build_list(self, paragraphs, start_index: int, metadata):

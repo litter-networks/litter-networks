@@ -4,9 +4,9 @@ import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 const mapsAreaController = require("../controllers/maps-area-controller");
 
 let OPENROUTE_API_KEY: string | undefined;
+const ssmClient = new SSMClient({ region: "eu-west-2" }); // reuse single client across requests
 
 async function getParameterFromStore(parameterName: string): Promise<string | undefined> {
-  const ssmClient = new SSMClient({ region: "eu-west-2" });
   try {
     const command = new GetParameterCommand({
       Name: parameterName,
@@ -15,7 +15,7 @@ async function getParameterFromStore(parameterName: string): Promise<string | un
     const response = await ssmClient.send(command);
     return response.Parameter?.Value;
   } catch (error) {
-    console.error("Failed to load session secret from Parameter Store:", error);
+    console.error("Failed to load OpenRouteService API key from Parameter Store:", error);
     return undefined;
   }
 }

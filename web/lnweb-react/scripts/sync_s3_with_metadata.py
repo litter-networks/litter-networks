@@ -60,6 +60,12 @@ cloudfront_client = boto3.client("cloudfront") if DISTRIBUTION_ID else None
 
 modified_paths: set[str] = set()
 files_uploaded = False
+aws_errors_detected = False
+
+
+def _mark_error() -> None:
+    global aws_errors_detected
+    aws_errors_detected = True
 
 
 def _cache_control_for_key(key: str) -> str:
@@ -103,6 +109,7 @@ def _should_upload(file_path: Path, key: str) -> bool:
             print(f"[sync] {key} missing from bucket, scheduling upload")
             return True
         print(f"[sync] error fetching metadata for {key}: {exc}")
+        _mark_error()
         return False
 
     s3_last_modified = response["LastModified"]
@@ -131,6 +138,7 @@ def _upload(file_path: Path, key: str) -> None:
         _track_invalidation(key)
     except ClientError as exc:  # pragma: no cover - network failure
         print(f"[upload] failed for {file_path}: {exc}")
+        _mark_error()
 
 
 def _refresh_metadata(key: str) -> None:
@@ -140,6 +148,7 @@ def _refresh_metadata(key: str) -> None:
     except ClientError as exc:  # pragma: no cover - network failure
         if exc.response["Error"]["Code"] != "404":
             print(f"[metadata] unable to read {key}: {exc}")
+            _mark_error()
         return
 
     expected_content_type = _mime_type(Path(key))
@@ -168,6 +177,7 @@ def _refresh_metadata(key: str) -> None:
         _track_invalidation(key)
     except ClientError as exc:  # pragma: no cover - network failure
         print(f"[metadata] failed for {key}: {exc}")
+        _mark_error()
 
 
 def _sync_file(file_path: Path) -> None:
@@ -203,6 +213,7 @@ def _invalidate_cloudfront() -> None:
         print(f"[cf] invalidation {invalidation_id} completed")
     except ClientError as exc:  # pragma: no cover - network failure
         print(f"[cf] invalidation failed: {exc}")
+        _mark_error()
 
 
 def upload_build_info() -> None:
@@ -221,6 +232,7 @@ def upload_build_info() -> None:
         _track_invalidation("build-info.json")
     except ClientError as exc:
         print(f"[upload] failed for build info: {exc}")
+        _mark_error()
 
 
 def fetch_url(url: str) -> str:
@@ -303,6 +315,9 @@ def main() -> int:
     result = "changed" if files_uploaded or modified_paths else "unchanged"
     print(f"SYNC_RESULT:{result}")
     run_smoke_tests()
+    if aws_errors_detected:
+        print("[sync] Completed with AWS errors; see log output for details.", file=sys.stderr)
+        return 1
     return 0
 
 

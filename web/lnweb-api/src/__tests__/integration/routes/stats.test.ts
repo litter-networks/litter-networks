@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-import type { Express, Router } from 'express';
+import type { Express } from 'express';
 
 jest.mock('../../../utils/networks-info.js', () => ({
   getBagsInfo: jest.fn(async (uniqueId) => ({
@@ -17,9 +17,10 @@ jest.mock('../../../utils/networks-info.js', () => ({
   findDistrictById: jest.fn(async () => ({ fullName: 'District 1' }))
 }));
 
+import statsRouter from '../../../routes/stats';
+
 const app: Express = express();
 app.use(express.json());
-const statsRouter = require('../../../routes/stats') as Router;
 app.use('/stats', statsRouter);
 
 describe('Stats Routes', () => {

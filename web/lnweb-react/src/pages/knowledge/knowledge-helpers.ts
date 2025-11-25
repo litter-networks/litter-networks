@@ -79,7 +79,7 @@ export function getKnowledgeCssPath(path: string) {
 
 export function updateInternalLinks(html: string, base: string) {
   return html.replace(/href="(\/[^"]*)"/g, (match, url) => {
-    if (!url.startsWith('/') || url.startsWith(base) || url.startsWith('//') || /^https?:\/\//.test(url)) {
+    if (url.startsWith(base) || url.startsWith('//') || /^https?:\/\//.test(url)) {
       return match;
     }
     const normalized = `${base}${url}`.replace(/\/+/g, '/');

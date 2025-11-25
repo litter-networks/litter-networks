@@ -1,23 +1,31 @@
-const { lambdaHandler } = require('./lambda');
+import { lambdaHandler } from './lambda';
 
 type TestEvent = {
-  httpMethod: string;
-  rawPath: string;
-  headers: Record<string, string>;
-  queryStringParameters: Record<string, string>;
+  requestContext: {
+    http: {
+      method: string;
+      path?: string;
+    };
+  };
+  rawPath?: string;
+  headers: Record<string, string> | null;
+  queryStringParameters: Record<string, string> | null;
   body: string | null;
 };
 
 async function testLambda() {
   const event: TestEvent = {
-    httpMethod: 'GET',
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: '/info/networks',
+      },
+    },
     rawPath: '/info/networks',
     headers: {
       'Content-Type': 'application/json',
     },
-    queryStringParameters: {
-      key: 'value',
-    },
+    queryStringParameters: null,
     body: null,
   };
 

@@ -28,7 +28,7 @@
     "node-cache": "^5.1.2"
   },
   "scripts": {
-    "start": "node src/server.js",
+    "start": "npm run build && node dist/server.js",
     "build": "rm -rf dist && tsc -p .",
     "test": "npm run build && NODE_PATH=./node_modules:./lambda-layer/nodejs/node_modules jest",
     "test:watch": "jest --watch"

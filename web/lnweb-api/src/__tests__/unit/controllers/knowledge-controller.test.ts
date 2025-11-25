@@ -1,43 +1,49 @@
-export {};
+jest.mock('@aws-sdk/client-dynamodb', () => {
+  const mockSend = jest.fn();
+  return {
+    DynamoDBClient: jest.fn(() => ({ send: mockSend })),
+    GetItemCommand: jest.fn((input) => input),
+    __mockSend: mockSend,
+  };
+});
+jest.mock('@aws-sdk/client-s3', () => {
+  const mockSend = jest.fn();
+  return {
+    S3Client: jest.fn(() => ({ send: mockSend })),
+    GetObjectCommand: jest.fn((input) => input),
+    __mockSend: mockSend,
+  };
+});
 
-const mockDynamoSend = jest.fn();
-const mockS3Send = jest.fn();
-
-jest.mock('@aws-sdk/client-dynamodb', () => ({
-  DynamoDBClient: jest.fn(() => ({ send: mockDynamoSend })),
-  GetItemCommand: jest.fn((input) => input),
-}));
-jest.mock('@aws-sdk/client-s3', () => ({
-  S3Client: jest.fn(() => ({ send: mockS3Send })),
-  GetObjectCommand: jest.fn((input) => input),
-}));
+const { __mockSend: mockDynamoSend } = require('@aws-sdk/client-dynamodb');
+const { __mockSend: mockS3Send } = require('@aws-sdk/client-s3');
 
 const {
-  getKnowledgePage,
-  getChildPages,
-  normalizePath,
-  extractBodyContent,
-  __resetCaches,
+  getKnowledgePage: getKnowledgePageFn,
+  getChildPages: getChildPagesFn,
+  normalizePath: normalizePathFn,
+  extractBodyContent: extractBodyContentFn,
+  __resetCaches: resetCachesFn,
 } = require('../../../controllers/knowledge-controller');
 
 describe('knowledge-controller utilities', () => {
 beforeEach(() => {
   mockDynamoSend.mockReset();
   mockS3Send.mockReset();
-  __resetCaches();
+  resetCachesFn();
 });
 
   it('normalizes knowledge paths consistently', () => {
-    expect(normalizePath()).toBe('knowledge');
-    expect(normalizePath('  knowledge/foo/bar  ')).toBe('knowledge/foo/bar');
-    expect(normalizePath('/foo/bar/')).toBe('knowledge/foo/bar');
-    expect(normalizePath('knowledge')).toBe('knowledge');
+    expect(normalizePathFn()).toBe('knowledge');
+    expect(normalizePathFn('  knowledge/foo/bar  ')).toBe('knowledge/foo/bar');
+    expect(normalizePathFn('/foo/bar/')).toBe('knowledge/foo/bar');
+    expect(normalizePathFn('knowledge')).toBe('knowledge');
   });
 
   it('extracts body content between body tags', () => {
     const html = '<html><body><section>Content</section></body></html>';
-    expect(extractBodyContent(html)).toBe('<section>Content</section>');
-    expect(extractBodyContent('<div>No body tags</div>')).toBe('<div>No body tags</div>');
+    expect(extractBodyContentFn(html)).toBe('<section>Content</section>');
+    expect(extractBodyContentFn('<div>No body tags</div>')).toBe('<div>No body tags</div>');
   });
 
   it('fetches and caches knowledge pages with Dynamo metadata', async () => {
@@ -52,14 +58,14 @@ beforeEach(() => {
       },
     });
 
-    const first = await getKnowledgePage('/faq/');
+    const first = await getKnowledgePageFn('/faq/');
     expect(first).toEqual({
       bodyContent: '<h1>Hello</h1>',
       metadata: { title: 'FAQ', description: 'Desc' },
     });
     expect(mockS3Send).toHaveBeenCalledTimes(1);
 
-    const second = await getKnowledgePage('/faq/');
+    const second = await getKnowledgePageFn('/faq/');
     expect(second).toEqual(first);
     expect(mockS3Send).toHaveBeenCalledTimes(1);
     expect(mockDynamoSend).toHaveBeenCalledTimes(1);
@@ -67,7 +73,7 @@ beforeEach(() => {
 
   it('throws when S3 fetch fails', async () => {
     mockS3Send.mockResolvedValue({ Body: undefined });
-    await expect(getKnowledgePage('missing')).rejects.toThrow('Failed to fetch knowledge page: knowledge/missing');
+    await expect(getKnowledgePageFn('missing')).rejects.toThrow('Failed to fetch knowledge page: knowledge/missing');
   });
 
   it('fetches and caches child pages from DynamoDB', async () => {
@@ -80,17 +86,17 @@ beforeEach(() => {
     };
     mockDynamoSend.mockResolvedValue(response);
 
-    const result = await getChildPages('/faq');
+    const result = await getChildPagesFn('/faq');
     expect(result).toEqual([{ pageUrl: 'knowledge/faq', pageTitle: 'FAQ' }]);
     expect(mockDynamoSend).toHaveBeenCalledTimes(1);
 
-    const cached = await getChildPages('/faq');
+    const cached = await getChildPagesFn('/faq');
     expect(cached).toEqual(result);
     expect(mockDynamoSend).toHaveBeenCalledTimes(1);
   });
 
   it('returns empty list when DynamoDB has no childPages', async () => {
     mockDynamoSend.mockResolvedValue({});
-    await expect(getChildPages('unknown')).resolves.toEqual([]);
+    await expect(getChildPagesFn('unknown')).resolves.toEqual([]);
   });
 });

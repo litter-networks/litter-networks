@@ -49,13 +49,7 @@ def app(ctx: click.Context, config_path: Optional[Path]) -> None:
     "--dump-dir",
     type=click.Path(path_type=Path),
     default=None,
-    help="Optional directory to write generated HTML/assets for comparison.",
-)
-@click.option(
-    "--dump-dir",
-    type=click.Path(path_type=Path),
-    default=None,
-    help="Optional directory to write generated HTML/assets for review.",
+    help="Optional directory to write generated HTML/assets for comparison/review.",
 )
 @click.pass_context
 def sync(ctx: click.Context, source: Path | None, dry_run: bool, dump_dir: Path | None) -> None:

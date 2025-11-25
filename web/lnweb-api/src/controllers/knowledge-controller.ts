@@ -55,9 +55,6 @@ function normalizePath(path?: string): string {
 }
 
 /**
- * Extracts meta tag properties from the document head and returns them as a key/value map.
- */
-/**
  * Extracts the inner HTML of the document's <body> element.
  */
 function extractBodyContent(htmlContent: string): string {
@@ -124,7 +121,12 @@ async function getKnowledgePage(path?: string): Promise<KnowledgePage> {
 }
 
 /**
- * Retrieve the child page references for a knowledge page.
+ * Cache knowledge page metadata for the provided normalized path.
+ *
+ * @param {string} normalizedPath canonical knowledge page path key
+ * @param {string} [title] optional title override to store
+ * @param {string} [description] optional description override to store
+ * @returns {void}
  */
 function cacheMetadata(normalizedPath: string, title?: string, description?: string): void {
   const cacheKey = `knowledge-meta:${normalizedPath}`;

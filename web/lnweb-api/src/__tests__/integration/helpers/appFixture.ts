@@ -107,13 +107,18 @@ jest.mock('../../../controllers/legacy/news-controller-legacy.js', () => ({
   }),
 }));
 
-const mockSsmSend = jest.fn();
 const mockFetch = jest.fn();
 
-jest.mock('@aws-sdk/client-ssm', () => ({
-  SSMClient: jest.fn(() => ({ send: mockSsmSend })),
-  GetParameterCommand: jest.fn((input) => input),
-}));
+jest.mock('@aws-sdk/client-ssm', () => {
+  const mockSend = jest.fn();
+  return {
+    SSMClient: jest.fn(() => ({ send: mockSend })),
+    GetParameterCommand: jest.fn((input) => input),
+    __mockSend: mockSend,
+  };
+});
+
+const { __mockSend: mockSsmSend } = require('@aws-sdk/client-ssm');
 
 (global as any).fetch = mockFetch;
 

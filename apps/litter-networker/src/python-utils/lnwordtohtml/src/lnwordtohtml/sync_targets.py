@@ -24,6 +24,7 @@ class S3Sync:
     dry_run: bool = True
 
     def sync_documents(self, documents: Iterable[ConvertedDocument]) -> None:
+        documents = list(documents)
         uploaded_assets: Set[str] = set()
         for doc in documents:
             for asset in doc.assets:

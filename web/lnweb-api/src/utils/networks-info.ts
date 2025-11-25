@@ -46,7 +46,6 @@ class NetworksInfo {
     if (!NetworksInfo.instance) {
       NetworksInfo.instance = this;
     }
-    return NetworksInfo.instance;
   }
 
     // Helper method to recursively flatten DynamoDB attribute values.
@@ -283,7 +282,7 @@ class NetworksInfo {
           isDistrict,
           isAll,
         };
-      } else {
+      } else if (statsUniqueId !== "all") {
         bagsInfo = JSON.parse(JSON.stringify(await this.getBagsInfo('all')));
         bagsInfo.networkName = networkFullName;
         bagsInfo.districtName = districtFullName;
@@ -296,6 +295,27 @@ class NetworksInfo {
         bagsInfo.bagCounts.allTime = '0';
         bagsInfo.bagCounts.gbsc = '0';
         bagsInfo.bagCounts.mostRecentPost = '-';
+      } else {
+        bagsInfo = {
+          networkName: "",
+          districtName: "",
+          bagCounts: {
+            thisMonthName: "",
+            thisMonth: '0',
+            lastMonthName: "",
+            lastMonth: '0',
+            thisYearName: "",
+            thisYear: '0',
+            lastYearName: "",
+            lastYear: '0',
+            allTime: '0',
+            gbsc: '0',
+            statsCreatedTime: null,
+            mostRecentPost: '-',
+          },
+          isDistrict: false,
+          isAll: true,
+        };
       }
 
       this.cacheBagsInfo.set(statsUniqueId, bagsInfo);

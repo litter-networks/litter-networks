@@ -14,6 +14,113 @@ provider "aws" {
 }
 
 #########################################
+# Litter Networks CloudFront WAF
+#########################################
+resource "aws_wafv2_web_acl" "litter_networks_cloudfront" {
+  name        = "LitterNetworksCloudFrontWAF"
+  description = "Managed by Terraform for all Litter Networks CloudFront distributions"
+  scope       = "CLOUDFRONT"
+
+  default_action {
+    allow {}
+  }
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "LitterNetworksCloudFrontWAF"
+    sampled_requests_enabled   = true
+  }
+
+  rule {
+    name     = "LN-RateLimit-Per-IP"
+    priority = 0
+
+    statement {
+      rate_based_statement {
+        aggregate_key_type = "IP"
+        limit              = 1000
+      }
+    }
+
+    action {
+      count {}
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "LN-RateLimit-Per-IP"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "LN-Amazon-IP-Reputation"
+    priority = 1
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesAmazonIpReputationList"
+        vendor_name = "AWS"
+      }
+    }
+
+    override_action {
+      none {}
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "LN-Amazon-IP-Reputation"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "LN-Common-Rule-Set"
+    priority = 2
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesCommonRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    override_action {
+      none {}
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "LN-Common-Rule-Set"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "LN-Known-Bad-Inputs"
+    priority = 3
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesKnownBadInputsRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    override_action {
+      none {}
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "LN-Known-Bad-Inputs"
+      sampled_requests_enabled   = true
+    }
+  }
+}
+
+#########################################
 # CloudFront Origin Access Control (OAC)
 #########################################
 resource "aws_cloudfront_origin_access_control" "lambda_origin_access_control" {
@@ -111,7 +218,7 @@ resource "aws_cloudfront_distribution" "dynamic" {
   http_version        = "http2"
   price_class         = "PriceClass_100"
   wait_for_deployment = true
-  web_acl_id          = "arn:aws:wafv2:us-east-1:851725192804:global/webacl/CreatedByCloudFront-d54606f0-ccb7-4723-96e1-ef0a5bc3840b/16fb7b49-777c-4636-b292-ef36bde36cc0"
+  web_acl_id          = aws_wafv2_web_acl.litter_networks_cloudfront.arn
   default_root_object = "index.html"
 
   default_cache_behavior {
@@ -207,6 +314,7 @@ resource "aws_cloudfront_distribution" "static" {
   http_version        = "http2and3"
   price_class         = "PriceClass_100"
   wait_for_deployment = true
+  web_acl_id          = aws_wafv2_web_acl.litter_networks_cloudfront.arn
 
   default_cache_behavior {
     allowed_methods          = ["GET", "HEAD"]
