@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+# Electron refuses to spawn a window if these are set (e.g. from some IDE terminals).
+unset ELECTRON_RUN_AS_NODE ELECTRON_NO_ATTACH_CONSOLE
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
