@@ -195,11 +195,7 @@ export function KnowledgePage() {
 function renderHtmlBlock(html: string | undefined, linkBase: string, index: number) {
   const safeHtml = sanitizeKnowledgeHtml(html, linkBase);
   if (!safeHtml) {
-    return (
-      <div key={`html-${index}`} className={styles.blockFallback}>
-        <p>Content unavailable.</p>
-      </div>
-    );
+    return null;
   }
 
   return (
