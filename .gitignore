@@ -4,6 +4,7 @@
 **/__pycache__/
 **/.DS_Store
 **/.venv/
+**/*.egg-info/
 **/.vs/
 **/bin/
 **/dist/
@@ -25,3 +26,6 @@ web/terraform/terraform.tfstate
 web/terraform/terraform.tfstate.backup
 web/terraform/.terraform/
 web/terraform/terraform-provider-*
+one-drive/
+nohup.out
+tmp/
