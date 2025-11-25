@@ -12,6 +12,13 @@ const navLinks = [
   { label: 'Knowledge', path: 'knowledge' },
 ];
 
+const DEFAULT_THEME_COLOR = '#FFFFFF';
+const themeColorVarMap: Record<string, string> = {
+  [styles.joinInHeaderColor]: '--join-in-color-active',
+  [styles.newsHeaderColor]: '--news-color',
+  [styles.knowledgeHeaderColor]: '--info-color-active',
+};
+
 /**
  * Renders the site header with section-aware styling, brand/filter menu trigger, and primary navigation.
  *
@@ -31,6 +38,19 @@ export function Header() {
     () => ({ returnPath: `${location.pathname}${location.search}${location.hash}` }),
     [location.pathname, location.search, location.hash],
   );
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (!metaTheme) {
+      return;
+    }
+    const cssVar = themeColorVarMap[headerColorClass] ?? '--join-in-color-active';
+    const computed = getComputedStyle(document.documentElement).getPropertyValue(cssVar)?.trim();
+    const color = computed || DEFAULT_THEME_COLOR;
+    metaTheme.setAttribute('content', color);
+  }, [headerColorClass]);
 
   const navItemsMarkup = navLinks.map((item) => {
     const href = buildPath(item.path);
@@ -174,6 +194,18 @@ function FilterMenuTrigger({
 
   const brandClassName = `${styles.navbarBrand} ${open ? styles.navbarBrandOpen : ''}`.trim();
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (open) {
+      root.classList.add('filter-menu-open');
+    } else {
+      root.classList.remove('filter-menu-open');
+    }
+    return () => {
+      root.classList.remove('filter-menu-open');
+    };
+  }, [open]);
+
   return (
     <div
       className={brandClassName}
@@ -193,7 +225,7 @@ function FilterMenuTrigger({
           alt="Toggle menu"
           onClick={(event) => {
             event.preventDefault();
-            setOpen((state) => !state);
+            setOpen((state: boolean) => !state);
           }}
         />
       </Link>
