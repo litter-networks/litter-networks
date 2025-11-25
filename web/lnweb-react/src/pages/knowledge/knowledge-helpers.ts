@@ -78,11 +78,16 @@ export function getKnowledgeCssPath(path: string) {
 }
 
 export function updateInternalLinks(html: string, base: string) {
-  return html.replace(/href="(\/[^"]*)"/g, (match, url) => {
-    if (url.startsWith(base) || url.startsWith('//') || /^https?:\/\//.test(url)) {
+  const baseTrimmed = base.replace(/\/+$/, '');
+  return html.replace(/href="([^"]*)"/g, (match, url) => {
+    if (url.startsWith(baseTrimmed) || url.startsWith('//') || /^https?:\/\//.test(url)) {
       return match;
     }
-    const normalized = `${base}${url}`.replace(/\/+/g, '/');
+    const pathWithoutLeadingSlash = url.replace(/^\/+/, '');
+    if (pathWithoutLeadingSlash.includes(':')) {
+      return match;
+    }
+    const normalized = `${baseTrimmed}/${pathWithoutLeadingSlash}`;
     return `href="${normalized}"`;
   });
 }
@@ -141,6 +146,9 @@ export function isSafeHref(href: string | null) {
   }
   const trimmed = href.trim();
   if (!trimmed) {
+    return false;
+  }
+  if (/javascript:/i.test(trimmed)) {
     return false;
   }
   const normalized = trimmed.toLowerCase();

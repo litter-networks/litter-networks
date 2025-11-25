@@ -131,6 +131,14 @@ resource "aws_cloudfront_origin_access_control" "lambda_origin_access_control" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_cloudfront_origin_access_control" "s3_origin_access_control" {
+  name                              = "CloudFrontS3AccessControl"
+  description                       = "Origin Access Control for S3 buckets"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "never"
+  signing_protocol                  = "sigv4"
+}
+
 #########################################################
 # CloudFront LNWeb-API General (Public) Cache Policy
 #########################################################
@@ -264,7 +272,7 @@ resource "aws_cloudfront_distribution" "dynamic" {
     connection_attempts      = 3
     connection_timeout       = 10
     domain_name              = "lnweb-public.s3.eu-west-2.amazonaws.com"
-    origin_access_control_id = "E1D78LQ7BH6R6S"
+    origin_access_control_id = aws_cloudfront_origin_access_control.s3_origin_access_control.id
     origin_id                = "lnweb-public.s3.eu-west-2.amazonaws.com"
   }
 
@@ -404,7 +412,7 @@ resource "aws_cloudfront_distribution" "static" {
     connection_attempts      = 3
     connection_timeout       = 10
     domain_name              = "lnweb-docs.s3.eu-west-2.amazonaws.com"
-    origin_access_control_id = "E1D78LQ7BH6R6S"
+    origin_access_control_id = aws_cloudfront_origin_access_control.s3_origin_access_control.id
     origin_id                = "lnweb-docs.s3.eu-west-2.amazonaws.com"
   }
 
@@ -412,7 +420,7 @@ resource "aws_cloudfront_distribution" "static" {
     connection_attempts      = 3
     connection_timeout       = 10
     domain_name              = "lnweb-public.s3.eu-west-2.amazonaws.com"
-    origin_access_control_id = "E1D78LQ7BH6R6S"
+    origin_access_control_id = aws_cloudfront_origin_access_control.s3_origin_access_control.id
     origin_id                = "lnweb-public.s3.eu-west-2.amazonaws.com"
   }
 

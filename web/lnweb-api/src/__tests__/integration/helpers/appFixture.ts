@@ -147,6 +147,7 @@ function createReqRes(method: HttpMethod, path: string, { body, headers, query }
     query,
   });
   const res = createResponse({ eventEmitter: EventEmitter });
+  (res as any).pipes = [];
   return { req, res };
 }
 

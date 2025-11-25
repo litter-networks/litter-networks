@@ -96,6 +96,7 @@
   font-size: clamp(13px, 3.5vw, 14px);
   font-weight: 600;
   cursor: pointer;
+  /* We may need to keep this touch target >=44px high to meet WCAG 2.5.5 on phones; consider adding min-height/padding later. */
 }
 
 .button:disabled {

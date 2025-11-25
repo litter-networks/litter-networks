@@ -4,6 +4,7 @@ import { useNavData } from '@/features/nav/useNavData';
 import type { Network } from '@/data-sources/networks';
 import { StatsBoardImage } from '@/components/stats/StatsBoardImage';
 import { usePageTitle } from '@/shared/usePageTitle';
+import { useMediaQuery } from '@/shared/useMediaQuery';
 import styles from './styles/home.module.css';
 
 type BlockType = 'knowledge' | 'join-in' | 'news';
@@ -74,23 +75,27 @@ export function HomePage() {
   }, [network]);
 
   const stackedBlocks = useMemo(() => interleaveColumns(columns), [columns]);
+  const isDesktop = useMediaQuery('(min-width: 920px)', true);
 
   return (
     <div className={css('page')}>
-      <div className={css('columns')}>
-        {columns.map((columnBlocks, columnIndex) => (
-          <div className={css('column')} key={`column-${columnIndex}`}>
-            {columnBlocks.map((block) => (
-              <BlockCard key={`${block.title}-${block.link}`} block={block} buildPath={buildPath} />
-            ))}
-          </div>
-        ))}
-      </div>
-      <div className={css('mobileStack')}>
-        {stackedBlocks.map((block, blockIndex) => (
-          <BlockCard key={`${block.title}-${block.link}-${blockIndex}`} block={block} buildPath={buildPath} />
-        ))}
-      </div>
+      {isDesktop ? (
+        <div className={css('columns')}>
+          {columns.map((columnBlocks, columnIndex) => (
+            <div className={css('column')} key={`column-${columnIndex}`}>
+              {columnBlocks.map((block) => (
+                <BlockCard key={`${block.title}-${block.link}`} block={block} buildPath={buildPath} />
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className={css('mobileStack')}>
+          {stackedBlocks.map((block, blockIndex) => (
+            <BlockCard key={`${block.title}-${block.link}-${blockIndex}`} block={block} buildPath={buildPath} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Set
@@ -131,13 +132,13 @@ class CloudfrontInvalidator:
         for target in targets:
             distribution_id = target.distribution_id
             paths = target.paths or ["/docs/*"]
-            caller_reference = f"lnwordtohtml-{int(time.time())}"
-            logger.info(
-                "Requesting invalidation %s for %s (paths %s)",
-                caller_reference,
-                distribution_id,
-                paths,
-            )
+        caller_reference = f"lnwordtohtml-{distribution_id}-{uuid.uuid4().hex[:8]}"
+        logger.info(
+            "Requesting invalidation %s for %s (paths %s)",
+            caller_reference,
+            distribution_id,
+            paths,
+        )
             response = self.aws.cloudfront.create_invalidation(
                 DistributionId=distribution_id,
                 InvalidationBatch={

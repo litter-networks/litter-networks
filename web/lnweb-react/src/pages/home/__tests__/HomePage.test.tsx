@@ -40,7 +40,7 @@ describe('HomePage', () => {
     );
     const [desktopNewsLink] = screen.getAllByText('News');
     expect(desktopNewsLink.closest('a')).toHaveAttribute('href', '/all/news');
-    expect(screen.getAllByRole('link').length).toBe(12);
+    expect(screen.getAllByRole('link').length).toBe(6);
   });
 
   it('renders network-specific blocks and the stats board when a network is selected', async () => {

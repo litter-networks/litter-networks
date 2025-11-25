@@ -5,21 +5,8 @@ const networksInfo = require("../utils/networks-info.js");
 type BagsInfoRequest = Request<{ uniqueId: string }>;
 type SummaryRequest = Request<{ networkId?: string }>;
 
-function initializeRoutes(): Router {
-  const router = express.Router();
-
-  router.get("/get-bags-info/:uniqueId", async (req: BagsInfoRequest, res: Response) => {
-    try {
-      const { uniqueId } = req.params;
-      const bagsInfo = await networksInfo.getBagsInfo(uniqueId);
-      res.json(bagsInfo);
-    } catch (error) {
-      console.error("Error retrieving bag info:", error);
-      res.status(500).json({ error: "An error occurred while fetching the data" });
-    }
-  });
-
-  router.get("/summary/:networkId?", async (req: SummaryRequest, res: Response) => {
+function createSummaryHandler(): RouterHandler {
+  return async (req: SummaryRequest, res: Response) => {
     try {
       const { networkId } = req.params;
       const allNetworks: Array<{ uniqueId: string; districtId?: string }> = await networksInfo.getAllNetworks();
@@ -84,7 +71,28 @@ function initializeRoutes(): Router {
       console.error("Error retrieving stats summary:", error);
       res.status(500).json({ error: "An error occurred while fetching the stats summary" });
     }
+  };
+}
+
+type RouterHandler = (req: SummaryRequest, res: Response) => Promise<void>;
+
+function initializeRoutes(): Router {
+  const router = express.Router();
+
+  router.get("/get-bags-info/:uniqueId", async (req: BagsInfoRequest, res: Response) => {
+    try {
+      const { uniqueId } = req.params;
+      const bagsInfo = await networksInfo.getBagsInfo(uniqueId);
+      res.json(bagsInfo);
+    } catch (error) {
+      console.error("Error retrieving bag info:", error);
+      res.status(500).json({ error: "An error occurred while fetching the data" });
+    }
   });
+
+  const summaryHandler = createSummaryHandler();
+  router.get("/summary", summaryHandler);
+  router.get("/summary/:networkId", summaryHandler);
 
   router.get("/get-bag-stats-json/:uniqueId", async (req: BagsInfoRequest, res: Response) => {
     try {

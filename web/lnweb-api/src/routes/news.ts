@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response, Router } from "express";
+import express, { NextFunction, Request, Response, Router, RequestHandler } from "express";
 
 const newsController = require("../controllers/news-controller.js");
 const newsControllerLegacy = require("../controllers/legacy/news-controller-legacy.js");
@@ -7,10 +7,8 @@ const cdnHost = "https://cdn.litternetworks.org";
 
 type NewsJsonRequest = Request<{ prevUniqueId?: string }>;
 
-function initializeRoutes(): Router {
-  const router = express.Router();
-
-  router.get("/get-press-cuttings-json/:prevUniqueId?", async (req: NewsJsonRequest, res: Response) => {
+function createPressCuttingsJsonHandler(): RequestHandler {
+  return async (req: NewsJsonRequest, res: Response) => {
     const { prevUniqueId = null } = req.params;
     const maxNumItemsDynamic = 10;
 
@@ -20,7 +18,15 @@ function initializeRoutes(): Router {
     } else {
       res.status(500).json({ error: "An error occurred while fetching the data." });
     }
-  });
+  };
+}
+
+function initializeRoutes(): Router {
+  const router = express.Router();
+
+  const pressCuttingsHandler = createPressCuttingsJsonHandler();
+  router.get("/get-press-cuttings-json", pressCuttingsHandler);
+  router.get("/get-press-cuttings-json/:prevUniqueId", pressCuttingsHandler);
 
   router.get("/get-press-cuttings-csv", (req: Request, res: Response, next: NextFunction) => {
     newsControllerLegacy.getPressCuttingsCsvDeprecated(req, res, next);

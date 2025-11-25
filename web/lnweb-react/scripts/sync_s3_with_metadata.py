@@ -14,7 +14,7 @@ from typing import Iterable
 import time
 from urllib import request as urllib_request
 from urllib.error import URLError
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 import boto3
 from botocore.exceptions import ClientError
@@ -255,6 +255,9 @@ def upload_build_info() -> None:
 
 
 def fetch_url(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.scheme.lower() not in {"http", "https"}:
+        raise ValueError(f"Only http(s) schemes are allowed for smoke-test URLs; got {url}")
     response = urllib_request.urlopen(url, timeout=30)
     charset = response.headers.get_content_charset() or "utf-8"
     body = response.read().decode(charset, errors="ignore")
