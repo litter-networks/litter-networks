@@ -6,16 +6,24 @@
 }
 
 .navbar {
+  position: relative;
+  z-index: 3;
+  padding: 6px 0;
+  margin: 0;
+  width: 100%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.4s ease;
+}
+
+.navbarContent {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  z-index: 3;
-  padding: 2px 12px;
-  margin: 0;
   gap: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.4s ease;
+  width: min(1220px, 95vw);
+  margin: 0 auto;
+  padding: 0 16px;
+  border-radius: 18px;
 }
 
 .joinInHeaderColor {
@@ -236,9 +244,8 @@
 .joinInSubMenu {
   position: relative;
   z-index: 1;
-  width: 92%;
-  margin: 0 auto;
-  margin-top: -6px;
+  width: min(1200px, 95vw);
+  margin: -6px auto 0;
   padding: 10px 8px 6px;
   background-color: var(--join-in-color-subheader);
   transition: background-color 0.4s ease;
@@ -305,4 +312,96 @@
 .facebookIcon {
   height: 14px;
   opacity: 0.8;
+}
+
+.facebookIconSmall {
+  display: none;
+  height: 16px;
+  opacity: 0.9;
+}
+
+@media (max-width: 1200px) {
+  .navbarContent {
+    border-radius: 0;
+  }
+
+  .navbarQuote {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .navbarContent {
+    flex-wrap: wrap;
+    width: 100%;
+    border-radius: 0;
+    padding: 0 12px;
+  }
+
+  .navbarCenter {
+    order: 1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .navbarRight {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 2px;
+  }
+
+  .navList {
+    width: min(520px, 95vw);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .joinInSubMenu {
+    width: min(520px, 95vw);
+  }
+}
+
+@media (max-width: 768px) {
+  .navbarContent {
+    gap: 12px;
+  }
+
+  .navItemLink {
+    padding: 12px 10px;
+    font-size: 15px;
+  }
+
+  .btnSubMenuJoinIn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .joinInSubMenuList {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .facebookIcon {
+    display: none;
+  }
+
+  .facebookIconSmall {
+    display: inline;
+  }
+}
+
+@media (max-width: 520px) {
+  .navbarRight {
+    padding-bottom: 4px;
+  }
+
+  .navList {
+    width: 100%;
+  }
+
+  .navItemLink {
+    padding: 10px 8px;
+    font-size: 14px;
+  }
 }

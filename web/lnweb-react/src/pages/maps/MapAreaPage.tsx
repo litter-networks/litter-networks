@@ -73,7 +73,7 @@ export function MapAreaPage() {
   }, [mode]);
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-area-map>
       <div className={styles.mapSurface}>
         <div id="map" ref={mapRootRef} className={styles.mapRoot} />
         {!mapReady && (

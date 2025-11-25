@@ -47,18 +47,20 @@ export function Header() {
   return (
     <header className={styles.header}>
       <nav className={`${styles.navbar} ${headerColorClass}`}>
-        <div className={styles.navbarQuote}>
-          <ul className={styles.quoteList}>
-            <li>“ If we each did our little bit...”</li>
-          </ul>
-        </div>
+        <div className={styles.navbarContent}>
+          <div className={styles.navbarQuote}>
+            <ul className={styles.quoteList}>
+              <li>“ If we each did our little bit...”</li>
+            </ul>
+          </div>
 
-        <div className={styles.navbarCenter}>
-          <FilterMenuTrigger headerColorClass={headerColorClass} searchColorClass={searchColorClass} />
-        </div>
+          <div className={styles.navbarCenter}>
+            <FilterMenuTrigger headerColorClass={headerColorClass} searchColorClass={searchColorClass} />
+          </div>
 
-        <div className={styles.navbarRight}>
-          <ul className={styles.navList}>{navItemsMarkup}</ul>
+          <div className={styles.navbarRight}>
+            <ul className={styles.navList}>{navItemsMarkup}</ul>
+          </div>
         </div>
       </nav>
 
@@ -122,6 +124,12 @@ export function Header() {
                   className={styles.facebookIcon}
                   src="https://cdn.litternetworks.org/images/facebook-logo.svg"
                   alt="Facebook"
+                />
+                <img
+                  className={styles.facebookIconSmall}
+                  src="/images/facebook-logo-small.svg"
+                  alt=""
+                  aria-hidden="true"
                 />
               </a>
             </li>
