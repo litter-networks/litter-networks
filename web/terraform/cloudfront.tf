@@ -1,4 +1,4 @@
-﻿terraform {
+terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -128,7 +128,7 @@ resource "aws_cloudfront_origin_access_control" "lambda_origin_access_control" {
   description                       = "IAM-protected access from CloudFront to Lambda Function URL"
   origin_access_control_origin_type = "lambda"
   signing_behavior                  = "always"
-  signing_protocol                   = "sigv4"
+  signing_protocol                  = "sigv4"
 }
 
 #########################################################
@@ -136,10 +136,10 @@ resource "aws_cloudfront_origin_access_control" "lambda_origin_access_control" {
 #########################################################
 
 resource "aws_cloudfront_cache_policy" "public_api_cache_policy" {
-  name        = "LNWebAPI-PublicCachePolicy"
+  name = "LNWebAPI-PublicCachePolicy"
 
   min_ttl     = 0
-  default_ttl = 600  # 10 minutes default (if API doesn't override)
+  default_ttl = 600   # 10 minutes default (if API doesn't override)
   max_ttl     = 86400 # Max 24 hours
 
   parameters_in_cache_key_and_forwarded_to_origin {
@@ -168,7 +168,7 @@ resource "aws_cloudfront_cache_policy" "public_api_cache_policy" {
 #########################################################
 
 resource "aws_cloudfront_cache_policy" "user_api_cache_policy" {
-  name        = "LNWebAPI-UserCachePolicy"
+  name = "LNWebAPI-UserCachePolicy"
 
   min_ttl     = 0
   default_ttl = 60   # Default 1 minute per user (if API doesn't override)
@@ -208,8 +208,8 @@ resource "aws_cloudfront_function" "spa_rewrite" {
 }
 
 resource "aws_cloudfront_distribution" "dynamic" {
-  comment             = "Dynamic CloudFront distribution for Litter Networks"
-  aliases             = [
+  comment = "Dynamic CloudFront distribution for Litter Networks"
+  aliases = [
     "api.litternetworks.org",
     "aws.litternetworks.org",
     "static.litternetworks.org",
@@ -222,17 +222,17 @@ resource "aws_cloudfront_distribution" "dynamic" {
   default_root_object = "index.html"
 
   default_cache_behavior {
-    allowed_methods          = ["GET", "HEAD"]
-    cache_policy_id          = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
-    cached_methods           = ["GET", "HEAD"]
-    compress                 = true
-    default_ttl              = 0
-    max_ttl                  = 0
-    min_ttl                  = 0
-    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
-    smooth_streaming         = false
-    target_origin_id         = "lnweb-public.s3.eu-west-2.amazonaws.com"
-    viewer_protocol_policy   = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cache_policy_id            = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    default_ttl                = 0
+    max_ttl                    = 0
+    min_ttl                    = 0
+    origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+    smooth_streaming           = false
+    target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
+    viewer_protocol_policy     = "redirect-to-https"
     response_headers_policy_id = aws_cloudfront_response_headers_policy.dynamic_headers.id
     function_association {
       event_type   = "viewer-request"
@@ -269,20 +269,20 @@ resource "aws_cloudfront_distribution" "dynamic" {
   }
 
   ordered_cache_behavior {
-    path_pattern             = "/api/*"
-    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods           = ["GET", "HEAD", "OPTIONS"]
-    compress                 = true
-    default_ttl              = 0
-    max_ttl                  = 0
-    min_ttl                  = 0
-    cache_policy_id          = aws_cloudfront_cache_policy.public_api_cache_policy.id
-    origin_request_policy_id = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
-    smooth_streaming         = false
-    target_origin_id         = "LNWeb-API-Lambda"
-    viewer_protocol_policy   = "redirect-to-https"
+    path_pattern               = "/api/*"
+    allowed_methods            = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods             = ["GET", "HEAD", "OPTIONS"]
+    compress                   = true
+    default_ttl                = 0
+    max_ttl                    = 0
+    min_ttl                    = 0
+    cache_policy_id            = aws_cloudfront_cache_policy.public_api_cache_policy.id
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
+    smooth_streaming           = false
+    target_origin_id           = "LNWeb-API-Lambda"
+    viewer_protocol_policy     = "redirect-to-https"
     response_headers_policy_id = aws_cloudfront_response_headers_policy.dynamic_headers.id
-  
+
     grpc_config {
       enabled = false
     }
@@ -317,17 +317,17 @@ resource "aws_cloudfront_distribution" "static" {
   web_acl_id          = aws_wafv2_web_acl.litter_networks_cloudfront.arn
 
   default_cache_behavior {
-    allowed_methods          = ["GET", "HEAD"]
-    cache_policy_id          = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
-    cached_methods           = ["GET", "HEAD"]
-    compress                 = false
-    default_ttl              = 0
-    max_ttl                  = 0
-    min_ttl                  = 0
-    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
-    smooth_streaming         = false
-    target_origin_id         = "lnweb-public.s3.eu-west-2.amazonaws.com"
-    viewer_protocol_policy   = "https-only"
+    allowed_methods            = ["GET", "HEAD"]
+    cache_policy_id            = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = false
+    default_ttl                = 0
+    max_ttl                    = 0
+    min_ttl                    = 0
+    origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+    smooth_streaming           = false
+    target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
+    viewer_protocol_policy     = "https-only"
     response_headers_policy_id = aws_cloudfront_response_headers_policy.static_headers.id
 
     grpc_config {
@@ -341,18 +341,18 @@ resource "aws_cloudfront_distribution" "static" {
   }
 
   ordered_cache_behavior {
-    allowed_methods          = ["GET", "HEAD"]
-    cache_policy_id          = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
-    cached_methods           = ["GET", "HEAD"]
-    compress                 = true
-    default_ttl              = 0
-    max_ttl                  = 0
-    min_ttl                  = 0
-    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
-    path_pattern             = "/images/*"
-    smooth_streaming         = false
-    target_origin_id         = "lnweb-public.s3.eu-west-2.amazonaws.com"
-    viewer_protocol_policy   = "https-only"
+    allowed_methods            = ["GET", "HEAD"]
+    cache_policy_id            = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    default_ttl                = 0
+    max_ttl                    = 0
+    min_ttl                    = 0
+    origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+    path_pattern               = "/images/*"
+    smooth_streaming           = false
+    target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
+    viewer_protocol_policy     = "https-only"
     response_headers_policy_id = aws_cloudfront_response_headers_policy.static_headers.id
 
     grpc_config {
@@ -361,18 +361,18 @@ resource "aws_cloudfront_distribution" "static" {
   }
 
   ordered_cache_behavior {
-    allowed_methods          = ["GET", "HEAD"]
-    cache_policy_id          = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
-    cached_methods           = ["GET", "HEAD"]
-    compress                 = true
-    default_ttl              = 0
-    max_ttl                  = 0
-    min_ttl                  = 0
-    origin_request_policy_id = "aa327c15-c971-48a2-98cf-9f9c8c5d8188"
-    path_pattern             = "/maps/*"
-    smooth_streaming         = false
-    target_origin_id         = "lnweb-public.s3.eu-west-2.amazonaws.com"
-    viewer_protocol_policy   = "https-only"
+    allowed_methods            = ["GET", "HEAD"]
+    cache_policy_id            = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    default_ttl                = 0
+    max_ttl                    = 0
+    min_ttl                    = 0
+    origin_request_policy_id   = "aa327c15-c971-48a2-98cf-9f9c8c5d8188"
+    path_pattern               = "/maps/*"
+    smooth_streaming           = false
+    target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
+    viewer_protocol_policy     = "https-only"
     response_headers_policy_id = aws_cloudfront_response_headers_policy.static_headers.id
 
     grpc_config {
@@ -381,18 +381,18 @@ resource "aws_cloudfront_distribution" "static" {
   }
 
   ordered_cache_behavior {
-    allowed_methods          = ["GET", "HEAD"]
-    cache_policy_id          = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
-    cached_methods           = ["GET", "HEAD"]
-    compress                 = true
-    default_ttl              = 0
-    max_ttl                  = 0
-    min_ttl                  = 0
-    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
-    path_pattern             = "/docs/*"
-    smooth_streaming         = false
-    target_origin_id         = "lnweb-docs.s3.eu-west-2.amazonaws.com"
-    viewer_protocol_policy   = "https-only"
+    allowed_methods            = ["GET", "HEAD"]
+    cache_policy_id            = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    default_ttl                = 0
+    max_ttl                    = 0
+    min_ttl                    = 0
+    origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+    path_pattern               = "/docs/*"
+    smooth_streaming           = false
+    target_origin_id           = "lnweb-docs.s3.eu-west-2.amazonaws.com"
+    viewer_protocol_policy     = "https-only"
     response_headers_policy_id = aws_cloudfront_response_headers_policy.static_headers.id
 
     grpc_config {
@@ -447,6 +447,24 @@ resource "aws_cloudfront_response_headers_policy" "dynamic_headers" {
 
 resource "aws_cloudfront_response_headers_policy" "static_headers" {
   name = "LitterNetworksStaticHeaders"
+
+  cors_config {
+    access_control_allow_credentials = false
+
+    access_control_allow_headers {
+      items = ["*"]
+    }
+
+    access_control_allow_methods {
+      items = ["GET", "HEAD", "OPTIONS"]
+    }
+
+    access_control_allow_origins {
+      items = ["*"]
+    }
+
+    origin_override = true
+  }
 
   security_headers_config {
     content_security_policy {

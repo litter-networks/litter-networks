@@ -46,6 +46,7 @@ HTML_CACHE_CONTROL = os.environ.get("HTML_CACHE_CONTROL", "public, max-age=60, m
 CONTENT_DISPOSITION = os.environ.get("CONTENT_DISPOSITION", "inline")
 BUILD_INFO_JSON = os.environ.get("BUILD_INFO_JSON")
 SMOKE_TEST_URL = os.environ.get("SMOKE_TEST_URL")
+ACCESS_CONTROL_ALLOW_ORIGIN = os.environ.get("ACCESS_CONTROL_ALLOW_ORIGIN", "*")
 
 if not BUCKET_NAME:
     print("DEPLOY_BUCKET environment variable is required.", file=sys.stderr)
@@ -70,6 +71,13 @@ def _mark_error() -> None:
 
 def _cache_control_for_key(key: str) -> str:
     return HTML_CACHE_CONTROL if key.endswith(".html") else ASSET_CACHE_CONTROL
+
+
+def _expected_metadata() -> dict[str, str]:
+    metadata: dict[str, str] = {}
+    if ACCESS_CONTROL_ALLOW_ORIGIN:
+        metadata["access-control-allow-origin"] = ACCESS_CONTROL_ALLOW_ORIGIN
+    return metadata
 
 
 def _invalidate_path_for_key(key: str) -> Iterable[str]:
@@ -123,9 +131,10 @@ def _should_upload(file_path: Path, key: str) -> bool:
 def _upload(file_path: Path, key: str) -> None:
     global files_uploaded
     cache_control = _cache_control_for_key(key)
+    metadata = _expected_metadata()
     try:
         with file_path.open("rb") as handle:
-            s3_client.put_object(
+            put_kwargs = dict(
                 Bucket=BUCKET_NAME,
                 Key=key,
                 Body=handle,
@@ -133,6 +142,9 @@ def _upload(file_path: Path, key: str) -> None:
                 CacheControl=cache_control,
                 ContentDisposition=CONTENT_DISPOSITION,
             )
+            if metadata:
+                put_kwargs["Metadata"] = metadata
+            s3_client.put_object(**put_kwargs)
         print(f"[upload] {file_path} -> s3://{BUCKET_NAME}/{key}")
         files_uploaded = True
         _track_invalidation(key)
@@ -143,6 +155,7 @@ def _upload(file_path: Path, key: str) -> None:
 
 def _refresh_metadata(key: str) -> None:
     cache_control = _cache_control_for_key(key)
+    metadata = _expected_metadata()
     try:
         response = s3_client.head_object(Bucket=BUCKET_NAME, Key=key)
     except ClientError as exc:  # pragma: no cover - network failure
@@ -155,16 +168,19 @@ def _refresh_metadata(key: str) -> None:
     current_cache_control = response.get("CacheControl")
     current_content_disposition = response.get("ContentDisposition")
     current_content_type = response.get("ContentType")
+    current_metadata = response.get("Metadata", {})
+    metadata_matches = all(current_metadata.get(k) == v for k, v in metadata.items())
 
     if (
         current_cache_control == cache_control
         and current_content_disposition == CONTENT_DISPOSITION
         and current_content_type == expected_content_type
+        and metadata_matches
     ):
         return
 
     try:
-        s3_client.copy_object(
+        copy_kwargs = dict(
             Bucket=BUCKET_NAME,
             CopySource={"Bucket": BUCKET_NAME, "Key": key},
             Key=key,
@@ -173,6 +189,9 @@ def _refresh_metadata(key: str) -> None:
             ContentType=expected_content_type,
             MetadataDirective="REPLACE",
         )
+        if metadata:
+            copy_kwargs["Metadata"] = metadata
+        s3_client.copy_object(**copy_kwargs)
         print(f"[metadata] refreshed s3://{BUCKET_NAME}/{key}")
         _track_invalidation(key)
     except ClientError as exc:  # pragma: no cover - network failure
