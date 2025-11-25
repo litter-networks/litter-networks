@@ -72,7 +72,7 @@ export function getKnowledgePath(wildcard: string) {
 
 export function getKnowledgeCssPath(path: string) {
   const normalized = getKnowledgePath(path);
-  const slug = normalized.replace(/^knowledge\/?/, 'knowledge').replace(/\//g, '-');
+  const slug = normalized.replace(/\//g, '-');
   return `https://cdn.litternetworks.org/docs/styles/${slug}.css`;
 }
 

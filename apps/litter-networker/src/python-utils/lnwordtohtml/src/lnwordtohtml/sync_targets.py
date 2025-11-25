@@ -7,7 +7,7 @@ import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Optional, Set
+from typing import Iterable, Set
 
 from .artifacts import ConvertedDocument
 from .aws_clients import AwsContext
@@ -110,32 +110,43 @@ class CloudfrontInvalidator:
     config: Config
     aws: AwsContext
     dry_run: bool = True
-    paths: Optional[list[str]] = None
 
     def invalidate(self) -> None:
-        distribution_id = self.config.aws.cloudfront_distribution_id
-        if not distribution_id:
+        targets = self.config.aws.get_cloudfront_targets()
+        if not targets:
             logger.info("No CloudFront distribution configured; skipping invalidation.")
             return
 
-        paths = self.paths or ["/api/knowledge/*", "/docs/*"]
-        caller_reference = f"lnwordtohtml-{int(time.time())}"
-        if self.dry_run:
-            logger.info(
-                "[dry-run] would invalidate %s paths on distribution %s",
-                paths,
-                distribution_id,
-            )
-            return
+        for target in targets:
+            distribution_id = target.distribution_id
+            paths = target.paths or ["/docs/*"]
+            caller_reference = f"lnwordtohtml-{int(time.time())}"
+            if self.dry_run:
+                logger.info(
+                    "[dry-run] would invalidate %s paths on distribution %s",
+                    paths,
+                    distribution_id,
+                )
+                continue
 
-        self.aws.cloudfront.create_invalidation(
-            DistributionId=distribution_id,
-            InvalidationBatch={
-                "CallerReference": caller_reference,
-                "Paths": {"Quantity": len(paths), "Items": paths},
-            },
-        )
-        logger.info("Requested CloudFront invalidation %s for %s", caller_reference, distribution_id)
+            logger.info(
+                "Requesting invalidation %s for %s (paths %s)",
+                caller_reference,
+                distribution_id,
+                paths,
+            )
+            response = self.aws.cloudfront.create_invalidation(
+                DistributionId=distribution_id,
+                InvalidationBatch={
+                    "CallerReference": caller_reference,
+                    "Paths": {"Quantity": len(paths), "Items": paths},
+                },
+            )
+            invalidation_id = response["Invalidation"]["Id"]
+            logger.info("Waiting for invalidation %s to complete...", invalidation_id)
+            waiter = self.aws.cloudfront.get_waiter("invalidation_completed")
+            waiter.wait(DistributionId=distribution_id, Id=invalidation_id)
+            logger.info("CloudFront invalidation %s complete", invalidation_id)
 
 
 __all__ = ["S3Sync", "DynamoSync", "CloudfrontInvalidator"]

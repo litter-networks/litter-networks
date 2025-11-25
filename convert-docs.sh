@@ -20,5 +20,17 @@ echo "[setup] Ensuring python-utils dependencies are installed..."
   "$VENV_DIR/bin/python" -m pip install -r "requirements.txt" >/dev/null
 )
 
+function run_stage() {
+  local label="$1"
+  shift
+  echo ""
+  echo "${label}... ========================="
+  local start
+  start=$(date +%s)
+  "$@"
+  local elapsed=$(( $(date +%s) - start ))
+  echo "${label} took ${elapsed} seconds."
+}
+
 echo "[docs] Running lnwordtohtml sync ($*)"
-exec "$VENV_DIR/bin/python" -m lnwordtohtml.cli sync "$@"
+run_stage "lnwordtohtml sync" "$VENV_DIR/bin/python" -m lnwordtohtml.cli sync "$@"
