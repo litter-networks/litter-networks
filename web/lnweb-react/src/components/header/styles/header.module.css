@@ -266,11 +266,13 @@
   display: flex;
   justify-content: space-evenly;
   gap: 12px;
+  flex-wrap: nowrap;
 }
 
 .joinInSubMenuList li {
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .joinInSubMenuList .navItemLink {
@@ -304,6 +306,7 @@
   font-size: 14px;
   opacity: 0.85;
   transition: transform 0.15s ease;
+  white-space: nowrap;
 }
 
 .btnSubMenuJoinIn:hover {
@@ -364,6 +367,20 @@
 
   .joinInSubMenu {
     width: min(520px, 95vw);
+  }
+
+  .joinInSubMenuList {
+    gap: 8px;
+  }
+
+  .joinInSubMenuList .navItemLink {
+    font-size: 14px;
+    padding: 3px 6px;
+  }
+
+  .btnSubMenuJoinIn {
+    padding: 4px 8px;
+    font-size: 13px;
   }
 }
 
