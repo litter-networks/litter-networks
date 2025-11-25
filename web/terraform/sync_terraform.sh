@@ -1,15 +1,23 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
 terraform apply
 
-if [ $? -ne 0 ]; then
-    echo "Terraform apply failed. Exiting..."
-    exit 1
-fi
+invalidate_distribution() {
+    local distribution_id="$1"
+    local label="$2"
 
-echo ""
-echo "Cloudfront Invalidation for Dynamic distro... ========================="
-aws cloudfront create-invalidation --distribution-id E38XGOGM7XNRC5 --paths "/*" > /dev/null 2>&1
+    echo ""
+    echo "${label}... ========================="
+    if output=$(aws cloudfront create-invalidation --distribution-id "${distribution_id}" --paths "/*" 2>&1); then
+        echo "${output}"
+    else
+        echo "CloudFront invalidation failed for distribution ${distribution_id}." >&2
+        echo "${output}" >&2
+        exit 1
+    fi
+}
 
-echo ""
-echo "Cloudfront Invalidation for Static distro... ========================="
-aws cloudfront create-invalidation --distribution-id EWXIG6ZADYHMA --paths "/*" > /dev/null 2>&1
-
+invalidate_distribution "E38XGOGM7XNRC5" "CloudFront invalidation for Dynamic distro"
+invalidate_distribution "EWXIG6ZADYHMA" "CloudFront invalidation for Static distro"
