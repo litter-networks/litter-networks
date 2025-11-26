@@ -15,62 +15,193 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-top: -50px;
+  margin-top: -70px;
   flex: 1;
   min-height: calc(100vh - 160px);
 }
 
 .mapSurface {
-  position: relative;
   flex: 1;
-  width: 100%;
-  border-radius: 8px;
+  position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  min-height: calc(100vh - 220px);
+  background-color: #fff;
 }
 
 .mapRoot,
 .mapSurface :global(#map) {
   width: 100%;
   height: 100%;
+  min-height: calc(100vh - 40px);
 }
 
-.titleBar,
-.toolbar {
-  position: absolute;
-  left: 0;
+.mapPane {
   width: 100%;
+  height: 100%;
+}
+
+.listSurface {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background: #fff;
+  padding: 220px 16px 28px;
+  box-sizing: border-box;
   display: flex;
   justify-content: center;
+}
+
+.listSheet {
+  width: min(900px, 95%);
+  padding: 20px 20px 24px;
+}
+
+.listHeader {
+  font-weight: 800;
+  color: #2f3d2f;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.districtList {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  z-index: 5;
-  pointer-events: none;
 }
 
-.titleBar {
-  top: 60px;
-  z-index: 1000;
+.districtCard {
+  background-color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(87, 120, 79, 0.3);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
 
-.toolbar {
-  top: 122px;
-  z-index: 1000;
+.districtCardOpen {
+  border-color: rgba(87, 120, 79, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.infoPill {
-  background-color: rgba(87, 120, 79, 0.85);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  min-width: 200px;
+.districtToggle {
+  width: 100%;
+  background: var(--join-in-color-active, rgba(127, 173, 116, 0.9));
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  box-sizing: border-box;
+  letter-spacing: 0.01em;
+}
+
+.districtToggle:hover {
+  background-color: rgba(127, 173, 116, 0.92);
+}
+
+.districtName {
+  flex: 1;
   text-align: center;
-  pointer-events: auto;
+  font-size: 1.15rem;
 }
 
-.title {
+.districtCount {
+  font-size: 0.95rem;
+  color: #f6f6f6;
+}
+
+.districtChevron {
+  font-size: 0.95rem;
+}
+
+.networkList {
+  list-style: none;
   margin: 0;
-  font-size: clamp(18px, 4.5vw, 24px);
+  padding: 10px 10px 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.districtIntro {
+  grid-column: 1 / -1;
+  background: rgba(140, 181, 130, 0.12);
+  border: 1px solid rgba(87, 120, 79, 0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #2f3d2f;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.districtIntro p {
+  margin: 0 0 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.districtIntro a {
+  color: #1f4b1f;
+  font-weight: 800;
+}
+
+.councilLinkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 3px solid rgba(87, 120, 79, 0.4);
+  background-color: rgba(127, 173, 116, 0.9);
+  color: #fff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.councilLinkButton:hover {
+  background-color: rgba(127, 173, 116, 0.95);
+  color: #fff !important;
+}
+
+.externalIcon {
+  height: 16px;
+  width: 16px;
+}
+
+.networkButton {
+  width: 100%;
+  text-align: left;
+  background: rgba(140, 181, 130, 0.12);
+  border: 1px solid rgba(87, 120, 79, 0.25);
+  border-radius: 8px;
+  padding: 12px 12px;
+  cursor: pointer;
+  color: #2f3d2f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.networkButton:hover {
+  background: rgba(140, 181, 130, 0.22);
+}
+
+.networkButtonActive {
+  background: rgba(127, 173, 116, 0.2);
+  border-color: rgba(87, 120, 79, 0.5);
+}
+
+.networkName {
+  flex: 1;
+}
+
+.networkSelectedBadge {
+  font-size: 0.9rem;
+  color: #2f3d2f;
+  font-weight: 800;
 }
 
 .mapFrame {
@@ -85,39 +216,6 @@
   font-weight: 600;
 }
 
-.button {
-  pointer-events: auto;
-  min-width: 96px;
-  padding: 3px 8px;
-  color: white;
-  background-color: rgba(127, 173, 116, 0.9);
-  border: 2px solid rgba(87, 120, 79, 0.4);
-  border-radius: 6px;
-  font-size: clamp(13px, 3.5vw, 14px);
-  font-weight: 600;
-  cursor: pointer;
-  /* We may need to keep this touch target >=44px high to meet WCAG 2.5.5 on phones; consider adding min-height/padding later. */
-}
-
-.button:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
 .placeholder {
   height: 320px;
-}
-/* Shift the toolbar, shrink titles, and adjust info pills when the map view is viewed on smaller devices. */
-@media (max-width: 768px) {
-  .toolbar {
-    top: 100px;
-  }
-
-  .title {
-    font-size: clamp(18px, 4vw, 20px);
-  }
-
-  .infoPill {
-    font-size: 0.9rem;
-  }
 }

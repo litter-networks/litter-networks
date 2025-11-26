@@ -30,7 +30,7 @@ const themeColorVarMap: Record<string, string> = {
  * @returns The header JSX element containing the navbar, brand/filter trigger, navigation links, and conditional join-in submenu.
  */
 export function Header() {
-  const { buildPath, facebookLink } = useNavData();
+  const { buildPath, facebookLink, network } = useNavData();
   const location = useLocation();
   const sectionName = getSectionFromPath(location.pathname);
   const headerColorClass = getHeaderColorClass(sectionName);
@@ -96,7 +96,7 @@ export function Header() {
                   location.pathname.includes('/join-in/choose') ? styles.navItemCurrent : ''
                 }`}
               >
-                Map
+                Choose
               </Link>
             </li>
             <li>
@@ -116,7 +116,7 @@ export function Header() {
                   location.pathname.endsWith('/join-in') ? styles.navItemCurrent : ''
                 }`}
               >
-                Reach Out
+                {network ? 'Local Info' : 'Reach Out'}
               </Link>
             </li>
             <li>
