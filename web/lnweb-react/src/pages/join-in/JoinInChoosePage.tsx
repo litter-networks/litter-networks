@@ -325,7 +325,6 @@ export function JoinInChoosePage() {
         </div>
 
         <ChooserWidget
-          title="Join In | Choose"
           areaName={areaName}
           networkName={networkName}
           onCancel={handleCancel}

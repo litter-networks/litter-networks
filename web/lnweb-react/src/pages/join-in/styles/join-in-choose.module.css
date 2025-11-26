@@ -56,10 +56,10 @@
 }
 
 .listHeader {
-  font-weight: 800;
   color: #2f3d2f;
   margin-bottom: 12px;
   font-size: 1.1rem;
+  text-align: center;
 }
 
 .districtList {

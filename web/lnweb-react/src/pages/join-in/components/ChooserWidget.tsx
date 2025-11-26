@@ -18,7 +18,6 @@ type Props = {
  * selected area/network details, and a view-mode toggle (map vs list).
  */
 export function ChooserWidget({
-  title,
   areaName,
   networkName,
   onCancel,
@@ -29,12 +28,6 @@ export function ChooserWidget({
 }: Props) {
   return (
     <div className={styles.overlayShell}>
-      <div className={styles.overlayTitleBar}>
-        <div className={styles.titleBadge}>
-          <h1 className={styles.title}>{title}</h1>
-        </div>
-      </div>
-
       <div className={styles.overlayControls}>
         <button type="button" className={styles.actionButton} onClick={onCancel}>
           Cancel

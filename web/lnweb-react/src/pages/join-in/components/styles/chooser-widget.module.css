@@ -3,26 +3,18 @@
   left: 0;
   width: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+  justify-content: center;
   z-index: 1000;
   pointer-events: none;
   top: 140px;
 }
 
-.overlayTitleBar {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
 .overlayControls {
   display: flex;
-  justify-content: center;
-  width: 100%;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  width: auto;
+  pointer-events: none;
 }
 
 .centerStack {
@@ -30,21 +22,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-}
-
-.titleBadge {
-  background-color: rgba(87, 120, 79, 0.85);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  min-width: 200px;
-  text-align: center;
   pointer-events: auto;
-}
-
-.title {
-  margin: 0;
-  font-size: clamp(18px, 4.5vw, 24px);
 }
 
 .actionButton {
@@ -85,7 +63,6 @@
   width: 160px;
   height: 44px;
   background-color: rgba(87, 120, 79, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
   overflow: hidden;
   pointer-events: auto;
@@ -133,6 +110,7 @@
   .overlayControls {
     flex-direction: column;
     gap: 8px;
+    width: 100%;
   }
 
   .actionButton {

@@ -28,7 +28,7 @@ export function JoinInDistrictList({
     <div className={styles.listSurface}>
       <div className={styles.listSheet}>
         <div className={styles.listHeader}>
-          There are currently {totalNetworks} Litter Networks across {totalDistricts} local-authority areas:
+          Here you can choose any one of the <b>{totalNetworks}</b> Litter Networks across <b>{totalDistricts}</b> local-authority areas!
         </div>
         <div className={styles.districtList}>
           {groupedDistricts.map((group) => {
