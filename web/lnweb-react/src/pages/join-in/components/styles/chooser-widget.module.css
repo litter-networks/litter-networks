@@ -101,27 +101,14 @@
   color: white;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px) and (orientation: portrait) {
   .overlayShell {
-    top: 110px;
-  }
-
-  .overlayControls {
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
+    top: 180px;
+    scale: 0.85;
   }
 
   .actionButton {
-    width: 70%;
-  }
-
-  .detailsCard {
-    width: 80%;
-    min-width: unset;
-  }
-
-  .viewSwitch {
-    width: 70%;
+    padding: 8px 2px;
+    min-width: 70px;
   }
 }

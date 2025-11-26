@@ -271,3 +271,9 @@
 .placeholder {
   height: 320px;
 }
+
+@media (max-width: 768px) and (orientation: portrait) {
+  .listSurface {
+    padding-top: 220px;
+  }
+}
