@@ -349,6 +349,58 @@ th {
   font-size: 14px;
 }
 
+.mapPreviewBlock {
+  flex: 0 0 25%;
+  min-width: 280px;
+  max-width: 420px;
+  margin-left: auto;
+}
+
+.mapPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mapPreviewHeader {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.mapPreviewFrame {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f5f7fb;
+}
+
+.mapPreviewOverlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.mapPreviewOverlay[data-state="error"] {
+  color: #b52323;
+}
+
+.mapPreviewMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  gap: 8px;
+  word-break: break-all;
+}
+
 .detailLink {
   color: var(--color-accent);
   font-weight: 600;

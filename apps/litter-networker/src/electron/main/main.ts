@@ -252,6 +252,10 @@ app.whenReady().then(async () => {
     if (!networksService) throw new Error("NetworksService unavailable");
     return networksService.deleteRow(uniqueId);
   });
+  ipcMain.handle("maps:listFiles", async (_event, mapSource: string) => {
+    if (!networksService) throw new Error("NetworksService unavailable");
+    return networksService.listMapFiles(mapSource);
+  });
   ipcMain.handle("content:run", async (_event, payload: ContentJobParams) => {
     if (!contentService) throw new Error("ContentService unavailable");
     await contentService.run(payload);

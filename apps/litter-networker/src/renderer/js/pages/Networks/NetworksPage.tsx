@@ -1,5 +1,5 @@
 import type { NetworksResponse } from "@shared/networks";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNetworksData } from "../../data-sources/useNetworksData";
 import styles from "./styles/NetworksPage.module.css";
 
@@ -46,6 +46,138 @@ const getDetailHtml = (row: NetworksResponse["rows"][number]) => {
 const getDetailBlocks = (row: NetworksResponse["rows"][number]) =>
   getDetailHtml(row).map((html) => ({ html }));
 
+const CDN_BASE = "https://cdn.litternetworks.org/maps";
+
+const leafletScriptUrl = "https://cdn.litternetworks.org/3rd-party/leaflet/leaflet.js";
+const leafletCssUrl = "https://cdn.litternetworks.org/3rd-party/leaflet/leaflet.css";
+
+let leafletPromise: Promise<void> | null = null;
+
+const ensureLeaflet = () => {
+  if (typeof window === "undefined") return Promise.resolve();
+  if ((window as any).L) return Promise.resolve();
+  if (leafletPromise) return leafletPromise;
+
+  leafletPromise = new Promise<void>((resolve, reject) => {
+    const cssId = "ln-leaflet-css";
+    if (!document.getElementById(cssId)) {
+      const link = document.createElement("link");
+      link.id = cssId;
+      link.rel = "stylesheet";
+      link.href = leafletCssUrl;
+      document.head.appendChild(link);
+    }
+
+    const script = document.createElement("script");
+    script.src = leafletScriptUrl;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Leaflet"));
+    document.body.appendChild(script);
+  });
+
+  return leafletPromise;
+};
+
+type MapPreviewProps = {
+  mapSource?: string | null;
+  mapFile?: string | null;
+  uniqueId?: string | null;
+};
+
+function buildMapUrl({ mapSource, mapFile, uniqueId }: MapPreviewProps) {
+  const source = (mapSource ?? "custom").trim();
+  const fileName = (() => {
+    if (!mapFile || mapFile === "-") {
+      return uniqueId ? `${uniqueId}.json` : null;
+    }
+    return mapFile.trim();
+  })();
+  if (!source || !fileName) return null;
+  return `${CDN_BASE}/${source}/${fileName}`;
+}
+
+function MapPreview({ mapSource, mapFile, uniqueId }: MapPreviewProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<any>(null);
+  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+
+  useEffect(() => {
+    const mapUrl = buildMapUrl({ mapSource, mapFile, uniqueId });
+    let cancelled = false;
+
+    const setup = async () => {
+      if (!mapUrl || !containerRef.current) {
+        return;
+      }
+      setStatus("loading");
+      try {
+        await ensureLeaflet();
+        if (cancelled || !containerRef.current) return;
+        const response = await fetch(mapUrl);
+        if (!response.ok) throw new Error(`Failed to fetch map ${response.status}`);
+        const geojson = await response.json();
+        if (cancelled || !containerRef.current) return;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const L: any = (window as typeof window & { L?: any }).L;
+        if (!L) throw new Error("Leaflet unavailable");
+
+        const map = L.map(containerRef.current, {
+          zoomControl: true,
+          attributionControl: false
+        });
+        mapRef.current = map;
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19
+        }).addTo(map);
+
+        const layer = L.geoJSON(geojson);
+        layer.addTo(map);
+        if (layer.getBounds().isValid()) {
+          map.fitBounds(layer.getBounds(), { padding: [12, 12] });
+        }
+        setStatus("idle");
+      } catch (error) {
+        console.error("Map preview failed", error);
+        setStatus("error");
+      }
+    };
+
+    setup();
+
+    return () => {
+      cancelled = true;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [mapFile, mapSource, uniqueId]);
+
+  const mapUrl = buildMapUrl({ mapSource, mapFile, uniqueId });
+  if (!mapUrl) return null;
+
+  return (
+    <div className={styles.mapPreview}>
+      <div className={styles.mapPreviewHeader}>Map preview</div>
+      <div className={styles.mapPreviewFrame} ref={containerRef}>
+        {status === "loading" && <div className={styles.mapPreviewOverlay}>Loading…</div>}
+        {status === "error" && (
+          <div className={styles.mapPreviewOverlay} data-state="error">
+            Could not load map.
+          </div>
+        )}
+      </div>
+      <div className={styles.mapPreviewMeta}>
+        <span>{mapSource ?? "custom"}</span>
+        <span title={mapUrl}>{mapUrl.replace(CDN_BASE + "/", "")}</span>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Render the Networks page: an inline-editable table UI for viewing and managing network records.
  *
@@ -72,6 +204,64 @@ export default function NetworksPage() {
       Object.values(row).some((value) => value.toLowerCase().includes(needle))
     );
   }, [filter, rows]);
+
+  const mapFileOptionsBySource = useMemo(() => {
+    const lookup: Record<string, string[]> = {};
+    rows.forEach((row) => {
+      const source = (row.mapSource ?? "custom").trim() || "custom";
+      const file =
+        row.mapFile && row.mapFile !== "-" ? row.mapFile.trim() : row.uniqueId ? `${row.uniqueId}.json` : null;
+      if (!file) return;
+      if (!lookup[source]) lookup[source] = [];
+      if (!lookup[source].includes(file)) lookup[source].push(file);
+    });
+    Object.values(lookup).forEach((list) => list.sort());
+    return lookup;
+  }, [rows]);
+
+  const [mapFileOptions, setMapFileOptions] = useState<Record<string, string[]>>({});
+  const loadingMapSources = useRef<Set<string>>(new Set());
+
+  const ensureMapFiles = useCallback(
+    async (mapSource: string) => {
+      const source = (mapSource ?? "custom").trim() || "custom";
+      if (mapFileOptions[source] || loadingMapSources.current.has(source)) return;
+      loadingMapSources.current.add(source);
+      try {
+        const files = await window.appApi.listMapFiles(source);
+        if (Array.isArray(files)) {
+          setMapFileOptions((prev) => ({ ...prev, [source]: files }));
+        }
+      } catch (error) {
+        console.error("Failed to load map files", error);
+      } finally {
+        loadingMapSources.current.delete(source);
+      }
+    },
+    [mapFileOptions]
+  );
+
+  const mapSources = useMemo(() => {
+    const sources = new Set<string>();
+    rows.forEach((row) => sources.add((row.mapSource ?? "custom").trim() || "custom"));
+    return Array.from(sources);
+  }, [rows]);
+
+  useEffect(() => {
+    mapSources.forEach((source) => {
+      void ensureMapFiles(source);
+    });
+  }, [ensureMapFiles, mapSources]);
+
+  const getMapFileOptions = (source: string, search: string) => {
+    const options =
+      mapFileOptions[source] ??
+      mapFileOptionsBySource[source] ??
+      [];
+    if (search.trim().length < 3) return [];
+    const needle = search.trim().toLowerCase();
+    return options.filter((opt) => opt.toLowerCase().includes(needle)).slice(0, 10);
+  };
 
   const baseRow = useMemo(() => {
     const base: Record<string, string> = {};
@@ -199,7 +389,24 @@ export default function NetworksPage() {
                     onChange={(event) => setNewRow((prev) => ({ ...prev, [header]: event.target.value }))}
                     placeholder={`Enter ${header}`}
                     className={styles.cellInput}
+                    list={header === "mapFile" ? "mapfile-new" : undefined}
+                    onFocus={() => {
+                      if (header === "mapFile") {
+                        const source = (newRow.mapSource ?? "custom").trim() || "custom";
+                        ensureMapFiles(source);
+                      }
+                    }}
                   />
+                  {header === "mapFile" && (
+                    <datalist id="mapfile-new">
+                      {getMapFileOptions(
+                        (newRow.mapSource ?? "custom").trim() || "custom",
+                        (newRow.mapFile ?? "").trim()
+                      ).map((option) => (
+                        <option key={option} value={option} />
+                      ))}
+                    </datalist>
+                  )}
                 </td>
               ))}
               <td />
@@ -207,6 +414,11 @@ export default function NetworksPage() {
             {visibleRows.map((row) => {
               const status = rowStatus[row.uniqueId] ?? "idle";
               const isModified = Boolean(modified[row.uniqueId]);
+              const effectiveMapSource =
+                (modified[row.uniqueId]?.mapSource ?? row.mapSource ?? "custom").trim() || "custom";
+              const effectiveMapFile =
+                (modified[row.uniqueId]?.mapFile ?? row.mapFile ?? "").trim() ||
+                (row.mapFile === "-" || !row.mapFile ? `${row.uniqueId}.json` : "");
               return (
                 <Fragment key={row.uniqueId}>
                   <tr>
@@ -246,15 +458,33 @@ export default function NetworksPage() {
                     </td>
                     {headers.map((header) => (
                       <td key={header}>
-                        <input
-                          value={modified[row.uniqueId]?.[header] ?? row[header] ?? ""}
-                          onChange={(event) => handleCellChange(row.uniqueId, header, event.target.value)}
-                          className={`${styles.cellInput} ${
-                            modified[row.uniqueId] && modified[row.uniqueId][header] ? styles.modifiedCell : ""
-                          }`}
-                        />
-                      </td>
-                    ))}
+                    <input
+                      value={modified[row.uniqueId]?.[header] ?? row[header] ?? ""}
+                      onChange={(event) => handleCellChange(row.uniqueId, header, event.target.value)}
+                      className={`${styles.cellInput} ${
+                        modified[row.uniqueId] && modified[row.uniqueId][header] ? styles.modifiedCell : ""
+                      }`}
+                      list={header === "mapFile" ? `mapfile-${row.uniqueId}` : undefined}
+                      onFocus={() => {
+                        if (header === "mapFile") {
+                          const source =
+                            (modified[row.uniqueId]?.mapSource ?? row.mapSource ?? "custom").trim() || "custom";
+                          ensureMapFiles(source);
+                        }
+                      }}
+                    />
+                    {header === "mapFile" && (
+                      <datalist id={`mapfile-${row.uniqueId}`}>
+                        {getMapFileOptions(
+                          (modified[row.uniqueId]?.mapSource ?? row.mapSource ?? "custom").trim() || "custom",
+                          (modified[row.uniqueId]?.mapFile ?? row.mapFile ?? "").trim()
+                        ).map((option) => (
+                          <option key={option} value={option} />
+                        ))}
+                      </datalist>
+                    )}
+                  </td>
+                ))}
                     <td className={styles.actionCell}>
                       <div className={styles.actionMenuWrapper}>
                         <button
@@ -304,6 +534,19 @@ export default function NetworksPage() {
                             />
                           </div>
                         ))}
+                        {buildMapUrl({
+                          mapSource: effectiveMapSource,
+                          mapFile: effectiveMapFile,
+                          uniqueId: row.uniqueId
+                        }) && (
+                          <div className={`${styles.detailBlock} ${styles.mapPreviewBlock}`}>
+                            <MapPreview
+                              mapSource={effectiveMapSource}
+                              mapFile={effectiveMapFile}
+                              uniqueId={row.uniqueId}
+                            />
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>

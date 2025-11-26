@@ -1,10 +1,12 @@
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
 import { DynamoDBDocumentClient, UpdateCommand, PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { fromIni } from "@aws-sdk/credential-providers";
 import type { NetworkRow, NetworksResponse } from "../../shared/networks";
 
 const AWS_REGION = process.env.AWS_REGION ?? "eu-west-2";
 const AWS_PROFILE = process.env.AWS_PROFILE ?? "ln";
+const CDN_BUCKET = process.env.CDN_BUCKET ?? "lnweb-public";
 const NETWORKS_INFO_TABLE = "LN-NetworksInfo";
 const NETWORKS_MAP_TABLE = "LN-NetworksMapInfo";
 const NETWORKS_PROXIMITY_TABLE = "LN-NetworksProximityInfo";
@@ -15,6 +17,11 @@ const documentClient = DynamoDBDocumentClient.from(
     credentials: fromIni({ profile: AWS_PROFILE })
   })
 );
+
+const s3Client = new S3Client({
+  region: AWS_REGION,
+  credentials: fromIni({ profile: AWS_PROFILE })
+});
 
 const preferredHeaders = ["uniqueId", "shortId", "districtId", "fullName", "logoName"];
 
@@ -164,5 +171,28 @@ export class NetworksService {
         )
       )
     );
+  }
+
+  async listMapFiles(mapSource: string): Promise<string[]> {
+    const prefix = `maps/${mapSource}/`;
+    const results: string[] = [];
+    let ContinuationToken: string | undefined;
+    do {
+      const response = await s3Client.send(
+        new ListObjectsV2Command({
+          Bucket: CDN_BUCKET,
+          Prefix: prefix,
+          ContinuationToken
+        })
+      );
+      const keys =
+        response.Contents?.map((item) => item.Key)
+          .filter((key): key is string => Boolean(key))
+          .map((key) => key.replace(prefix, ""))
+          .filter((key) => key && !key.endsWith("/")) ?? [];
+      results.push(...keys);
+      ContinuationToken = response.NextContinuationToken;
+    } while (ContinuationToken);
+    return Array.from(new Set(results)).sort();
   }
 }
