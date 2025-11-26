@@ -61,26 +61,7 @@ export function JoinInDistrictList({
                   <ul className={styles.networkList}>
                     <li className={styles.districtIntro}>
                       <p>
-                        There {networkVerb} currently <b>{networkCount}</b> {networkLabel} in {group.name}.  The whole area is covered by{' '}
-                        {group.councilUrl ? (
-                          <a
-                            href={group.councilUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className={styles.councilLinkButton}
-                          >
-                            <img
-                              src="https://cdn.litternetworks.org/images/icon-external-link.svg"
-                              alt=""
-                              aria-hidden="true"
-                              className={styles.externalIcon}
-                            />
-                            {group.councilName ?? `${group.name} Council`}
-                          </a>
-                        ) : (
-                          group.councilName ?? `${group.name} Council`
-                        )}
-                        .
+                        There {networkVerb} currently <b>{networkCount}</b> {networkLabel} in {group.name}.
                       </p>
                     </li>
                     {group.networks
