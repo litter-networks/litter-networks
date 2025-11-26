@@ -46,7 +46,7 @@ export function JoinInDistrictList({
                 >
                   <span className={styles.districtName}>{group.name}</span>
                   <span className={styles.districtMeta}>
-                    <span className={styles.districtCount}>{group.networks.length} networks</span>
+                    <span className={styles.districtCount}>{group.networks.length}</span>
                     <img
                       src="/images/dropdown-icon.png"
                       alt=""
@@ -96,9 +96,14 @@ export function JoinInDistrictList({
                             onClick={() => handleListSelect(net.uniqueId)}
                           >
                             <span className={styles.networkName}>{net.fullName ?? net.uniqueId}</span>
-                            {net.uniqueId === selectedNetworkId && (
-                              <span className={styles.networkSelectedBadge}>Selected</span>
-                            )}
+                            <span
+                              className={`${styles.networkStatusRegion} ${
+                                net.uniqueId === selectedNetworkId ? styles.networkStatusSelected : ''
+                              }`}
+                              aria-hidden="true"
+                            >
+                              {net.uniqueId === selectedNetworkId ? '✓' : ''}
+                            </span>
                           </button>
                         </li>
                       ))}
