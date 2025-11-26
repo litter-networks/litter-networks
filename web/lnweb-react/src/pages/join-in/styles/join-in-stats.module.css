@@ -120,7 +120,7 @@
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
-
+/* Reduce rotary board padding/height on narrow tablets and phones for a tighter column stack. */
 @media (max-width: 768px) {
   .rotator {
     min-height: 420px;

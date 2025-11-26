@@ -338,6 +338,7 @@
   opacity: 0.9;
 }
 
+/* Remove the quote and flatten the shell once layout compresses below large desktop widths. */
 @media (max-width: 1200px) {
   .navbarContent {
     border-radius: 0;
@@ -348,6 +349,7 @@
   }
 }
 
+/* Allow nav content to wrap, center center/right regions, and shrink submenu sizing on smaller desktops/tablets. */
 @media (max-width: 1024px) {
   .navbarContent {
     flex-wrap: wrap;
@@ -394,6 +396,7 @@
   }
 }
 
+/* Tighten spacing and adjust icon visibility for tablets / larger phones. */
 @media (max-width: 768px) {
   .navbarContent {
     gap: 12px;
@@ -423,6 +426,7 @@
   }
 }
 
+/* Ensure nav list and right-hand controls stretch full width on narrow handsets. */
 @media (max-width: 520px) {
   .navbarRight {
     padding-bottom: 4px;
@@ -442,12 +446,14 @@
   }
 }
 
+/* Scale the brand lockup slightly down for phones around 480px wide. */
 @media (max-width: 480px) {
   .header {
     --brand-scale: 0.82;
   }
 }
 
+/* Further scale the brand/fonte for very small screens (~400px) so the text stays readable. */
 @media (max-width: 400px) {
   .header {
     --brand-scale: 0.76;

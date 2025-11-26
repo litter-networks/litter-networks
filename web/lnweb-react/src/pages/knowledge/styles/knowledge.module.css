@@ -11,6 +11,7 @@
   width: 100%;
 }
 
+/* Reduce padding and border thickness on tablets and narrow desktops to keep content in view. */
 @media (max-width: 900px) {
   .page {
     padding: 1.25rem clamp(14px, 5vw, 32px) 3rem;
@@ -21,6 +22,7 @@
   }
 }
 
+/* Further shrink gutters and borders once we hit smaller phones (<640px) to maximize reading space. */
 @media (max-width: 640px) {
   .page {
     padding: 1rem clamp(12px, 6vw, 24px) 2.5rem;
@@ -271,7 +273,7 @@
     transform: rotate(360deg);
   }
 }
-
+/* On widths below 900px also limit iframe height and allow contents entries to fill width. */
 @media (max-width: 900px) {
   .knowledgeMain {
     margin-left: -10px;

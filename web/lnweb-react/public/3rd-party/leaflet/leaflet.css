@@ -652,6 +652,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 /* Printing */
 
+/* Ensure leaflet controls preserve background colors during printing. */
 @media print {
 	/* Prevent printers from removing background-images of controls. */
 	.leaflet-control {

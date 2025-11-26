@@ -107,7 +107,7 @@
 .placeholder {
   height: 320px;
 }
-
+/* Shift the toolbar, shrink titles, and adjust info pills when the map view is viewed on smaller devices. */
 @media (max-width: 768px) {
   .toolbar {
     top: 100px;

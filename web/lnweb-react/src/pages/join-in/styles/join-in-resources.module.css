@@ -155,7 +155,7 @@
 .noticeLink {
   color: inherit;
 }
-
+/* Swap to the portrait layout when devices are naturally taller than wide. */
 @media (orientation: portrait) {
   .landscape {
     display: none;
@@ -170,7 +170,7 @@
     margin: 0 auto;
   }
 }
-
+/* When the viewport is extremely wide but very short (very wide foldables / tiny heights around 400px) fall back to portrait layout for readability. */
 @media (min-aspect-ratio: 18.5 / 9) and (max-height: 400px) {
   .landscape {
     display: none;

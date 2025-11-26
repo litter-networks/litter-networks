@@ -162,7 +162,7 @@
     transform: rotate(360deg);
   }
 }
-
+/* Switch to portrait-only cards and shrink headers once the viewport matches tablets or small desktops. */
 @media (max-width: 900px) {
   .landscapeCard {
     display: none;
