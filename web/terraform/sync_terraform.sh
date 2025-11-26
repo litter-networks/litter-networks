@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+export AWS_PROFILE="${AWS_PROFILE:-ln}"
+
 terraform apply
 
 invalidate_distribution() {

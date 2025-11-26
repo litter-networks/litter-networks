@@ -135,7 +135,7 @@ resource "aws_cloudfront_origin_access_control" "s3_origin_access_control" {
   name                              = "CloudFrontS3AccessControl"
   description                       = "Origin Access Control for S3 buckets"
   origin_access_control_origin_type = "s3"
-  signing_behavior                  = "never"
+  signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
 
@@ -203,6 +203,47 @@ resource "aws_cloudfront_cache_policy" "user_api_cache_policy" {
   }
 }
 
+resource "aws_cloudfront_cache_policy" "no_cache" {
+  name = "LitterNetworksNoCachePolicy"
+
+  default_ttl = 1
+  max_ttl     = 1
+  min_ttl     = 0
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_gzip   = true
+    enable_accept_encoding_brotli = true
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+
+    query_strings_config {
+      query_string_behavior = "all"
+    }
+  }
+}
+
+resource "aws_cloudfront_origin_request_policy" "all_viewer" {
+  name = "LitterNetworksAllViewerOriginRequestPolicy-v2"
+
+  headers_config {
+    header_behavior = "allViewer"
+  }
+
+  cookies_config {
+    cookie_behavior = "none"
+  }
+
+  query_strings_config {
+    query_string_behavior = "all"
+  }
+}
+
 
 #########################################
 # CloudFront Distribution – Dynamic API
@@ -231,13 +272,13 @@ resource "aws_cloudfront_distribution" "dynamic" {
 
   default_cache_behavior {
     allowed_methods            = ["GET", "HEAD"]
-    cache_policy_id            = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
+    cache_policy_id            = aws_cloudfront_cache_policy.no_cache.id
     cached_methods             = ["GET", "HEAD"]
     compress                   = true
     default_ttl                = 0
     max_ttl                    = 0
     min_ttl                    = 0
-    origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
     smooth_streaming           = false
     target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
     viewer_protocol_policy     = "redirect-to-https"
@@ -309,6 +350,7 @@ resource "aws_cloudfront_distribution" "dynamic" {
     minimum_protocol_version       = "TLSv1.2_2021"
     ssl_support_method             = "sni-only"
   }
+
 }
 
 #########################################
@@ -326,13 +368,13 @@ resource "aws_cloudfront_distribution" "static" {
 
   default_cache_behavior {
     allowed_methods            = ["GET", "HEAD"]
-    cache_policy_id            = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
+    cache_policy_id            = aws_cloudfront_cache_policy.no_cache.id
     cached_methods             = ["GET", "HEAD"]
     compress                   = false
     default_ttl                = 0
     max_ttl                    = 0
     min_ttl                    = 0
-    origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
     smooth_streaming           = false
     target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
     viewer_protocol_policy     = "https-only"
@@ -343,20 +385,15 @@ resource "aws_cloudfront_distribution" "static" {
     }
   }
 
-  logging_config {
-    bucket          = "lnweb-cloudfront-logs.s3.amazonaws.com"
-    include_cookies = true
-  }
-
   ordered_cache_behavior {
     allowed_methods            = ["GET", "HEAD"]
-    cache_policy_id            = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
+    cache_policy_id            = aws_cloudfront_cache_policy.no_cache.id
     cached_methods             = ["GET", "HEAD"]
     compress                   = true
     default_ttl                = 0
     max_ttl                    = 0
     min_ttl                    = 0
-    origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
     path_pattern               = "/images/*"
     smooth_streaming           = false
     target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
@@ -370,13 +407,13 @@ resource "aws_cloudfront_distribution" "static" {
 
   ordered_cache_behavior {
     allowed_methods            = ["GET", "HEAD"]
-    cache_policy_id            = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
+    cache_policy_id            = aws_cloudfront_cache_policy.no_cache.id
     cached_methods             = ["GET", "HEAD"]
     compress                   = true
     default_ttl                = 0
     max_ttl                    = 0
     min_ttl                    = 0
-    origin_request_policy_id   = "aa327c15-c971-48a2-98cf-9f9c8c5d8188"
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
     path_pattern               = "/maps/*"
     smooth_streaming           = false
     target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
@@ -390,13 +427,13 @@ resource "aws_cloudfront_distribution" "static" {
 
   ordered_cache_behavior {
     allowed_methods            = ["GET", "HEAD"]
-    cache_policy_id            = "cf09114c-01f7-4330-ad1c-1bd3f9cb7b12"
+    cache_policy_id            = aws_cloudfront_cache_policy.no_cache.id
     cached_methods             = ["GET", "HEAD"]
     compress                   = true
     default_ttl                = 0
     max_ttl                    = 0
     min_ttl                    = 0
-    origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
     path_pattern               = "/docs/*"
     smooth_streaming           = false
     target_origin_id           = "lnweb-docs.s3.eu-west-2.amazonaws.com"
@@ -437,6 +474,7 @@ resource "aws_cloudfront_distribution" "static" {
     minimum_protocol_version       = "TLSv1.2_2021"
     ssl_support_method             = "sni-only"
   }
+
 }
 
 #########################################
