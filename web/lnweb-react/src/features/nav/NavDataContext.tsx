@@ -131,8 +131,29 @@ export function NavDataProvider({ filterStringParam, children }: ProviderProps) 
   const toggleFavorite = useCallback((id: string) => {
     setFavoriteIds((prev) => {
       const next = new Set(prev);
+      const now = Date.now();
       if (next.has(id)) {
         next.delete(id);
+        setUsageByNetwork((prevUsage) => {
+          const updated = {
+            ...prevUsage,
+            [id]: {
+              visits: prevUsage[id]?.visits ?? 0,
+              lastVisited: now,
+            },
+          };
+          const trimmedEntries = Object.entries(updated)
+            .sort((a, b) => b[1].lastVisited - a[1].lastVisited)
+            .slice(0, MAX_TRACKED_NETWORKS);
+          const trimmed: Record<string, NetworkUsage> = {};
+          trimmedEntries.forEach(([key, value]) => {
+            trimmed[key] = value;
+          });
+          if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(trimmed));
+          }
+          return trimmed;
+        });
       } else {
         next.add(id);
       }

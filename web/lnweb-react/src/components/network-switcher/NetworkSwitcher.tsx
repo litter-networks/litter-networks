@@ -1,0 +1,78 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useNavData } from '@/features/nav/useNavData';
+import { NetworkSwitcherMenu } from './NetworkSwitcherMenu';
+import styles from './styles/networkSwitcher.module.css';
+
+type Props = {
+  headerColorClass: string;
+  searchColorClass: string;
+};
+
+/**
+ * Trigger + dropdown wrapper for selecting networks, searching, and managing favourites.
+ */
+export function NetworkSwitcher({ headerColorClass, searchColorClass }: Props) {
+  const { buildPath, displayName } = useNavData();
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      if (!triggerRef.current || triggerRef.current.contains(event.target as Node)) {
+        return;
+      }
+      setOpen(false);
+    };
+
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+
+  const triggerClassName = useMemo(
+    () => `${styles.networkSwitcher} ${open ? styles.networkSwitcherOpen : ''}`.trim(),
+    [open],
+  );
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (open) {
+      root.classList.add('filter-menu-open');
+    } else {
+      root.classList.remove('filter-menu-open');
+    }
+    return () => {
+      root.classList.remove('filter-menu-open');
+    };
+  }, [open]);
+
+  return (
+    <div
+      className={triggerClassName}
+      tabIndex={0}
+      ref={triggerRef}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <Link className={styles.networkSwitcherLink} to={buildPath('')}>
+        <img className={styles.networkSwitcherLogo} src="/brand/logo-only.svg" alt="Litter Networks logo" />
+        <span className={styles.networkSwitcherTitle}>{displayName}</span>
+        <img
+          className={`${styles.networkSwitcherChevron} ${open ? styles.networkSwitcherChevronOpen : ''}`}
+          src="/images/dropdown-icon.png"
+          alt="Toggle network menu"
+          onClick={(event) => {
+            event.preventDefault();
+            setOpen((state: boolean) => !state);
+          }}
+        />
+      </Link>
+      <NetworkSwitcherMenu
+        open={open}
+        onRequestClose={() => setOpen(false)}
+        headerColorClass={headerColorClass}
+        searchColorClass={searchColorClass}
+      />
+    </div>
+  );
+}
