@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
-import { fetchAreaInfo } from '@/data-sources/maps';
-import { loadMapsAssets } from '@/shared/mapsAssets';
 import { usePageTitle } from '@/shared/usePageTitle';
 import { fetchDistrictsCsv, type DistrictCsvRow } from '@/data-sources/districts';
 import { ChooserWidget, type ViewMode } from './components/ChooserWidget';
@@ -24,32 +22,6 @@ interface LayerClickMessage {
   };
 }
 
-/**
- * Render the Join In | Choose page with an interactive map and network selection toolbar.
- *
- * The component loads area information and map assets, initializes an embedded map,
- * and updates the displayed Area and Network when the map posts `layerClick` messages
- * from the same origin. Users can cancel to return to the previous or a safe fallback
- * path, or choose a highlighted network to navigate into that network (or redirect to
- * a resolved return URL if provided in navigation state/referrer).
- *
- * @returns The React element for the Join In | Choose page.
- */
-const resetMapContainer = (container: HTMLDivElement | null) => {
-  if (!container) return;
-  container.replaceChildren();
-  delete (container as unknown as { _leaflet_id?: string })._leaflet_id;
-};
-
-const recreateMapContainer = (ref: React.RefObject<HTMLDivElement | null>) => {
-  const node = ref.current;
-  if (!node || !node.parentElement) return null;
-  const clone = node.cloneNode(false) as HTMLDivElement;
-  node.parentElement.replaceChild(clone, node);
-  ref.current = clone;
-  return clone;
-};
-
 export function JoinInChoosePage() {
   const { network, networks } = useNavData();
   const navigate = useNavigate();
@@ -63,7 +35,6 @@ export function JoinInChoosePage() {
   const [districtMeta, setDistrictMeta] = useState<Record<string, DistrictCsvRow>>({});
   const mapRootRef = useRef<HTMLDivElement>(null);
   const selectionFromMapRef = useRef(false);
-  const [mapReady, setMapReady] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     if (typeof window === 'undefined') return 'map';
     const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
@@ -155,57 +126,6 @@ export function JoinInChoosePage() {
       networkId: selectedNetwork?.uniqueId ?? network?.uniqueId ?? '',
     };
   }, [network?.districtId, network?.uniqueId, selectedNetwork]);
-  const mapSelectionKey = `${mapSelection.districtId ?? ''}|${mapSelection.networkId ?? ''}`;
-
-  useEffect(() => {
-    if (selectionFromMapRef.current) {
-      selectionFromMapRef.current = false;
-      return () => {};
-    }
-    if (viewMode !== 'map') {
-      resetMapContainer(mapRootRef.current);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setMapReady(false);
-      return () => {};
-    }
-    if (!mapRootRef.current) {
-      return () => {};
-    }
-    setMapReady(false);
-    const container = recreateMapContainer(mapRootRef) ?? mapRootRef.current;
-    resetMapContainer(container);
-    let cancelled = false;
-    const controller = new AbortController();
-    const run = async () => {
-      try {
-        await loadMapsAssets();
-        const areaInfo = await fetchAreaInfo(controller.signal);
-        if (cancelled || !window.createMap || !mapRootRef.current) return;
-        (mapRootRef.current as unknown as { _leaflet_id?: string })._leaflet_id = undefined;
-        window.createMap(
-          'areas',
-          'https://cdn.litternetworks.org',
-          'heatmap-lymm.json',
-          areaInfo,
-          true,
-          mapSelection,
-          '',
-        );
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setMapReady(true);
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          console.error('Could not render map', error);
-        }
-      }
-    };
-    run();
-    return () => {
-      cancelled = true;
-      controller.abort();
-      resetMapContainer(mapRootRef.current);
-    };
-  }, [mapSelectionKey, viewMode]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -347,7 +267,12 @@ export function JoinInChoosePage() {
     <div className={styles.page}>
       <div className={styles.mapContainerShell} data-map-container>
         <div className={styles.mapSurface}>
-          <JoinInMapView mapRef={mapRootRef} mapReady={mapReady} viewMode={viewMode} />
+          <JoinInMapView
+            mapRef={mapRootRef}
+            viewMode={viewMode}
+            mapSelection={mapSelection}
+            selectionFromMapRef={selectionFromMapRef}
+          />
           <JoinInDistrictList
             viewMode={viewMode}
             groupedDistricts={groupedDistricts}
