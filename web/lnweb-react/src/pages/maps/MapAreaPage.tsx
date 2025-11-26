@@ -64,15 +64,16 @@ export function MapAreaPage() {
       setMapError('Sorry, the map could not be loaded right now.');
     });
 
+    const rootElement = mapRootRef.current;
     return () => {
       cancelled = true;
       controller.abort();
-      mapRootRef.current?.replaceChildren();
+      rootElement?.replaceChildren();
     };
   }, [mode]);
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-area-map>
       <div className={styles.mapSurface}>
         <div id="map" ref={mapRootRef} className={styles.mapRoot} />
         {!mapReady && (

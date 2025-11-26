@@ -3,7 +3,7 @@ module.exports = {
   collectCoverage: false,
   coverageDirectory: "coverage",
   coveragePathIgnorePatterns: ["/node_modules/"],
-  testMatch: ["**/?(*.)+(test).[jt]s"],
+  testMatch: ["**/dist/**/?(*.)+(test).[jt]s"],
   modulePaths: [
     "<rootDir>/node_modules",
     "<rootDir>/lambda-layer/nodejs/node_modules"

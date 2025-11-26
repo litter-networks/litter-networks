@@ -70,7 +70,7 @@
 
 .title {
   margin: 0;
-  font-size: 24px;
+  font-size: clamp(18px, 4.5vw, 24px);
 }
 
 .mapFrame {
@@ -88,14 +88,15 @@
 .button {
   pointer-events: auto;
   min-width: 96px;
-  padding: 6px 12px;
+  padding: 3px 8px;
   color: white;
   background-color: rgba(127, 173, 116, 0.9);
   border: 2px solid rgba(87, 120, 79, 0.4);
   border-radius: 6px;
-  font-size: 14px;
+  font-size: clamp(13px, 3.5vw, 14px);
   font-weight: 600;
   cursor: pointer;
+  /* We may need to keep this touch target >=44px high to meet WCAG 2.5.5 on phones; consider adding min-height/padding later. */
 }
 
 .button:disabled {
@@ -106,14 +107,14 @@
 .placeholder {
   height: 320px;
 }
-
+/* Shift the toolbar, shrink titles, and adjust info pills when the map view is viewed on smaller devices. */
 @media (max-width: 768px) {
   .toolbar {
     top: 100px;
   }
 
   .title {
-    font-size: 20px;
+    font-size: clamp(18px, 4vw, 20px);
   }
 
   .infoPill {

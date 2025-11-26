@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useNavData } from '@/features/nav/NavDataContext';
+import { useNavData } from '@/features/nav/useNavData';
 import { getSectionFromPath } from '@/shared/sections';
+import { getHeaderColorClass, getPathSuffix, getSearchColorClass } from './header-helpers';
 import styles from './styles/header.module.css';
 
 const navLinks = [
@@ -10,6 +11,13 @@ const navLinks = [
   { label: 'News', path: 'news' },
   { label: 'Knowledge', path: 'knowledge' },
 ];
+
+const DEFAULT_THEME_COLOR = '#FFFFFF';
+const themeColorVarMap: Record<string, string> = {
+  [styles.joinInHeaderColor]: '--join-in-color-active',
+  [styles.newsHeaderColor]: '--news-color',
+  [styles.knowledgeHeaderColor]: '--info-color-active',
+};
 
 /**
  * Renders the site header with section-aware styling, brand/filter menu trigger, and primary navigation.
@@ -30,6 +38,19 @@ export function Header() {
     () => ({ returnPath: `${location.pathname}${location.search}${location.hash}` }),
     [location.pathname, location.search, location.hash],
   );
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (!metaTheme) {
+      return;
+    }
+    const cssVar = themeColorVarMap[headerColorClass] ?? '--join-in-color-active';
+    const computed = getComputedStyle(document.documentElement).getPropertyValue(cssVar)?.trim();
+    const color = computed || DEFAULT_THEME_COLOR;
+    metaTheme.setAttribute('content', color);
+  }, [headerColorClass]);
 
   const navItemsMarkup = navLinks.map((item) => {
     const href = buildPath(item.path);
@@ -46,18 +67,20 @@ export function Header() {
   return (
     <header className={styles.header}>
       <nav className={`${styles.navbar} ${headerColorClass}`}>
-        <div className={styles.navbarQuote}>
-          <ul className={styles.quoteList}>
-            <li>“ If we each did our little bit...”</li>
-          </ul>
-        </div>
+        <div className={styles.navbarContent}>
+          <div className={styles.navbarQuote}>
+            <ul className={styles.quoteList}>
+              <li>“ If we each did our little bit...”</li>
+            </ul>
+          </div>
 
-        <div className={styles.navbarCenter}>
-          <FilterMenuTrigger headerColorClass={headerColorClass} searchColorClass={searchColorClass} />
-        </div>
+          <div className={styles.navbarCenter}>
+            <FilterMenuTrigger headerColorClass={headerColorClass} searchColorClass={searchColorClass} />
+          </div>
 
-        <div className={styles.navbarRight}>
-          <ul className={styles.navList}>{navItemsMarkup}</ul>
+          <div className={styles.navbarRight}>
+            <ul className={styles.navList}>{navItemsMarkup}</ul>
+          </div>
         </div>
       </nav>
 
@@ -122,6 +145,12 @@ export function Header() {
                   src="https://cdn.litternetworks.org/images/facebook-logo.svg"
                   alt="Facebook"
                 />
+                <img
+                  className={styles.facebookIconSmall}
+                  src="/images/facebook-logo-small.svg"
+                  alt=""
+                  aria-hidden="true"
+                />
               </a>
             </li>
           </ul>
@@ -165,6 +194,18 @@ function FilterMenuTrigger({
 
   const brandClassName = `${styles.navbarBrand} ${open ? styles.navbarBrandOpen : ''}`.trim();
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (open) {
+      root.classList.add('filter-menu-open');
+    } else {
+      root.classList.remove('filter-menu-open');
+    }
+    return () => {
+      root.classList.remove('filter-menu-open');
+    };
+  }, [open]);
+
   return (
     <div
       className={brandClassName}
@@ -184,7 +225,7 @@ function FilterMenuTrigger({
           alt="Toggle menu"
           onClick={(event) => {
             event.preventDefault();
-            setOpen((state) => !state);
+            setOpen((state: boolean) => !state);
           }}
         />
       </Link>
@@ -261,8 +302,11 @@ function FilterMenu({
 
   useEffect(() => {
     if (!open) {
-      setSearchTerm('');
+      return;
     }
+    return () => {
+      setSearchTerm('');
+    };
   }, [open]);
 
   const generalLinks: Array<{ label: string; to: string; preserveReturnPath?: boolean }> = [
@@ -333,53 +377,3 @@ function FilterMenu({
     </ul>
   );
 }
-
-/**
- * Selects the header color CSS class for a given site section.
- *
- * @param section - Site section identifier (for example `'news'`, `'knowledge'`, or other section names)
- * @returns The CSS module class name to apply to the header: `newsHeaderColor` for `'news'`, `knowledgeHeaderColor` for `'knowledge'`, and `joinInHeaderColor` for all other values
- */
-function getHeaderColorClass(section: ReturnType<typeof getSectionFromPath>) {
-  switch (section) {
-    case 'news':
-      return styles.newsHeaderColor;
-    case 'knowledge':
-      return styles.knowledgeHeaderColor;
-    default:
-      return styles.joinInHeaderColor;
-  }
-}
-
-/**
- * Selects the CSS class used for the header's search color based on the current section.
- *
- * @param section - Current section identifier returned by `getSectionFromPath` (e.g., `'news'`, `'knowledge'`, `'join-in'`).
- * @returns The CSS module class for the search color: `styles.newsHeaderSearchColor` for `'news'`, `styles.knowledgeHeaderSearchColor` for `'knowledge'`, and `styles.joinInHeaderSearchColor` otherwise.
- */
-function getSearchColorClass(section: ReturnType<typeof getSectionFromPath>) {
-  switch (section) {
-    case 'news':
-      return styles.newsHeaderSearchColor;
-    case 'knowledge':
-      return styles.knowledgeHeaderSearchColor;
-    default:
-      return styles.joinInHeaderSearchColor;
-  }
-}
-
-/**
- * Extracts the path portion after the first path segment.
- *
- * @param pathname - The full URL pathname (for example, "/network/item" or "/join-in").
- * @returns The suffix of `pathname` starting at the second segment (including the leading slash), or an empty string if `pathname` is empty or has no suffix.
- */
-function getPathSuffix(pathname: string) {
-  if (!pathname) {
-    return '';
-  }
-  const suffix = pathname.replace(/^\/[^/]+/, '');
-  return suffix === '/' ? '' : suffix;
-}
-
-export { getHeaderColorClass, getSearchColorClass, getPathSuffix };

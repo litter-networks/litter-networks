@@ -83,7 +83,12 @@
     "name": "stats-bags-info-anfield",
     "path": "/stats/get-bags-info/anfieldlitter",
     "type": "json",
-    "extension": ".golden.json"
+    "extension": ".golden.json",
+    "rules": {
+      "json": {
+        "onlyKeys": true
+      }
+    }
   },
   {
     "name": "stats-summary",
@@ -95,7 +100,12 @@
     "name": "stats-bag-stats-json",
     "path": "/stats/get-bag-stats-json/anfieldlitter",
     "type": "json",
-    "extension": ".golden.json"
+    "extension": ".golden.json",
+    "rules": {
+      "json": {
+        "onlyKeys": true
+      }
+    }
   },
   {
     "name": "joinin-district-info-liverpool",

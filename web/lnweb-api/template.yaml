@@ -6,9 +6,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: LNWeb-API
-      Handler: src/lambda.lambdaHandler
+      Handler: dist/lambda.lambdaHandler
       Runtime: nodejs22.x
-      CodeUri: src/
+      CodeUri: dist/
       MemorySize: 512
       Timeout: 10
       Layers:
@@ -122,4 +122,3 @@ Outputs:
   LambdaFunctionUrl:
     Description: "Lambda Function URL"
     Value: !GetAtt LNWebApiFunctionUrl.FunctionUrl
-

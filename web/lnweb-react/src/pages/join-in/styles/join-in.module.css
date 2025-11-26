@@ -77,13 +77,13 @@
   text-align: center;
   color: #4f5a48;
 }
-
+/* On landscape screens give each action block half-width so two-column grid fits comfortably. */
 @media screen and (orientation: landscape) {
   .block {
     flex: 1 1 calc(50% - 7.5px);
   }
 }
-
+/* Force single-column stack for phones under 720px so each block fills available width. */
 @media screen and (max-width: 720px) {
   .block {
     flex: 1 1 100%;

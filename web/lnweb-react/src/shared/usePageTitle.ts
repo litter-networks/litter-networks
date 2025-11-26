@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavData } from '@/features/nav/NavDataContext';
+import { useNavData } from '@/features/nav/useNavData';
 
 /**
  * Set the document title to a page-specific title followed by the current network suffix.

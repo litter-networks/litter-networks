@@ -13,11 +13,12 @@
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "typecheck": "tsc -b",
-    "deploy": "bash scripts/deploy.sh"
+    "deploy": "bash sync_public.sh"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",
     "dompurify": "^3.3.0",
+    "leaflet": "^1.9.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6"

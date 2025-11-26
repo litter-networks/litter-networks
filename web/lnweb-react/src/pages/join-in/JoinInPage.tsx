@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useNavData } from '@/features/nav/NavDataContext';
+import { useNavData } from '@/features/nav/useNavData';
 import { fetchDistrictLocalInfo, type DistrictLocalInfo } from '@/data-sources/joinIn';
 import { usePageTitle } from '@/shared/usePageTitle';
 import { getPrimaryDistrictId } from '@/shared/districtIds';
@@ -31,14 +31,27 @@ export function JoinInPage() {
 
   useEffect(() => {
     let cancelled = false;
+
+    const schedule = (fn: () => void) => {
+      Promise.resolve().then(() => {
+        if (!cancelled) {
+          fn();
+        }
+      });
+    };
+
     if (!districtId) {
-      setLocalInfo(null);
-      setLoading(false);
-      return;
+      schedule(() => {
+        setLocalInfo(null);
+        setLoading(false);
+      });
+      return () => {
+        cancelled = true;
+      };
     }
 
     const controller = new AbortController();
-    setLoading(true);
+    schedule(() => setLoading(true));
     fetchDistrictLocalInfo(districtId, controller.signal)
       .then((info) => {
         if (!cancelled) {

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import * as httpClient from '@/lib/httpClient';
-import { fetchDistrictLocalInfo } from '../joinIn';
+import { fetchDistrictLocalInfo, type DistrictLocalInfo } from '../joinIn';
 
 describe('join-in data source', () => {
   beforeEach(() => {
@@ -12,11 +12,8 @@ describe('join-in data source', () => {
   });
 
   it('fetches district info for the primary district id and encodes the path', async () => {
-    const data = { uniqueId: 'primary', disposeEmail: 'test' };
-    const apiSpy = vi
-      .spyOn(httpClient, 'apiRequest')
-      .mockResolvedValueOnce(data as any);
-
+    const data: DistrictLocalInfo = { uniqueId: 'primary', disposeEmail: 'test' };
+    const apiSpy = vi.spyOn(httpClient, 'apiRequest').mockResolvedValueOnce(data);
     const result = await fetchDistrictLocalInfo('primary,secondary');
     expect(result).toEqual(data);
     expect(apiSpy).toHaveBeenCalledWith(

@@ -35,7 +35,7 @@ const api = {
   addNetworkRow: (payload: { uniqueId: string; newRow: Record<string, string> }) =>
     ipcRenderer.invoke("networks:add", payload) as Promise<void>,
   deleteNetworkRow: (uniqueId: string) => ipcRenderer.invoke("networks:delete", uniqueId) as Promise<void>,
-  runContentJob: (payload: { networkId?: string; force?: boolean }) =>
+  runContentJob: (payload: { job?: "legacy" | "docs"; networkId?: string; force?: boolean; dryRun?: boolean }) =>
     ipcRenderer.invoke("content:run", payload) as Promise<{ ok: true }>,
   stopContentJob: () => ipcRenderer.invoke("content:stop") as Promise<{ stopped: boolean }>,
   subscribeContentProgress: () => ipcRenderer.send("content:subscribe"),

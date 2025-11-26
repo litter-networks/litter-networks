@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { appEnv } from '@/config/env';
-import { useNavData } from '@/features/nav/NavDataContext';
+import { useNavData } from '@/features/nav/useNavData';
 import type { Network } from '@/data-sources/networks';
 import { StatsBoardImage } from '@/components/stats/StatsBoardImage';
 import { usePageTitle } from '@/shared/usePageTitle';
+import { useMediaQuery } from '@/shared/useMediaQuery';
 import styles from './styles/home.module.css';
 
 type BlockType = 'knowledge' | 'join-in' | 'news';
@@ -73,15 +74,28 @@ export function HomePage() {
     return createDefaultColumns();
   }, [network]);
 
+  const stackedBlocks = useMemo(() => interleaveColumns(columns), [columns]);
+  const isDesktop = useMediaQuery('(min-width: 920px)', true);
+
   return (
     <div className={css('page')}>
-      {columns.map((columnBlocks, columnIndex) => (
-        <div className={css('column')} key={`column-${columnIndex}`}>
-          {columnBlocks.map((block) => (
-            <BlockCard key={`${block.title}-${block.link}`} block={block} buildPath={buildPath} />
+      {isDesktop ? (
+        <div className={css('columns')}>
+          {columns.map((columnBlocks, columnIndex) => (
+            <div className={css('column')} key={`column-${columnIndex}`}>
+              {columnBlocks.map((block) => (
+                <BlockCard key={`${block.title}-${block.link}`} block={block} buildPath={buildPath} />
+              ))}
+            </div>
           ))}
         </div>
-      ))}
+      ) : (
+        <div className={css('mobileStack')}>
+          {stackedBlocks.map((block, blockIndex) => (
+            <BlockCard key={`${block.title}-${block.link}-${blockIndex}`} block={block} buildPath={buildPath} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -351,4 +365,27 @@ function createNetworkColumns(network: Network): WelcomeBlock[][] {
   ];
 
   return [left, right];
+}
+
+/**
+ * Interleave column arrays so responsive layouts can stack blocks left-right-left order.
+ */
+function interleaveColumns(columns: WelcomeBlock[][]) {
+  if (!columns.length) {
+    return [];
+  }
+
+  const maxLength = Math.max(...columns.map((column) => column.length));
+  const result: WelcomeBlock[] = [];
+
+  for (let index = 0; index < maxLength; index += 1) {
+    columns.forEach((column) => {
+      const block = column[index];
+      if (block) {
+        result.push(block);
+      }
+    });
+  }
+
+  return result;
 }

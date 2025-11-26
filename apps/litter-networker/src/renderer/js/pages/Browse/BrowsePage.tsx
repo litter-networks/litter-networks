@@ -250,7 +250,7 @@ export default function BrowsePage() {
 
   const lnUrl = useMemo(() => {
     const base = snapshot?.paneLayout.right.url ?? "https://litternetworks.org";
-    if (!selectedNetwork || selectedNetwork === HOME_NETWORK_ID) return `${base}/area`;
+    if (!selectedNetwork || selectedNetwork === HOME_NETWORK_ID) return `${base}`;
     return `${base.replace(/\/$/, "")}/network/${selectedNetwork}`;
   }, [snapshot, selectedNetwork]);
 

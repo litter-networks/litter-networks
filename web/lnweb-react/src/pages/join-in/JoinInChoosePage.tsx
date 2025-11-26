@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useNavData } from '@/features/nav/NavDataContext';
+import { useNavData } from '@/features/nav/useNavData';
 import { fetchAreaInfo } from '@/data-sources/maps';
 import { loadMapsAssets } from '@/shared/mapsAssets';
 import { usePageTitle } from '@/shared/usePageTitle';
@@ -81,10 +81,11 @@ export function JoinInChoosePage() {
       }
       console.error('Failed to initialise join-in map', error);
     });
+    const rootElement = mapRootRef.current;
     return () => {
       cancelled = true;
       controller.abort();
-      mapRootRef.current?.replaceChildren();
+      rootElement?.replaceChildren();
     };
   }, [network?.districtId, network?.uniqueId]);
 

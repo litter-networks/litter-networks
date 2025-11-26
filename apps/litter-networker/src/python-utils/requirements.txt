@@ -5,4 +5,4 @@ requests
 geopy
 tqdm
 shapely
-
+-e ./lnwordtohtml

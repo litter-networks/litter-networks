@@ -1,5 +1,5 @@
 .page {
-  padding: 1.5rem 0 4rem;
+  padding: 1.5rem clamp(16px, 4vw, 48px) 4rem;
 }
 
 .knowledgeMain {
@@ -7,6 +7,30 @@
   border-radius: 15px;
   border: 5px solid rgb(231, 230, 242);
   color: #1f2a1c;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Reduce padding and border thickness on tablets and narrow desktops to keep content in view. */
+@media (max-width: 900px) {
+  .page {
+    padding: 1.25rem clamp(14px, 5vw, 32px) 3rem;
+  }
+
+  .knowledgeMain {
+    border-width: 4px;
+  }
+}
+
+/* Further shrink gutters and borders once we hit smaller phones (<640px) to maximize reading space. */
+@media (max-width: 640px) {
+  .page {
+    padding: 1rem clamp(12px, 6vw, 24px) 2.5rem;
+  }
+
+  .knowledgeMain {
+    border-width: 3px;
+  }
 }
 
 .knowledgeMain :global(h1),
@@ -50,9 +74,41 @@
   display: block;
 }
 
+.knowledgeMain :global(.video-container) {
+  margin: 1rem auto;
+  width: 100%;
+}
+
+.knowledgeMain :global(.video-container iframe) {
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+}
+
+.knowledgeMain :global(.ln-shell) {
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.knowledgeMain :global(.ln-align-justify) {
+  text-align: justify;
+}
+
+.knowledgeMain :global(.ln-align-left) {
+  text-align: left;
+}
+
+.knowledgeMain :global(.ln-align-right) {
+  text-align: right;
+}
+
+.knowledgeMain :global(.ln-align-center) {
+  text-align: center;
+}
+
 .knowledgeMain :global(iframe) {
   width: 80%;
-  height: 500px;
+  height: 650px;
   border: none;
   border-radius: 8px;
 }
@@ -217,7 +273,7 @@
     transform: rotate(360deg);
   }
 }
-
+/* On widths below 900px also limit iframe height and allow contents entries to fill width. */
 @media (max-width: 900px) {
   .knowledgeMain {
     margin-left: -10px;

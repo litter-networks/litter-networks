@@ -3,7 +3,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 const mockUseNavData = vi.fn();
 
-vi.mock('@/features/nav/NavDataContext', () => ({
+vi.mock('@/features/nav/useNavData', () => ({
   useNavData: () => mockUseNavData(),
 }));
 
@@ -33,11 +33,13 @@ describe('HomePage', () => {
     const Component = await HomePage();
     render(<Component />);
 
-    expect(screen.getByText('How It Works').closest('a')).toHaveAttribute(
+    const [desktopHowItWorksLink] = screen.getAllByText('How It Works');
+    expect(desktopHowItWorksLink.closest('a')).toHaveAttribute(
       'href',
       '/all/knowledge/getting-started/how-it-works',
     );
-    expect(screen.getByText('News').closest('a')).toHaveAttribute('href', '/all/news');
+    const [desktopNewsLink] = screen.getAllByText('News');
+    expect(desktopNewsLink.closest('a')).toHaveAttribute('href', '/all/news');
     expect(screen.getAllByRole('link').length).toBe(6);
   });
 
@@ -51,10 +53,12 @@ describe('HomePage', () => {
     const Component = await HomePage();
     render(<Component />);
 
-    expect(screen.getByText('Join In on Facebook').closest('a')).toHaveAttribute(
+    const [desktopFacebookLink] = screen.getAllByText('Join In on Facebook');
+    expect(desktopFacebookLink.closest('a')).toHaveAttribute(
       'href',
       `https://www.facebook.com/groups/${network.uniqueId}`,
     );
-    expect(screen.getByTestId('stats-board')).toHaveAttribute('data-uniqueid', network.uniqueId);
+    const [desktopStatsBoard] = screen.getAllByTestId('stats-board');
+    expect(desktopStatsBoard).toHaveAttribute('data-uniqueid', network.uniqueId);
   });
 });

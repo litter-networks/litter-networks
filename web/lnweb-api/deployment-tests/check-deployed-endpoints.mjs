@@ -1,8 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = path.resolve(ROOT, '..');
 const CONFIG_PATH = path.join(ROOT, 'endpoint-config.json');
 const GOLDEN_DIR = path.join(ROOT, 'goldens');
 const OUTPUT_DIR = path.join(ROOT, 'latest-responses');
@@ -35,8 +37,7 @@ async function resetOutputDir() {
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 }
 
-async function requestEndpoint(entry) {
-  const url = `${API_BASE}${entry.path}`;
+async function requestEndpoint(url, entry) {
   const response = await fetch(url, {
     method: entry.method ?? 'GET',
     headers: entry.headers ?? { Accept: entry.type === 'json' ? 'application/json' : '*/*' },
@@ -50,16 +51,17 @@ async function requestEndpoint(entry) {
 }
 
 async function run() {
+  await ensureTypeScriptBuild();
   const config = await loadConfig();
   await ensureGoldenDir();
   await resetOutputDir();
   let failed = false;
 
   for (const entry of config) {
-    const printLabel = `${entry.name} (${entry.path})`;
-    process.stdout.write(`Checking ${printLabel} ... `);
+    const url = `${API_BASE}${entry.path}`;
+    process.stdout.write(`Checking [${url}] ... `);
     try {
-      const body = await requestEndpoint(entry);
+      const body = await requestEndpoint(url, entry);
       const extension =
         entry.extension ??
         (entry.type === 'json' ? '.json' : entry.type === 'text' ? '.txt' : '.golden');
@@ -78,14 +80,14 @@ async function run() {
       const normalizedExisting = normalizeBody(existing, entry);
       if (normalizedExisting !== normalizedBody) {
         console.log(colorize('✗ mismatch', COLOR_RED));
-        console.error(`  ${printLabel} did not match golden file.`);
+        console.error(`  ${entry.name} (${entry.path}) did not match golden file.`);
         failed = true;
       } else {
         console.log(colorize('OK', COLOR_GREEN));
       }
     } catch (error) {
       console.log(colorize('✗ error', COLOR_RED));
-      console.error(`  ${printLabel} failed: ${error.message}`);
+      console.error(`  ${entry.name} (${entry.path}) failed: ${error.message}`);
       failed = true;
     }
   }
@@ -93,6 +95,27 @@ async function run() {
   if (failed && !UPDATE) {
     throw new Error('One or more endpoint checks failed');
   }
+}
+
+async function ensureTypeScriptBuild() {
+  if (process.env.SKIP_TS_BUILD === 'true') {
+    return;
+  }
+  await runCommand('npm', ['run', 'build'], { cwd: PROJECT_ROOT });
+}
+
+function runCommand(command, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { stdio: 'inherit', ...options });
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`${command} ${args.join(' ')} exited with code ${code}`));
+      }
+    });
+    child.on('error', reject);
+  });
 }
 
 function colorize(text, color) {
@@ -130,6 +153,10 @@ function normalizeJson(payload, rules = {}) {
   const ignorePaths = Array.isArray(rules.ignorePaths) ? rules.ignorePaths : [];
   for (const path of ignorePaths) {
     removeJsonPath(parsed, path);
+  }
+
+  if (rules.onlyKeys) {
+    parsed = replaceValuesWithPlaceholders(parsed);
   }
 
   const canonical = canonicalizeJson(parsed);
@@ -236,4 +263,18 @@ function normalizeText(payload, rules = {}) {
     result += '\n';
   }
   return result;
+}
+
+function replaceValuesWithPlaceholders(value) {
+  if (Array.isArray(value)) {
+    return value.map(replaceValuesWithPlaceholders);
+  }
+  if (isPlainObject(value)) {
+    const result = {};
+    for (const key of Object.keys(value)) {
+      result[key] = replaceValuesWithPlaceholders(value[key]);
+    }
+    return result;
+  }
+  return null;
 }

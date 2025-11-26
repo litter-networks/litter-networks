@@ -21,32 +21,33 @@ describe('StatsBoardImage', () => {
   let originalImage: typeof Image;
 
   beforeEach(() => {
-    originalImage = global.Image;
-    // @ts-expect-error monkey patch for tests
-    global.Image = MockImage as unknown as typeof Image;
+    originalImage = globalThis.Image;
+    globalThis.Image = MockImage as unknown as typeof Image;
   });
 
   afterEach(() => {
-    // @ts-expect-error restore
-    global.Image = originalImage;
+    globalThis.Image = originalImage;
     vi.restoreAllMocks();
   });
 
   it('displays a placeholder and then renders the generated data URL', async () => {
     const placeholder = '/placeholder.png';
-    vi.spyOn(statsData, 'fetchBagsInfo').mockResolvedValue({
-      bagCounts: {},
-      thisMonthName: '',
-      thisMonth: 0,
-      lastMonthName: '',
-      lastMonth: 0,
-      thisYearName: '',
-      thisYear: 0,
-      lastYearName: '',
-      lastYear: 0,
-      allTime: 0,
-      memberCountAll: 0,
-    } as any);
+    const bagInfo: statsData.BagsInfo = {
+      bagCounts: {
+        thisMonthName: '',
+        thisMonth: 0,
+        lastMonthName: '',
+        lastMonth: 0,
+        thisYearName: '',
+        thisYear: 0,
+        lastYearName: '',
+        lastYear: 0,
+        allTime: 0,
+      },
+      networkName: 'Example Network',
+      districtName: 'Example District',
+    };
+    vi.spyOn(statsData, 'fetchBagsInfo').mockResolvedValue(bagInfo);
 
     const renderSpy = vi
       .spyOn(renderStatsBoardModule, 'renderStatsBoard')

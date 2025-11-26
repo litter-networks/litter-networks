@@ -15,6 +15,7 @@ export default function ContentPage() {
   const { networks = [] } = snapshot ?? { networks: [] };
   const { logs, running, summary, run, stop } = useContentJob();
   const [selectedNetwork, setSelectedNetwork] = useState<string>(networks[0]?.id ?? "");
+  const [docsDryRun, setDocsDryRun] = useState(true);
 
   const friendlyNetworks = useMemo(
     () =>
@@ -39,7 +40,7 @@ export default function ContentPage() {
         <header className={styles.header}>
           <div>
             <p className={styles.pageTitle}>Content Generator</p>
-            <p className={styles.pageSubtitle}>Run the LNUtils generation jobs.</p>
+            <p className={styles.pageSubtitle}>Run the LNUtils generation jobs or sync knowledge docs.</p>
           </div>
         </header>
         <section className={styles.formRow}>
@@ -83,6 +84,23 @@ export default function ContentPage() {
           >
             Cancel
           </button>
+          <button
+            type="button"
+            className={`${styles.secondaryButton} ${running ? styles.disabledButton : ""}`}
+            disabled={running}
+            onClick={() => run({ job: "docs", dryRun: docsDryRun })}
+          >
+            Sync Knowledge Docs
+          </button>
+          <label className={styles.checkboxGroup}>
+            <input
+              type="checkbox"
+              checked={docsDryRun}
+              disabled={running}
+              onChange={(event) => setDocsDryRun(event.target.checked)}
+            />
+            Dry run (skip uploads + invalidation)
+          </label>
         </section>
         <section className={styles.logs}>
           <p className={styles.logsTitle}>{summary}</p>

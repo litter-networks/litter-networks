@@ -24,7 +24,6 @@ export function StatsSummaryImage({ summary, networkName, districtName, classNam
 
   useEffect(() => {
     let cancelled = false;
-    setImageSrc(null);
 
     async function renderBoard() {
       if (!boardRef.current) {
@@ -52,6 +51,7 @@ export function StatsSummaryImage({ summary, networkName, districtName, classNam
     renderBoard();
     return () => {
       cancelled = true;
+      setImageSrc(null);
     };
   }, [summary, networkName, districtName]);
 

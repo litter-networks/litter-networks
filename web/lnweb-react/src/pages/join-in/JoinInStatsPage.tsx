@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { StatsBoardImage } from '@/components/stats/StatsBoardImage';
 import { fetchStatsSummary, type StatsSummary } from '@/data-sources/stats';
-import { useNavData } from '@/features/nav/NavDataContext';
+import { useNavData } from '@/features/nav/useNavData';
 import { StatsSummaryImage } from '@/components/stats/StatsSummaryImage';
 import { usePageTitle } from '@/shared/usePageTitle';
 import { getPrimaryDistrictId } from '@/shared/districtIds';
@@ -76,7 +76,7 @@ export function JoinInStatsPage() {
       targets.push({
         id: 'district',
         uniqueId: districtUniqueId,
-        caption: `${network.districtFullName ?? 'Local'} Area`,
+        caption: `${network?.districtFullName ?? 'Local'} Area`,
       });
     }
     targets.push({

@@ -10,22 +10,14 @@ const loadedCss = new Set<string>();
  */
 export async function loadMapsAssets() {
   await Promise.all([
-    ensureCss(
-      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-      'sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H',
-      'anonymous',
-    ),
+    ensureCss('https://cdn.litternetworks.org/3rd-party/leaflet/leaflet.css'),
     ensureCss(
       'https://cdn.litternetworks.org/css/maps.css',
       'sha384-zR6gXLggfih2rRvjpeSGoCPsqkFGPLPzxa58ww943ZomF9uVvTApN2tt0Is9tVgK',
       'anonymous',
     ),
   ]);
-  await ensureScript(
-    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-    'sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH',
-    'anonymous',
-  );
+  await ensureScript('https://cdn.litternetworks.org/3rd-party/leaflet/leaflet.js');
   await ensureScript(
     'https://cdn.litternetworks.org/js/maps.js',
     'sha384-fkne35iYTpuzOuGDCawh1eVhyYggV0aufzqHM1OodyIsPbjWVwrBgSoPt6ZN5c/o',

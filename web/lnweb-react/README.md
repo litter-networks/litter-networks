@@ -17,3 +17,12 @@
 ## Testing/maintenance
 - Keep Vitest + RTL suites focused on features/components by mocking `useNavigate`, `useNetworks`, `window.appApi`, or `fetch` as needed.
 - New helpers or context logic should update this README if they blur the `features` vs `data-sources` distinction.
+
+## Deployment
+- `npm run deploy` executes `sync_public.sh`, which lints, typechecks, runs Vitest, audits dependencies, builds the SPA, and then uploads `dist/` to S3 with metadata enforcement and targeted CloudFront invalidations (via `scripts/sync_s3_with_metadata.py`).
+- Required environment variables:
+  - `DEPLOY_BUCKET`: target bucket for the static assets (e.g., `lnweb-public`).
+  - `AWS_PROFILE`: defaults to `ln` if unset.
+- Optional environment variables:
+  - `DISTRIBUTION_ID`: when provided, CloudFront invalidations run for only the folders that changed.
+  - `SMOKE_TEST_URL`: URL to `curl` after deployment to confirm CDN freshness (e.g., `https://aws.litternetworks.org/`).

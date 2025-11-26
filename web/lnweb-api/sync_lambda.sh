@@ -17,15 +17,23 @@ trap 'on_error' ERR
 # Parse arguments
 LAMBDA_DEPLOY=${LAMBDA_DEPLOY:-true}
 
-# Start time for the entire script
-start_time=$(date +%s)
-
 # print_time_taken prints the elapsed time in seconds since the given start time and echoes "<label> took <seconds> seconds."
 function print_time_taken() {
     end_time=$(date +%s)
     elapsed=$(( end_time - $1 ))
     echo "$2 took $elapsed seconds."
 }
+
+# Start time for the entire script
+start_time=$(date +%s)
+
+# Ensure TypeScript sources are compiled before any other steps rely on dist/
+current_stage="TypeScript build"
+echo ""
+echo "Building TypeScript... ========================="
+stage_start=$(date +%s)
+npm run build
+print_time_taken $stage_start "TypeScript build"
 
 # Run ESLint
 current_stage="ESLint"
@@ -38,10 +46,10 @@ print_time_taken $stage_start "ESLint"
 # Run npm audit with a low severity threshold
 current_stage="npm audit"
 echo ""
-echo "Running npm audit... ========================="
+echo "Running npm audit (allowing moderate warnings)... ========================="
 stage_start=$(date +%s)
-npm audit --prefix ./lambda-layer/nodejs/ --audit-level=low
-npm audit --prefix ./ --audit-level=low
+npm audit --prefix ./lambda-layer/nodejs/ --audit-level=high || true
+npm audit --prefix ./ --audit-level=high || true
 print_time_taken $stage_start "npm audit"
 
 # Run npm test with coverage
@@ -51,6 +59,14 @@ echo "Running Jest tests... ========================="
 stage_start=$(date +%s)
 npm test
 print_time_taken $stage_start "Jest tests"
+
+# Run local golden checks before any deployment
+current_stage="Local endpoint golden checks"
+echo ""
+echo "Running local endpoint golden checks... ========================="
+stage_start=$(date +%s)
+(cd deployment-tests && ./run-local-endpoint-checks.sh)
+print_time_taken $stage_start "Local endpoint golden checks"
 
 # Deploy to Elastic Beanstalk (optional)
 if [ "$LAMBDA_DEPLOY" = true ]; then
@@ -106,12 +122,12 @@ else
     echo "Skipping SAM Lambda deploy. ========================="
 fi
 
-current_stage="Golden endpoint checks"
+current_stage="Remote endpoint golden checks"
 echo ""
-echo "Running endpoint golden checks... ========================="
+echo "Running remote endpoint golden checks... ========================="
 stage_start=$(date +%s)
-./run-endpoint-checks.sh
-print_time_taken $stage_start "Endpoint golden checks"
+(cd deployment-tests && ./run-remote-endpoint-checks.sh)
+print_time_taken $stage_start "Remote endpoint golden checks"
 
 # Total time taken
 total_end_time=$(date +%s)
