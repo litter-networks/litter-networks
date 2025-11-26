@@ -5,6 +5,8 @@ const networksInfo = require("../utils/networks-info.js");
 type BagsInfoRequest = Request<{ uniqueId: string }>;
 type SummaryRequest = Request<{ networkId?: string }>;
 
+type RouterHandler = (req: SummaryRequest, res: Response) => Promise<void>;
+
 function createSummaryHandler(): RouterHandler {
   return async (req: SummaryRequest, res: Response) => {
     try {
@@ -73,8 +75,6 @@ function createSummaryHandler(): RouterHandler {
     }
   };
 }
-
-type RouterHandler = (req: SummaryRequest, res: Response) => Promise<void>;
 
 function initializeRoutes(): Router {
   const router = express.Router();

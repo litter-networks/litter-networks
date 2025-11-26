@@ -132,13 +132,13 @@ class CloudfrontInvalidator:
         for target in targets:
             distribution_id = target.distribution_id
             paths = target.paths or ["/docs/*"]
-        caller_reference = f"lnwordtohtml-{distribution_id}-{uuid.uuid4().hex[:8]}"
-        logger.info(
-            "Requesting invalidation %s for %s (paths %s)",
-            caller_reference,
-            distribution_id,
-            paths,
-        )
+            caller_reference = f"lnwordtohtml-{distribution_id}-{uuid.uuid4().hex[:8]}"
+            logger.info(
+                "Requesting invalidation %s for %s (paths %s)",
+                caller_reference,
+                distribution_id,
+                paths,
+            )
             response = self.aws.cloudfront.create_invalidation(
                 DistributionId=distribution_id,
                 InvalidationBatch={
@@ -148,9 +148,7 @@ class CloudfrontInvalidator:
             )
             invalidation_id = response["Invalidation"]["Id"]
             waiter = self.aws.cloudfront.get_waiter("invalidation_completed")
-            invalidation_promises.append(
-                (distribution_id, invalidation_id, waiter)
-            )
+            invalidation_promises.append((distribution_id, invalidation_id, waiter))
 
         for distribution_id, invalidation_id, waiter in invalidation_promises:
             logger.info("Waiting for invalidation %s on %s to complete...", invalidation_id, distribution_id)

@@ -8,15 +8,7 @@ import { useEffect, useState } from 'react';
  * @returns Whether the query currently matches
  */
 export function useMediaQuery(query: string, defaultMatches = false): boolean {
-  const [matches, setMatches] = useState(() => {
-    if (typeof window === 'undefined') {
-      return defaultMatches;
-    }
-    if (typeof window.matchMedia !== 'function') {
-      return defaultMatches;
-    }
-    return window.matchMedia(query).matches;
-  });
+  const [matches, setMatches] = useState(defaultMatches);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -26,9 +18,22 @@ export function useMediaQuery(query: string, defaultMatches = false): boolean {
       return;
     }
     const mediaQueryList = window.matchMedia(query);
+    // Update to current match once we're on the client even though the hook initialized with defaultMatches.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMatches(mediaQueryList.matches);
+
     const updateMatches = (event: MediaQueryListEvent) => setMatches(event.matches);
-    mediaQueryList.addEventListener('change', updateMatches);
-    return () => mediaQueryList.removeEventListener('change', updateMatches);
+    if (typeof mediaQueryList.addEventListener === 'function') {
+      mediaQueryList.addEventListener('change', updateMatches);
+      return () => mediaQueryList.removeEventListener('change', updateMatches);
+    }
+
+    if (typeof mediaQueryList.addListener === 'function') {
+      mediaQueryList.addListener(updateMatches);
+      return () => mediaQueryList.removeListener(updateMatches);
+    }
+
+    return undefined;
   }, [query]);
 
   return matches;

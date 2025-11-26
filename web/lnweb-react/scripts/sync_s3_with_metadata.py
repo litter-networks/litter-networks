@@ -17,7 +17,7 @@ from urllib.error import URLError
 from urllib.parse import urljoin, urlparse
 
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, WaiterError
 
 ALLOWED_EXTENSIONS = {
     ".css",
@@ -226,12 +226,25 @@ def _invalidate_cloudfront() -> None:
                 "CallerReference": f"lnweb-react-{datetime.now(timezone.utc).timestamp()}",
             },
         )
-        invalidation_id = invalidation["Invalidation"]["Id"]
-        waiter = cloudfront_client.get_waiter("invalidation_completed")
-        waiter.wait(DistributionId=DISTRIBUTION_ID, Id=invalidation_id)
-        print(f"[cf] invalidation {invalidation_id} completed")
     except ClientError as exc:  # pragma: no cover - network failure
         print(f"[cf] invalidation failed: {exc}")
+        _mark_error()
+        return
+
+    invalidation_id = invalidation["Invalidation"]["Id"]
+    waiter = cloudfront_client.get_waiter("invalidation_completed")
+    try:
+        waiter.wait(
+            DistributionId=DISTRIBUTION_ID,
+            Id=invalidation_id,
+            WaiterConfig={"Delay": 10, "MaxAttempts": 30},
+        )
+        print(f"[cf] invalidation {invalidation_id} completed")
+    except WaiterError as exc:
+        print(f"[cf] invalidation {invalidation_id} did not complete within the configured wait: {exc}")
+        _mark_error()
+    except ClientError as exc:  # pragma: no cover - network failure
+        print(f"[cf] invalidation wait failed: {exc}")
         _mark_error()
 
 
