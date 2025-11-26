@@ -262,7 +262,16 @@ function FilterMenu({
   headerColorClass: string;
   searchColorClass: string;
 }) {
-  const { networks, network, buildPath, nearbyNetworks } = useNavData();
+  const {
+    networks,
+    network,
+    buildPath,
+    nearbyNetworks,
+    recentNetworks,
+    favoriteNetworks,
+    toggleFavorite,
+    isFavorite,
+  } = useNavData();
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const trimmedTerm = searchTerm.trim().toLowerCase();
@@ -316,6 +325,28 @@ function FilterMenu({
 
   const hasResults = trimmedTerm.length > 0 && filteredNetworks.length > 0;
 
+  const renderNetworkItem = (item: (typeof networks)[number], keyPrefix?: string, meta?: string) => (
+    <li key={`${keyPrefix ?? 'net'}-${item.uniqueId}`} className={styles.menuItemRow}>
+      <Link to={buildNetworkSwitchPath(item.uniqueId)} className={styles.menuItemLink} onClick={onRequestClose}>
+        <img className={styles.navbarBrandLogo} src="/brand/logo-only.svg" alt="Litter Networks logo" />
+        <span className={styles.menuItemLabel}>{item.fullName ?? item.uniqueId}</span>
+        {meta && <span className={styles.distanceMeta}>{meta}</span>}
+      </Link>
+      <button
+        type="button"
+        className={`${styles.favButton} ${isFavorite(item.uniqueId) ? styles.favButtonActive : ''}`}
+        aria-label={isFavorite(item.uniqueId) ? 'Remove from favourites' : 'Add to favourites'}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          toggleFavorite(item.uniqueId);
+        }}
+      >
+        {isFavorite(item.uniqueId) ? '★' : '☆'}
+      </button>
+    </li>
+  );
+
   return (
     <ul className={`${styles.filterMenu} ${open ? styles.filterMenuOpen : ''} ${headerColorClass}`}>
       <li className={styles.filterSearch}>
@@ -330,32 +361,35 @@ function FilterMenu({
       <li>
         <span className={`${styles.menuLabel} ${!hasResults ? styles.hidden : ''}`}>search results:</span>
       </li>
-      {filteredNetworks.map((item) => (
-        <li key={item.uniqueId}>
-          <Link to={buildNetworkSwitchPath(item.uniqueId)} className={styles.menuItemLink} onClick={onRequestClose}>
-            <img className={styles.navbarBrandLogo} src="/brand/logo-only.svg" alt="Litter Networks logo" />
-            {item.fullName ?? item.uniqueId}
-          </Link>
-        </li>
-      ))}
+      {filteredNetworks.map((item) => renderNetworkItem(item, 'search'))}
+      {favoriteNetworks.length > 0 && (
+        <>
+          <li>
+            <span className={styles.menuLabel}>favourites:</span>
+          </li>
+          {favoriteNetworks.map((item) => renderNetworkItem(item, 'fav'))}
+        </>
+      )}
+      {recentNetworks.length > 0 && (
+        <>
+          <li>
+            <span className={styles.menuLabel}>recent:</span>
+          </li>
+          {recentNetworks.map((item) => renderNetworkItem(item, 'recent'))}
+        </>
+      )}
       {network && nearbyNetworks.length > 0 && (
         <>
           <li>
             <span className={styles.menuLabel}>nearby:</span>
           </li>
-          {nearbyNetworks.map((nearby) => (
-            <li key={`${network.uniqueId}-${nearby.uniqueId}`}>
-              <Link
-                to={buildNetworkSwitchPath(nearby.uniqueId)}
-                className={styles.menuItemLink}
-                onClick={onRequestClose}
-              >
-                <img className={styles.navbarBrandLogo} src="/brand/logo-only.svg" alt="Litter Networks logo" />
-                {nearby.fullName ?? nearby.uniqueId}
-                {nearby.roundedDistance != null ? ` (${nearby.roundedDistance} miles)` : ''}
-              </Link>
-            </li>
-          ))}
+          {nearbyNetworks.map((nearby) =>
+            renderNetworkItem(
+              nearby,
+              'nearby',
+              nearby.roundedDistance != null ? `${nearby.roundedDistance} miles` : undefined,
+            ),
+          )}
         </>
       )}
       <li>

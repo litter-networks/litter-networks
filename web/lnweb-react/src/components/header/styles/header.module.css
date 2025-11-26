@@ -239,11 +239,46 @@
   text-decoration: none;
   font-size: 16px;
   padding: 8px 12px;
+  flex: 1 1 auto;
 }
 
 .menuItemLink:hover {
   box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.18);
   border-radius: 10px;
+}
+
+.menuItemRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.menuItemLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.favButton {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 6px 8px;
+  line-height: 1;
+  font-size: 20px;
+  transition: color 0.15s ease, transform 0.15s ease;
+  min-width: 32px;
+  margin-left: auto;
+}
+
+.favButton:hover {
+  color: white;
+  transform: scale(1.05);
+}
+
+.favButtonActive {
+  color: gold;
 }
 
 .distanceMeta {

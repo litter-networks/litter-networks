@@ -10,6 +10,10 @@ export interface NavData {
   networks: Network[];
   loading: boolean;
   nearbyNetworks: NearbyNetwork[];
+  recentNetworks: Network[];
+  favoriteNetworks: Network[];
+  toggleFavorite: (id: string) => void;
+  isFavorite: (id: string) => boolean;
 }
 
 export const NavDataContext = createContext<NavData | undefined>(undefined);

@@ -18,6 +18,7 @@ vi.mock('@/data-sources/networks', () => ({
 describe('NavDataProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
   });
 
   it('provides context derived from the selected network and fetches nearby networks', async () => {
@@ -49,8 +50,42 @@ describe('NavDataProvider', () => {
     expect(result.current.displayName).toBe('Test Network Litter Network');
     expect(result.current.facebookLink).toBe(`https://www.facebook.com/groups/${network.uniqueId}`);
     expect(result.current.buildPath('join-in')).toBe('/short/join-in');
+    expect(result.current.recentNetworks).toEqual([network]);
+    expect(result.current.favoriteNetworks).toEqual([]);
+    expect(result.current.isFavorite(network.uniqueId)).toBe(false);
     expect(mockFetchNearbyNetworks).toHaveBeenCalledWith(network.uniqueId, expect.any(AbortSignal));
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('excludes favourites from recent list', async () => {
+    const { NavDataProvider } = await import('../NavDataContext');
+    const { useNavData } = await import('../useNavData');
+
+    const networkA = { uniqueId: 'net-a', shortId: 'a', fullName: 'Network A' };
+    const networkB = { uniqueId: 'net-b', shortId: 'b', fullName: 'Network B' };
+    mockUseNetworks.mockReturnValue({ networks: [networkA, networkB], loading: false });
+    mockFetchNearbyNetworks.mockResolvedValue([]);
+
+    window.localStorage.setItem(
+      'ln.network-usage',
+      JSON.stringify({
+        [networkA.uniqueId]: { visits: 10, lastVisited: 1 },
+        [networkB.uniqueId]: { visits: 2, lastVisited: 2 },
+      }),
+    );
+    window.localStorage.setItem('ln.network-favorites', JSON.stringify([networkA.uniqueId]));
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <NavDataProvider filterStringParam={networkB.uniqueId}>{children}</NavDataProvider>
+    );
+
+    const { result } = renderHook(() => useNavData(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.favoriteNetworks.map((n) => n?.uniqueId)).toEqual(['net-a']);
+    });
+
+    expect(result.current.recentNetworks.map((n) => n.uniqueId)).toEqual(['net-b']);
   });
 
   it('redirects to /all when filterStringParam is missing', async () => {
