@@ -10,10 +10,9 @@
 }
 
 .overlayControls {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 12px;
-  width: auto;
   pointer-events: none;
 }
 

@@ -33,6 +33,9 @@ export function JoinInDistrictList({
         <div className={styles.districtList}>
           {groupedDistricts.map((group) => {
             const isOpen = expandedDistricts.has(group.id);
+            const networkCount = group.networks.length;
+            const networkVerb = networkCount === 1 ? 'is' : 'are';
+            const networkLabel = networkCount === 1 ? 'Litter Network' : 'Litter Networks';
             return (
               <div key={group.id} className={`${styles.districtCard} ${isOpen ? styles.districtCardOpen : ''}`}>
                 <button
@@ -42,16 +45,23 @@ export function JoinInDistrictList({
                   aria-expanded={isOpen}
                 >
                   <span className={styles.districtName}>{group.name}</span>
-                  <span className={styles.districtCount}>{group.networks.length} networks</span>
-                  <span className={styles.districtChevron} aria-hidden="true">
-                    {isOpen ? '▾' : '▸'}
+                  <span className={styles.districtMeta}>
+                    <span className={styles.districtCount}>{group.networks.length} networks</span>
+                    <img
+                      src="/images/dropdown-icon.png"
+                      alt=""
+                      aria-hidden="true"
+                      className={`${styles.districtDropdownIcon} ${
+                        isOpen ? styles.districtDropdownIconOpen : ''
+                      }`}
+                    />
                   </span>
                 </button>
                 {isOpen && (
                   <ul className={styles.networkList}>
                     <li className={styles.districtIntro}>
                       <p>
-                        This is the area covered by{" "}
+                        There {networkVerb} currently <b>{networkCount}</b> {networkLabel} in {group.name}.  The whole area is covered by{' '}
                         {group.councilUrl ? (
                           <a
                             href={group.councilUrl}
@@ -59,20 +69,19 @@ export function JoinInDistrictList({
                             rel="noreferrer"
                             className={styles.councilLinkButton}
                           >
-                            {group.councilName ?? `${group.name} Council`}
                             <img
                               src="https://cdn.litternetworks.org/images/icon-external-link.svg"
                               alt=""
                               aria-hidden="true"
                               className={styles.externalIcon}
                             />
+                            {group.councilName ?? `${group.name} Council`}
                           </a>
                         ) : (
                           group.councilName ?? `${group.name} Council`
                         )}
                         .
                       </p>
-                      <p>There are currently {group.networks.length} Litter Networks in {group.name}.</p>
                     </li>
                     {group.networks
                       .slice()
