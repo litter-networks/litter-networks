@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { DistrictGroup } from '@/pages/join-in/choose-types';
 import type { ViewMode } from '@/pages/join-in/components/ChooserWidget';
 import styles from '@/pages/join-in/styles/join-in-choose.module.css';
@@ -23,6 +24,19 @@ export function JoinInDistrictList({
   totalNetworks,
   totalDistricts,
 }: Props) {
+  const previousViewModeRef = useRef<ViewMode>(viewMode);
+
+  useEffect(() => {
+    const switchedToList = viewMode === 'list' && previousViewModeRef.current !== 'list';
+    previousViewModeRef.current = viewMode;
+    if (!switchedToList || !selectedNetworkId) return;
+
+    const selectedButton = document.querySelector<HTMLElement>(`[data-net-id="${selectedNetworkId}"]`);
+    if (selectedButton) {
+      selectedButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [viewMode, selectedNetworkId]);
+
   if (viewMode !== 'list') return null;
   return (
     <div className={styles.listSurface}>
@@ -71,6 +85,7 @@ export function JoinInDistrictList({
                         <li key={net.uniqueId}>
                           <button
                             type="button"
+                            data-net-id={net.uniqueId}
                             className={`${styles.networkButton} ${
                               selectedNetworkId === net.uniqueId ? styles.networkButtonActive : ''
                             }`}
