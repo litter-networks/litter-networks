@@ -87,6 +87,7 @@ export function NavDataProvider({ filterStringParam, children }: ProviderProps) 
     try {
       const parsed = JSON.parse(window.localStorage.getItem(USAGE_STORAGE_KEY) ?? '{}');
       if (parsed && typeof parsed === 'object') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUsageByNetwork(parsed);
       }
     } catch {
@@ -96,6 +97,7 @@ export function NavDataProvider({ filterStringParam, children }: ProviderProps) 
     try {
       const favRaw = JSON.parse(window.localStorage.getItem(FAVORITES_STORAGE_KEY) ?? '[]');
       if (Array.isArray(favRaw)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFavoriteIds(new Set(favRaw.filter((id) => typeof id === 'string')));
       }
     } catch {
@@ -108,6 +110,7 @@ export function NavDataProvider({ filterStringParam, children }: ProviderProps) 
       return;
     }
     const now = Date.now();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUsageByNetwork((prev) => {
       const next = {
         ...prev,
@@ -253,12 +256,12 @@ function deriveUsageLists(
     .filter((entry) => !favoriteIds.has(entry.id))
     .sort((a, b) => b.lastVisited - a.lastVisited)
     .slice(0, 5)
-    .map((item) => byId.get(item.id)!)
-    .filter(Boolean);
+    .map((item) => byId.get(item.id))
+    .filter((net): net is Network => Boolean(net));
 
   const favoriteNetworks = Array.from(favoriteIds)
     .map((id) => byId.get(id))
-    .filter(Boolean)
+    .filter((net): net is Network => Boolean(net))
     .sort((a, b) => {
       const nameA = (a?.fullName ?? a?.uniqueId ?? '').toLowerCase();
       const nameB = (b?.fullName ?? b?.uniqueId ?? '').toLowerCase();

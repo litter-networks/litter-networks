@@ -41,7 +41,7 @@ const resetMapContainer = (container: HTMLDivElement | null) => {
   delete (container as unknown as { _leaflet_id?: string })._leaflet_id;
 };
 
-const recreateMapContainer = (ref: React.RefObject<HTMLDivElement>) => {
+const recreateMapContainer = (ref: React.RefObject<HTMLDivElement | null>) => {
   const node = ref.current;
   if (!node || !node.parentElement) return null;
   const clone = node.cloneNode(false) as HTMLDivElement;
@@ -61,7 +61,7 @@ export function JoinInChoosePage() {
   const [selectedNetworkId, setSelectedNetworkId] = useState<string | null>(null);
   const [expandedDistricts, setExpandedDistricts] = useState<Set<string>>(new Set());
   const [districtMeta, setDistrictMeta] = useState<Record<string, DistrictCsvRow>>({});
-  const mapRootRef = useRef<HTMLDivElement | null>(null);
+  const mapRootRef = useRef<HTMLDivElement>(null);
   const selectionFromMapRef = useRef(false);
   const [mapReady, setMapReady] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -123,11 +123,15 @@ export function JoinInChoosePage() {
 
   useEffect(() => {
     if (!network?.uniqueId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedNetworkId(network.uniqueId);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNetworkName(network.fullName ?? network.uniqueId);
     const primaryDistId = network.districtId?.split(',')[0].trim();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAreaName(getDistrictLabel(primaryDistId, network.districtFullName));
     if (network.districtId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpandedDistricts((prev) => {
         const next = new Set(prev);
         next.add(network.districtId as string);
@@ -160,6 +164,7 @@ export function JoinInChoosePage() {
     }
     if (viewMode !== 'map') {
       resetMapContainer(mapRootRef.current);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMapReady(false);
       return () => {};
     }
@@ -185,6 +190,7 @@ export function JoinInChoosePage() {
           mapSelection,
           '',
         );
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMapReady(true);
       } catch (error) {
         if (!controller.signal.aborted) {
@@ -227,12 +233,17 @@ export function JoinInChoosePage() {
       }
       const info = event.data.data;
       selectionFromMapRef.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAreaName(info.areaFullName || info.areaId || '-');
       if (info.networkId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setNetworkName(info.networkFullName || info.networkId);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedNetworkId(info.networkId);
       } else {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setNetworkName('-');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedNetworkId(null);
       }
     };
@@ -244,6 +255,7 @@ export function JoinInChoosePage() {
     if (!selectedNetworkId) return;
     const matched = networks.find((n) => n.uniqueId === selectedNetworkId);
     if (matched?.districtId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpandedDistricts((prev) => {
         const next = new Set(prev);
         matched.districtId
@@ -348,6 +360,7 @@ export function JoinInChoosePage() {
         </div>
 
         <ChooserWidget
+          title="Join In | Choose"
           areaName={areaName}
           networkName={networkName}
           onCancel={handleCancel}

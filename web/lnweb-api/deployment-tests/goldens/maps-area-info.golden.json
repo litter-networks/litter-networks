@@ -1,1 +1,603 @@
-{"areaInfo":[{"mapName":"knowsley","mapStyle":"zone-style-2","uniqueId":"knowsley","fullName":"Knowsley","networks":[]},{"mapName":"wigan","mapStyle":"zone-style-1","uniqueId":"wigan","fullName":"Wigan","networks":[{"uniqueId":"worsleymesneslitter","fullName":"Worsley Mesnes","mapSource":"wards","mapFile":"worsley_mesnes_e05015013.json"}]},{"mapName":"st_helens","mapStyle":"zone-style-4","uniqueId":"sthelens","fullName":"St Helens","networks":[{"uniqueId":"parrlitter","fullName":"Parr","mapSource":"wards","mapFile":"parr_e05014128.json"},{"uniqueId":"ecclestonlitter","fullName":"Eccleston","mapSource":"wards","mapFile":"eccleston_e05014123.json"},{"uniqueId":"sthelenslitter","fullName":"St Helens Centre","mapSource":"wards","mapFile":"st_helens_town_centre_e05014132.json"},{"uniqueId":"sankeycanallitter","fullName":"Sankey Canal","mapSource":"custom","mapFile":"sankeycanallitter.json"},{"uniqueId":"blackbrooklitter","fullName":"Blackbrook","mapSource":"wards","mapFile":"blackbrook_e05014121.json"},{"uniqueId":"westparklitter","fullName":"West Park","mapSource":"wards","mapFile":"west_park_e05014136.json"},{"uniqueId":"mossbanklitter","fullName":"Moss Bank","mapSource":"wards","mapFile":"moss_bank_e05014125.json"}]},{"mapName":"cheshire_west_and_chester","mapStyle":"zone-style-2","uniqueId":"cheshirewest","fullName":"Cheshire West and Chester","networks":[{"uniqueId":"hoolelitter","fullName":"Newton & Hoole","mapSource":"wards","mapFile":"newton_&_hoole_e05012228.json"},{"uniqueId":"riverweaverlitter","fullName":"River Weaver","mapSource":"custom","mapFile":"-"},{"uniqueId":"helsbylitter","fullName":"Helsby","mapSource":"parishes","mapFile":"helsby_e04011112.json"},{"uniqueId":"frodshamlitter","fullName":"Frodsham","mapSource":"parishes","mapFile":"frodsham_e04012539.json"}]},{"mapName":"manchester","mapStyle":"zone-style-2","uniqueId":"manchester","fullName":"Manchester","networks":[{"uniqueId":"manchesterlitter","fullName":"Manchester Central","mapSource":"custom","mapFile":"-"},{"uniqueId":"baguleylitter","fullName":"Baguley","mapSource":"wards","mapFile":"baguley_e05011352.json"}]},{"mapName":"warrington","mapStyle":"zone-style-3","uniqueId":"warrington","fullName":"Warrington","networks":[{"uniqueId":"whitecrosslitter","fullName":"Whitecross","mapSource":"custom","mapFile":"-"},{"uniqueId":"westbrookandcallandslitter","fullName":"Westbrook and Callands","mapSource":"wards","mapFile":"westbrook_e05011045.json"},{"uniqueId":"woolstonlitter","fullName":"Woolston","mapSource":"parishes","mapFile":"woolston_e04000336.json"},{"uniqueId":"warringtoncentrelitter","fullName":"Warrington Centre","mapSource":"custom","mapFile":"-"},{"uniqueId":"dallamlitternetwork","fullName":"Dallam","mapSource":"custom","mapFile":"-"},{"uniqueId":"tptwarrington","fullName":"Trans Pennine Trail Warrington","mapSource":"custom","mapFile":"-"},{"uniqueId":"greatsankeylitter","fullName":"Great Sankey","mapSource":"parishes","mapFile":"great_sankey_e04000326.json"},{"uniqueId":"sankeycanallitter","fullName":"Sankey Canal","mapSource":"custom","mapFile":"sankeycanallitter.json"},{"uniqueId":"appletonlitter","fullName":"Appleton","mapSource":"parishes","mapFile":"appleton_e04000319.json"},{"uniqueId":"winwicklitter","fullName":"Winwick","mapSource":"custom","mapFile":"-"},{"uniqueId":"orfordlitter","fullName":"Orford, Poplars and Hulme","mapSource":"custom","mapFile":"-"},{"uniqueId":"fairfieldandhowleylitter","fullName":"Fairfield and Howley","mapSource":"wards","mapFile":"fairfield_and_howley_e05011030.json"},{"uniqueId":"croftlitter","fullName":"Croft","mapSource":"parishes","mapFile":"croft_e04000322.json"},{"uniqueId":"poultonfearnheadlitter","fullName":"Poulton-with-Fearnhead","mapSource":"parishes","mapFile":"poulton-with-fearnhead_e04000330.json"},{"uniqueId":"strettonlitter","fullName":"Stretton","mapSource":"parishes","mapFile":"stretton_e04000333.json"},{"uniqueId":"penkethcuerdleylitter","fullName":"Penketh and Cuerdley","mapSource":"wards","mapFile":"penketh_and_cuerdley_e05011039.json"},{"uniqueId":"grappenhallandthelwall","fullName":"Grappenhall and Thelwall","mapSource":"parishes","mapFile":"grappenhall_and_thelwall_e04000325.json"},{"uniqueId":"waltonparishlitter","fullName":"Walton Parish","mapSource":"parishes","mapFile":"walton_e04000334.json"},{"uniqueId":"stocktonheathlitter","fullName":"Stockton Heath","mapSource":"wards","mapFile":"stockton_heath_e05011044.json"},{"uniqueId":"bewseylitter","fullName":"Bewsey","mapSource":"custom","mapFile":"-"},{"uniqueId":"latchfordlitter","fullName":"Latchford","mapSource":"custom","mapFile":"-"},{"uniqueId":"lymmlitter","fullName":"Lymm","mapSource":"parishes","mapFile":"lymm_e04000328.json"},{"uniqueId":"birchwoodlitter","fullName":"Birchwood","mapSource":"parishes","mapFile":"birchwood_e04000320.json"}]},{"mapName":"wirral","mapStyle":"zone-style-4","uniqueId":"wirral","fullName":"Wirral","networks":[{"uniqueId":"bromboroughlitter","fullName":"Bromborough","mapSource":"wards","mapFile":"bromborough_e05000957.json"},{"uniqueId":"westkirbylitter","fullName":"West Kirby","mapSource":"custom","mapFile":"-"}]},{"mapName":"liverpool","mapStyle":"zone-style-3","uniqueId":"liverpool","fullName":"Liverpool","networks":[{"uniqueId":"liverpoolcentrallitter","fullName":"Liverpool Central","mapSource":"custom","mapFile":"-"},{"uniqueId":"wavertreevillagelitter","fullName":"Wavertree Village","mapSource":"wards","mapFile":"wavertree_village_e05015335.json"},{"uniqueId":"knottyashdovecotparklitter","fullName":"Knotty Ash & Dovecot Park","mapSource":"wards","mapFile":"knotty_ash_&_dovecot_park_e05015311.json"},{"uniqueId":"kirkdalelitter","fullName":"Kirkdale","mapSource":"custom","mapFile":"-"},{"uniqueId":"norrisgreenlitter","fullName":"Norris Green","mapSource":"wards","mapFile":"norris_green_e05015314.json"},{"uniqueId":"orrellparklitter","fullName":"Orrell Park","mapSource":"wards","mapFile":"orrell_park_e05015317.json"},{"uniqueId":"seftonparklitter","fullName":"Sefton Park","mapSource":"wards","mapFile":"sefton_park_e05015321.json"},{"uniqueId":"aigburthlitter","fullName":"Aigburth","mapSource":"wards","mapFile":"aigburth_e05015277.json"},{"uniqueId":"vauxhalllitter","fullName":"Vauxhall","mapSource":"wards","mapFile":"vauxhall_e05015330.json"},{"uniqueId":"fazakerleylitter","fullName":"Fazakerley","mapSource":"custom","mapFile":"fazakerley.json"},{"uniqueId":"evertoneastlitter","fullName":"Everton East","mapSource":"wards","mapFile":"everton_east_e05015297.json"},{"uniqueId":"evertonwestlitter","fullName":"Everton West","mapSource":"wards","mapFile":"everton_west_e05015299.json"},{"uniqueId":"sandfieldparklitter","fullName":"Sandfield Park","mapSource":"wards","mapFile":"sandfield_park_e05015320.json"},{"uniqueId":"waltonlitter","fullName":"Walton","mapSource":"wards","mapFile":"walton_e05015331.json"},{"uniqueId":"countywardlitter","fullName":"County Ward","mapSource":"wards","mapFile":"county_e05015292.json"},{"uniqueId":"anfieldlitter","fullName":"Anfield","mapSource":"wards","mapFile":"anfield_e05015279.json"},{"uniqueId":"clubmoorwestlitter","fullName":"Clubmoor West","mapSource":"wards","mapFile":"clubmoor_west_e05015291.json"},{"uniqueId":"evertonnorthlitter","fullName":"Everton North","mapSource":"wards","mapFile":"everton_north_e05015298.json"},{"uniqueId":"kensingtonfairfieldlitter","fullName":"Kensington & Fairfield","mapSource":"wards","mapFile":"kensington_&_fairfield_e05015308.json"},{"uniqueId":"wavertreegardenlitter","fullName":"Wavertree Garden Suburb","mapSource":"wards","mapFile":"wavertree_garden_suburb_e05015334.json"},{"uniqueId":"tuebrooklitter","fullName":"Tuebrook & Stoneycroft","mapSource":"wards","mapFile":"stoneycroft_e05015326.json"}]},{"mapName":"sefton","mapStyle":"zone-style-4","uniqueId":"sefton","fullName":"Sefton","networks":[{"uniqueId":"linacrelitternetwork","fullName":"Linacre","mapSource":"wards","mapFile":"linacre_e05000942.json"}]},{"mapName":"stockport","mapStyle":"zone-style-4","uniqueId":"stockport","fullName":"Stockport","networks":[{"uniqueId":"bredburywoodleylitter","fullName":"Bredbury and Woodley","mapSource":"wards","mapFile":"bredbury_&_woodley_e05015016.json"}]},{"mapName":"cheshire_east","mapStyle":"zone-style-1","uniqueId":"cheshireeast","fullName":"Cheshire East","networks":[{"uniqueId":"riverweaverlitter","fullName":"River Weaver","mapSource":"custom","mapFile":"-"}]},{"mapName":"halton","mapStyle":"zone-style-1","uniqueId":"halton","fullName":"Halton","networks":[{"uniqueId":"wiggislandlitter","fullName":"Wigg Island","mapSource":"custom","mapFile":"-"},{"uniqueId":"haltonviewlitter","fullName":"Halton View","mapSource":"wards","mapFile":"halton_view_e05013181.json"},{"uniqueId":"houghgreenlitter","fullName":"Hough Green","mapSource":"wards","mapFile":"hough_green_e05013183.json"},{"uniqueId":"oldtownlitter","fullName":"Runcorn Old Town","mapSource":"custom","mapFile":"-"},{"uniqueId":"dittonlitter","fullName":"Ditton","mapSource":"wards","mapFile":"ditton,_hale_village_&_halebank_e05013176.json"},{"uniqueId":"sankeycanallitter","fullName":"Sankey Canal","mapSource":"custom","mapFile":"sankeycanallitter.json"},{"uniqueId":"brookvalelitter","fullName":"Brookvale","mapSource":"custom","mapFile":"-"},{"uniqueId":"haddockswoodlitter","fullName":"Haddocks Wood","mapSource":"custom","mapFile":"haddockswood.json"},{"uniqueId":"sandymoorlitter","fullName":"Sandymoor","mapSource":"parishes","mapFile":"sandymoor_e04000318.json"},{"uniqueId":"windmillhillwoodlitter","fullName":"Windmill Hill Wood","mapSource":"custom","mapFile":"-"},{"uniqueId":"daresburylitter","fullName":"Daresbury","mapSource":"parishes","mapFile":"daresbury_e04000313.json"},{"uniqueId":"haltonlealitter","fullName":"Halton Lea","mapSource":"custom","mapFile":"haltonlealitter.json"},{"uniqueId":"murdishawlitter","fullName":"Murdishaw","mapSource":"custom","mapFile":"-"},{"uniqueId":"castlefieldslitter","fullName":"Castlefields","mapSource":"custom","mapFile":"castlefieldslitter.json"},{"uniqueId":"haltonbrooklitter","fullName":"Halton Brook","mapSource":"custom","mapFile":"haltonbrook.json"},{"uniqueId":"grangelitter","fullName":"Grange","mapSource":"wards","mapFile":"grange_e05013178.json"},{"uniqueId":"centralwestbanklitter","fullName":"Widnes Central & West Bank","mapSource":"wards","mapFile":"central_&_west_bank_e05013174.json"},{"uniqueId":"moorelitter","fullName":"Moore","mapSource":"parishes","mapFile":"moore_e04000315.json"},{"uniqueId":"appletonwidneslitter","fullName":"Appleton","mapSource":"wards","mapFile":"appleton_e05013169.json"},{"uniqueId":"runcornhill","fullName":"Runcorn Hill","mapSource":"custom","mapFile":"runcornhill.json"},{"uniqueId":"manorparklitter","fullName":"Manor Park","mapSource":"custom","mapFile":"manorparklitter.json"}]}]}
+{
+  "areaInfo": [
+    {
+      "mapName": "knowsley",
+      "mapStyle": "zone-style-2",
+      "uniqueId": "knowsley",
+      "fullName": "Knowsley",
+      "networks": []
+    },
+    {
+      "mapName": "wigan",
+      "mapStyle": "zone-style-1",
+      "uniqueId": "wigan",
+      "fullName": "Wigan",
+      "networks": [
+        {
+          "uniqueId": "worsleymesneslitter",
+          "fullName": "Worsley Mesnes",
+          "mapSource": "wards",
+          "mapFile": "worsley_mesnes_e05015013.json"
+        }
+      ]
+    },
+    {
+      "mapName": "st_helens",
+      "mapStyle": "zone-style-4",
+      "uniqueId": "sthelens",
+      "fullName": "St Helens",
+      "networks": [
+        {
+          "uniqueId": "parrlitter",
+          "fullName": "Parr",
+          "mapSource": "wards",
+          "mapFile": "parr_e05014128.json"
+        },
+        {
+          "uniqueId": "ecclestonlitter",
+          "fullName": "Eccleston",
+          "mapSource": "wards",
+          "mapFile": "eccleston_e05014123.json"
+        },
+        {
+          "uniqueId": "sthelenslitter",
+          "fullName": "St Helens Centre",
+          "mapSource": "wards",
+          "mapFile": "st_helens_town_centre_e05014132.json"
+        },
+        {
+          "uniqueId": "sankeycanallitter",
+          "fullName": "Sankey Canal",
+          "mapSource": "custom",
+          "mapFile": "sankeycanallitter.json"
+        },
+        {
+          "uniqueId": "blackbrooklitter",
+          "fullName": "Blackbrook",
+          "mapSource": "wards",
+          "mapFile": "blackbrook_e05014121.json"
+        },
+        {
+          "uniqueId": "westparklitter",
+          "fullName": "West Park",
+          "mapSource": "wards",
+          "mapFile": "west_park_e05014136.json"
+        },
+        {
+          "uniqueId": "mossbanklitter",
+          "fullName": "Moss Bank",
+          "mapSource": "wards",
+          "mapFile": "moss_bank_e05014125.json"
+        }
+      ]
+    },
+    {
+      "mapName": "cheshire_west_and_chester",
+      "mapStyle": "zone-style-2",
+      "uniqueId": "cheshirewest",
+      "fullName": "Cheshire West and Chester",
+      "networks": [
+        {
+          "uniqueId": "hoolelitter",
+          "fullName": "Newton & Hoole",
+          "mapSource": "wards",
+          "mapFile": "newton_&_hoole_e05012228.json"
+        },
+        {
+          "uniqueId": "riverweaverlitter",
+          "fullName": "River Weaver",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "helsbylitter",
+          "fullName": "Helsby",
+          "mapSource": "parishes",
+          "mapFile": "helsby_e04011112.json"
+        },
+        {
+          "uniqueId": "frodshamlitter",
+          "fullName": "Frodsham",
+          "mapSource": "parishes",
+          "mapFile": "frodsham_e04012539.json"
+        }
+      ]
+    },
+    {
+      "mapName": "manchester",
+      "mapStyle": "zone-style-2",
+      "uniqueId": "manchester",
+      "fullName": "Manchester",
+      "networks": [
+        {
+          "uniqueId": "manchesterlitter",
+          "fullName": "Manchester Central",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "baguleylitter",
+          "fullName": "Baguley",
+          "mapSource": "wards",
+          "mapFile": "baguley_e05011352.json"
+        }
+      ]
+    },
+    {
+      "mapName": "warrington",
+      "mapStyle": "zone-style-3",
+      "uniqueId": "warrington",
+      "fullName": "Warrington",
+      "networks": [
+        {
+          "uniqueId": "whitecrosslitter",
+          "fullName": "Whitecross",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "westbrookandcallandslitter",
+          "fullName": "Westbrook and Callands",
+          "mapSource": "wards",
+          "mapFile": "westbrook_e05011045.json"
+        },
+        {
+          "uniqueId": "woolstonlitter",
+          "fullName": "Woolston",
+          "mapSource": "parishes",
+          "mapFile": "woolston_e04000336.json"
+        },
+        {
+          "uniqueId": "warringtoncentrelitter",
+          "fullName": "Warrington Centre",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "dallamlitternetwork",
+          "fullName": "Dallam",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "tptwarrington",
+          "fullName": "Trans Pennine Trail Warrington",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "greatsankeylitter",
+          "fullName": "Great Sankey",
+          "mapSource": "parishes",
+          "mapFile": "great_sankey_e04000326.json"
+        },
+        {
+          "uniqueId": "sankeycanallitter",
+          "fullName": "Sankey Canal",
+          "mapSource": "custom",
+          "mapFile": "sankeycanallitter.json"
+        },
+        {
+          "uniqueId": "appletonlitter",
+          "fullName": "Appleton",
+          "mapSource": "parishes",
+          "mapFile": "appleton_e04000319.json"
+        },
+        {
+          "uniqueId": "winwicklitter",
+          "fullName": "Winwick",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "orfordlitter",
+          "fullName": "Orford, Poplars and Hulme",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "fairfieldandhowleylitter",
+          "fullName": "Fairfield and Howley",
+          "mapSource": "wards",
+          "mapFile": "fairfield_and_howley_e05011030.json"
+        },
+        {
+          "uniqueId": "croftlitter",
+          "fullName": "Croft",
+          "mapSource": "parishes",
+          "mapFile": "croft_e04000322.json"
+        },
+        {
+          "uniqueId": "poultonfearnheadlitter",
+          "fullName": "Poulton-with-Fearnhead",
+          "mapSource": "parishes",
+          "mapFile": "poulton-with-fearnhead_e04000330.json"
+        },
+        {
+          "uniqueId": "strettonlitter",
+          "fullName": "Stretton",
+          "mapSource": "parishes",
+          "mapFile": "stretton_e04000333.json"
+        },
+        {
+          "uniqueId": "penkethcuerdleylitter",
+          "fullName": "Penketh and Cuerdley",
+          "mapSource": "wards",
+          "mapFile": "penketh_and_cuerdley_e05011039.json"
+        },
+        {
+          "uniqueId": "grappenhallandthelwall",
+          "fullName": "Grappenhall and Thelwall",
+          "mapSource": "parishes",
+          "mapFile": "grappenhall_and_thelwall_e04000325.json"
+        },
+        {
+          "uniqueId": "waltonparishlitter",
+          "fullName": "Walton Parish",
+          "mapSource": "parishes",
+          "mapFile": "walton_e04000334.json"
+        },
+        {
+          "uniqueId": "stocktonheathlitter",
+          "fullName": "Stockton Heath",
+          "mapSource": "wards",
+          "mapFile": "stockton_heath_e05011044.json"
+        },
+        {
+          "uniqueId": "bewseylitter",
+          "fullName": "Bewsey",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "latchfordlitter",
+          "fullName": "Latchford",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "lymmlitter",
+          "fullName": "Lymm",
+          "mapSource": "parishes",
+          "mapFile": "lymm_e04000328.json"
+        },
+        {
+          "uniqueId": "birchwoodlitter",
+          "fullName": "Birchwood",
+          "mapSource": "parishes",
+          "mapFile": "birchwood_e04000320.json"
+        }
+      ]
+    },
+    {
+      "mapName": "wirral",
+      "mapStyle": "zone-style-4",
+      "uniqueId": "wirral",
+      "fullName": "Wirral",
+      "networks": [
+        {
+          "uniqueId": "bromboroughlitter",
+          "fullName": "Bromborough",
+          "mapSource": "wards",
+          "mapFile": "bromborough_e05000957.json"
+        },
+        {
+          "uniqueId": "westkirbylitter",
+          "fullName": "West Kirby",
+          "mapSource": "custom",
+          "mapFile": "-"
+        }
+      ]
+    },
+    {
+      "mapName": "liverpool",
+      "mapStyle": "zone-style-3",
+      "uniqueId": "liverpool",
+      "fullName": "Liverpool",
+      "networks": [
+        {
+          "uniqueId": "liverpoolcentrallitter",
+          "fullName": "Liverpool Central",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "wavertreevillagelitter",
+          "fullName": "Wavertree Village",
+          "mapSource": "wards",
+          "mapFile": "wavertree_village_e05015335.json"
+        },
+        {
+          "uniqueId": "knottyashdovecotparklitter",
+          "fullName": "Knotty Ash & Dovecot Park",
+          "mapSource": "wards",
+          "mapFile": "knotty_ash_&_dovecot_park_e05015311.json"
+        },
+        {
+          "uniqueId": "kirkdalelitter",
+          "fullName": "Kirkdale",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "norrisgreenlitter",
+          "fullName": "Norris Green",
+          "mapSource": "wards",
+          "mapFile": "norris_green_e05015314.json"
+        },
+        {
+          "uniqueId": "orrellparklitter",
+          "fullName": "Orrell Park",
+          "mapSource": "wards",
+          "mapFile": "orrell_park_e05015317.json"
+        },
+        {
+          "uniqueId": "seftonparklitter",
+          "fullName": "Sefton Park",
+          "mapSource": "wards",
+          "mapFile": "sefton_park_e05015321.json"
+        },
+        {
+          "uniqueId": "aigburthlitter",
+          "fullName": "Aigburth",
+          "mapSource": "wards",
+          "mapFile": "aigburth_e05015277.json"
+        },
+        {
+          "uniqueId": "vauxhalllitter",
+          "fullName": "Vauxhall",
+          "mapSource": "wards",
+          "mapFile": "vauxhall_e05015330.json"
+        },
+        {
+          "uniqueId": "fazakerleylitter",
+          "fullName": "Fazakerley",
+          "mapSource": "custom",
+          "mapFile": "fazakerley.json"
+        },
+        {
+          "uniqueId": "evertoneastlitter",
+          "fullName": "Everton East",
+          "mapSource": "wards",
+          "mapFile": "everton_east_e05015297.json"
+        },
+        {
+          "uniqueId": "evertonwestlitter",
+          "fullName": "Everton West",
+          "mapSource": "wards",
+          "mapFile": "everton_west_e05015299.json"
+        },
+        {
+          "uniqueId": "sandfieldparklitter",
+          "fullName": "Sandfield Park",
+          "mapSource": "wards",
+          "mapFile": "sandfield_park_e05015320.json"
+        },
+        {
+          "uniqueId": "waltonlitter",
+          "fullName": "Walton",
+          "mapSource": "wards",
+          "mapFile": "walton_e05015331.json"
+        },
+        {
+          "uniqueId": "countywardlitter",
+          "fullName": "County Ward",
+          "mapSource": "wards",
+          "mapFile": "county_e05015292.json"
+        },
+        {
+          "uniqueId": "anfieldlitter",
+          "fullName": "Anfield",
+          "mapSource": "wards",
+          "mapFile": "anfield_e05015279.json"
+        },
+        {
+          "uniqueId": "clubmoorwestlitter",
+          "fullName": "Clubmoor West",
+          "mapSource": "wards",
+          "mapFile": "clubmoor_west_e05015291.json"
+        },
+        {
+          "uniqueId": "evertonnorthlitter",
+          "fullName": "Everton North",
+          "mapSource": "wards",
+          "mapFile": "everton_north_e05015298.json"
+        },
+        {
+          "uniqueId": "kensingtonfairfieldlitter",
+          "fullName": "Kensington & Fairfield",
+          "mapSource": "wards",
+          "mapFile": "kensington_&_fairfield_e05015308.json"
+        },
+        {
+          "uniqueId": "wavertreegardenlitter",
+          "fullName": "Wavertree Garden Suburb",
+          "mapSource": "wards",
+          "mapFile": "wavertree_garden_suburb_e05015334.json"
+        },
+        {
+          "uniqueId": "tuebrooklitter",
+          "fullName": "Tuebrook & Stoneycroft",
+          "mapSource": "custom",
+          "mapFile": "tuebrooklitter.json"
+        }
+      ]
+    },
+    {
+      "mapName": "sefton",
+      "mapStyle": "zone-style-4",
+      "uniqueId": "sefton",
+      "fullName": "Sefton",
+      "networks": [
+        {
+          "uniqueId": "linacrelitternetwork",
+          "fullName": "Linacre",
+          "mapSource": "wards",
+          "mapFile": "linacre_e05000942.json"
+        }
+      ]
+    },
+    {
+      "mapName": "stockport",
+      "mapStyle": "zone-style-4",
+      "uniqueId": "stockport",
+      "fullName": "Stockport",
+      "networks": [
+        {
+          "uniqueId": "bredburywoodleylitter",
+          "fullName": "Bredbury and Woodley",
+          "mapSource": "wards",
+          "mapFile": "bredbury_&_woodley_e05015016.json"
+        }
+      ]
+    },
+    {
+      "mapName": "cheshire_east",
+      "mapStyle": "zone-style-1",
+      "uniqueId": "cheshireeast",
+      "fullName": "Cheshire East",
+      "networks": [
+        {
+          "uniqueId": "riverweaverlitter",
+          "fullName": "River Weaver",
+          "mapSource": "custom",
+          "mapFile": "-"
+        }
+      ]
+    },
+    {
+      "mapName": "halton",
+      "mapStyle": "zone-style-1",
+      "uniqueId": "halton",
+      "fullName": "Halton",
+      "networks": [
+        {
+          "uniqueId": "wiggislandlitter",
+          "fullName": "Wigg Island",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "haltonviewlitter",
+          "fullName": "Halton View",
+          "mapSource": "wards",
+          "mapFile": "halton_view_e05013181.json"
+        },
+        {
+          "uniqueId": "houghgreenlitter",
+          "fullName": "Hough Green",
+          "mapSource": "wards",
+          "mapFile": "hough_green_e05013183.json"
+        },
+        {
+          "uniqueId": "oldtownlitter",
+          "fullName": "Runcorn Old Town",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "dittonlitter",
+          "fullName": "Ditton",
+          "mapSource": "wards",
+          "mapFile": "ditton,_hale_village_&_halebank_e05013176.json"
+        },
+        {
+          "uniqueId": "sankeycanallitter",
+          "fullName": "Sankey Canal",
+          "mapSource": "custom",
+          "mapFile": "sankeycanallitter.json"
+        },
+        {
+          "uniqueId": "brookvalelitter",
+          "fullName": "Brookvale",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "haddockswoodlitter",
+          "fullName": "Haddocks Wood",
+          "mapSource": "custom",
+          "mapFile": "haddockswood.json"
+        },
+        {
+          "uniqueId": "sandymoorlitter",
+          "fullName": "Sandymoor",
+          "mapSource": "parishes",
+          "mapFile": "sandymoor_e04000318.json"
+        },
+        {
+          "uniqueId": "windmillhillwoodlitter",
+          "fullName": "Windmill Hill Wood",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "daresburylitter",
+          "fullName": "Daresbury",
+          "mapSource": "parishes",
+          "mapFile": "daresbury_e04000313.json"
+        },
+        {
+          "uniqueId": "haltonlealitter",
+          "fullName": "Halton Lea",
+          "mapSource": "custom",
+          "mapFile": "haltonlealitter.json"
+        },
+        {
+          "uniqueId": "murdishawlitter",
+          "fullName": "Murdishaw",
+          "mapSource": "custom",
+          "mapFile": "-"
+        },
+        {
+          "uniqueId": "castlefieldslitter",
+          "fullName": "Castlefields",
+          "mapSource": "custom",
+          "mapFile": "castlefieldslitter.json"
+        },
+        {
+          "uniqueId": "haltonbrooklitter",
+          "fullName": "Halton Brook",
+          "mapSource": "custom",
+          "mapFile": "haltonbrook.json"
+        },
+        {
+          "uniqueId": "grangelitter",
+          "fullName": "Grange",
+          "mapSource": "wards",
+          "mapFile": "grange_e05013178.json"
+        },
+        {
+          "uniqueId": "centralwestbanklitter",
+          "fullName": "Widnes Central & West Bank",
+          "mapSource": "wards",
+          "mapFile": "central_&_west_bank_e05013174.json"
+        },
+        {
+          "uniqueId": "moorelitter",
+          "fullName": "Moore",
+          "mapSource": "parishes",
+          "mapFile": "moore_e04000315.json"
+        },
+        {
+          "uniqueId": "appletonwidneslitter",
+          "fullName": "Appleton",
+          "mapSource": "wards",
+          "mapFile": "appleton_e05013169.json"
+        },
+        {
+          "uniqueId": "runcornhill",
+          "fullName": "Runcorn Hill",
+          "mapSource": "custom",
+          "mapFile": "runcornhill.json"
+        },
+        {
+          "uniqueId": "manorparklitter",
+          "fullName": "Manor Park",
+          "mapSource": "custom",
+          "mapFile": "manorparklitter.json"
+        }
+      ]
+    }
+  ]
+}

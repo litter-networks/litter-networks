@@ -78,7 +78,7 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
 
   const hasResults = trimmedTerm.length > 0 && filteredNetworks.length > 0;
 
-  const renderNetworkItem = (item: (typeof networks)[number], keyPrefix?: string, meta?: string) => (
+  const renderNetworkItem = (item: { uniqueId: string; fullName?: string }, keyPrefix?: string, meta?: string) => (
     <li key={`${keyPrefix ?? 'net'}-${item.uniqueId}`} className={styles.networkSwitcherItem}>
       <Link
         to={buildNetworkSwitchPath(item.uniqueId)}
@@ -152,7 +152,7 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
           </li>
           {nearbyNetworks.map((nearby) =>
             renderNetworkItem(
-              nearby,
+              { uniqueId: nearby.uniqueId, fullName: nearby.fullName },
               'nearby',
               nearby.roundedDistance != null ? `${nearby.roundedDistance} miles` : undefined,
             ),

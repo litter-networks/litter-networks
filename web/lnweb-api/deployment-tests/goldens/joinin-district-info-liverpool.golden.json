@@ -1,1 +1,10 @@
-{"councilTakesKBTBags":"1","disposeSideWasteThreshold":"3","disposeEmail":"keepliverpooltidy@liverpool.gov.uk","councilBagsDescription":"clear","disposeSmallInBins":"1","uniqueId":"liverpool","flyTipReportUrl":"https://liverpool.gov.uk/environmental-problems/rubbish-and-litter/flytipping/","localRecyclingUrl":"https://liverpool.gov.uk/bins-and-recycling/find-a-recycling-centre-or-rubbish-tip/"}
+{
+  "councilTakesKBTBags": "1",
+  "disposeSideWasteThreshold": "3",
+  "disposeEmail": "keepliverpooltidy@liverpool.gov.uk",
+  "councilBagsDescription": "clear",
+  "disposeSmallInBins": "1",
+  "uniqueId": "liverpool",
+  "flyTipReportUrl": "https://liverpool.gov.uk/environmental-problems/rubbish-and-litter/flytipping/",
+  "localRecyclingUrl": "https://liverpool.gov.uk/bins-and-recycling/find-a-recycling-centre-or-rubbish-tip/"
+}

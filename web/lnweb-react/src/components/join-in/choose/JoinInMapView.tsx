@@ -3,7 +3,7 @@ import type { ViewMode } from '@/pages/join-in/components/ChooserWidget';
 import styles from '@/pages/join-in/styles/join-in-choose.module.css';
 
 type Props = {
-  mapRef: RefObject<HTMLDivElement>;
+  mapRef: RefObject<HTMLDivElement | null>;
   mapReady: boolean;
   viewMode: ViewMode;
 };
