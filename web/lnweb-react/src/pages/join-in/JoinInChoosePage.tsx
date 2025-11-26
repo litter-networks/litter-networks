@@ -35,6 +35,21 @@ interface LayerClickMessage {
  *
  * @returns The React element for the Join In | Choose page.
  */
+const resetMapContainer = (container: HTMLDivElement | null) => {
+  if (!container) return;
+  container.replaceChildren();
+  delete (container as unknown as { _leaflet_id?: string })._leaflet_id;
+};
+
+const recreateMapContainer = (ref: React.RefObject<HTMLDivElement>) => {
+  const node = ref.current;
+  if (!node || !node.parentElement) return null;
+  const clone = node.cloneNode(false) as HTMLDivElement;
+  node.parentElement.replaceChild(clone, node);
+  ref.current = clone;
+  return clone;
+};
+
 export function JoinInChoosePage() {
   const { network, networks } = useNavData();
   const navigate = useNavigate();
@@ -47,6 +62,7 @@ export function JoinInChoosePage() {
   const [expandedDistricts, setExpandedDistricts] = useState<Set<string>>(new Set());
   const [districtMeta, setDistrictMeta] = useState<Record<string, DistrictCsvRow>>({});
   const mapRootRef = useRef<HTMLDivElement | null>(null);
+  const selectionFromMapRef = useRef(false);
   const [mapReady, setMapReady] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     if (typeof window === 'undefined') return 'map';
@@ -120,64 +136,69 @@ export function JoinInChoosePage() {
     }
   }, [network?.uniqueId, network?.fullName, network?.districtFullName, network?.districtId, getDistrictLabel]);
 
-  useEffect(() => {
-    if (viewMode !== 'map') {
-      if (mapRootRef.current) {
-        mapRootRef.current.innerHTML = '';
-      }
-      setMapReady(false);
-      return undefined;
+  const selectedNetwork = useMemo(() => {
+    if (selectedNetworkId) {
+      return networks.find((n) => n.uniqueId === selectedNetworkId) ?? null;
     }
+    return network ?? null;
+  }, [network, networks, selectedNetworkId]);
+
+  const mapSelection = useMemo(() => {
+    const primaryDistrict =
+      selectedNetwork?.districtId?.split(',').map((id) => id.trim()).find(Boolean) ?? network?.districtId ?? '';
+    return {
+      districtId: primaryDistrict ?? '',
+      networkId: selectedNetwork?.uniqueId ?? network?.uniqueId ?? '',
+    };
+  }, [network?.districtId, network?.uniqueId, selectedNetwork]);
+  const mapSelectionKey = `${mapSelection.districtId ?? ''}|${mapSelection.networkId ?? ''}`;
+
+  useEffect(() => {
+    if (selectionFromMapRef.current) {
+      selectionFromMapRef.current = false;
+      return () => {};
+    }
+    if (viewMode !== 'map') {
+      resetMapContainer(mapRootRef.current);
+      setMapReady(false);
+      return () => {};
+    }
+    if (!mapRootRef.current) {
+      return () => {};
+    }
+    setMapReady(false);
+    const container = recreateMapContainer(mapRootRef) ?? mapRootRef.current;
+    resetMapContainer(container);
     let cancelled = false;
     const controller = new AbortController();
-
-    async function load() {
-      const [areaInfo] = await Promise.all([fetchAreaInfo(controller.signal), loadMapsAssets()]);
-      if (cancelled) {
-        return;
-      }
-
-      if (window.createMap && mapRootRef.current) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const selection: any = {
-          districtId: network?.districtId ?? '',
-          networkId: network?.uniqueId ?? '',
-        };
-
-        try {
-          mapRootRef.current.innerHTML = '';
-          window.createMap(
-            'areas',
-            'https://cdn.litternetworks.org',
-            'heatmap-lymm.json',
-            areaInfo,
-            true,
-            selection,
-            '',
-          );
-          setMapReady(true);
-        } catch (error) {
+    const run = async () => {
+      try {
+        await loadMapsAssets();
+        const areaInfo = await fetchAreaInfo(controller.signal);
+        if (cancelled || !window.createMap || !mapRootRef.current) return;
+        window.createMap(
+          'areas',
+          'https://cdn.litternetworks.org',
+          'heatmap-lymm.json',
+          areaInfo,
+          true,
+          mapSelection,
+          '',
+        );
+        setMapReady(true);
+      } catch (error) {
+        if (!controller.signal.aborted) {
           console.error('Could not render map', error);
         }
       }
-    }
-
-    load().catch((error) => {
-      if (controller.signal.aborted) {
-        return;
-      }
-      console.error('Failed to initialise join-in map', error);
-    });
-
+    };
+    run();
     return () => {
       cancelled = true;
       controller.abort();
-      if (mapRootRef.current) {
-        mapRootRef.current.innerHTML = '';
-      }
-      setMapReady(false);
+      resetMapContainer(mapRootRef.current);
     };
-  }, [network?.districtId, network?.uniqueId, viewMode]);
+  }, [mapSelectionKey, viewMode]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -205,6 +226,7 @@ export function JoinInChoosePage() {
         return;
       }
       const info = event.data.data;
+      selectionFromMapRef.current = true;
       setAreaName(info.areaFullName || info.areaId || '-');
       if (info.networkId) {
         setNetworkName(info.networkFullName || info.networkId);
@@ -282,6 +304,7 @@ export function JoinInChoosePage() {
   };
 
   const handleListSelect = (netId: string) => {
+    selectionFromMapRef.current = false;
     const net = networks.find((n) => n.uniqueId === netId);
     if (!net) return;
     setSelectedNetworkId(net.uniqueId);
