@@ -181,6 +181,7 @@ export function JoinInChoosePage() {
         await loadMapsAssets();
         const areaInfo = await fetchAreaInfo(controller.signal);
         if (cancelled || !window.createMap || !mapRootRef.current) return;
+        (mapRootRef.current as unknown as { _leaflet_id?: string })._leaflet_id = undefined;
         window.createMap(
           'areas',
           'https://cdn.litternetworks.org',
