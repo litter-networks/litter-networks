@@ -1,6 +1,12 @@
-import { useEffect, useState, type MutableRefObject, type RefObject } from 'react';
+import {
+  useEffect,
+  useState,
+  type MutableRefObject,
+  type RefObject,
+} from 'react';
 import { fetchAreaInfo } from '@/data-sources/maps';
 import { loadMapsAssets } from '@/shared/mapsAssets';
+import { scheduleStateUpdate } from '@/shared/scheduleStateUpdate';
 import type { ViewMode } from '@/pages/join-in/components/ChooserWidget';
 import styles from '@/pages/join-in/styles/join-in-choose.module.css';
 
@@ -41,17 +47,18 @@ export function JoinInMapView({ mapRef, viewMode, mapSelection, selectionFromMap
     }
     if (viewMode !== 'map') {
       resetMapContainer(mapRef.current);
-      setMapReady(false);
+      scheduleStateUpdate(() => setMapReady(false));
       return () => {};
     }
     if (!mapRef.current) {
       return () => {};
     }
-    setMapReady(false);
+    scheduleStateUpdate(() => setMapReady(false));
     const container = recreateMapContainer(mapRef) ?? mapRef.current;
     resetMapContainer(container);
     let cancelled = false;
     const controller = new AbortController();
+    const activeContainer = container;
     const run = async () => {
       try {
         await loadMapsAssets();
@@ -78,9 +85,9 @@ export function JoinInMapView({ mapRef, viewMode, mapSelection, selectionFromMap
     return () => {
       cancelled = true;
       controller.abort();
-      resetMapContainer(mapRef.current);
+      resetMapContainer(activeContainer);
     };
-  }, [mapRef, mapSelection, viewMode, selectionFromMapRef]);
+  }, [mapRef, mapSelection, selectionFromMapRef, viewMode]);
 
   if (viewMode !== 'map') {
     return null;

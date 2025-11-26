@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
 import { usePageTitle } from '@/shared/usePageTitle';
 import { fetchDistrictsCsv, type DistrictCsvRow } from '@/data-sources/districts';
+import { scheduleStateUpdate } from '@/shared/scheduleStateUpdate';
 import { ChooserWidget, type ViewMode } from './components/ChooserWidget';
 import { JoinInMapView } from '@/components/join-in/choose/JoinInMapView';
 import { JoinInDistrictList } from '@/components/join-in/choose/JoinInDistrictList';
@@ -94,20 +95,18 @@ export function JoinInChoosePage() {
 
   useEffect(() => {
     if (!network?.uniqueId) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSelectedNetworkId(network.uniqueId);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNetworkName(network.fullName ?? network.uniqueId);
+    scheduleStateUpdate(() => setSelectedNetworkId(network.uniqueId));
+    scheduleStateUpdate(() => setNetworkName(network.fullName ?? network.uniqueId));
     const primaryDistId = network.districtId?.split(',')[0].trim();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setAreaName(getDistrictLabel(primaryDistId, network.districtFullName));
+    scheduleStateUpdate(() => setAreaName(getDistrictLabel(primaryDistId, network.districtFullName)));
     if (network.districtId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setExpandedDistricts((prev) => {
-        const next = new Set(prev);
-        next.add(network.districtId as string);
-        return next;
-      });
+      scheduleStateUpdate(() =>
+        setExpandedDistricts((prev) => {
+          const next = new Set(prev);
+          next.add(network.districtId as string);
+          return next;
+        }),
+      );
     }
   }, [network?.uniqueId, network?.fullName, network?.districtFullName, network?.districtId, getDistrictLabel]);
 
@@ -154,18 +153,13 @@ export function JoinInChoosePage() {
       }
       const info = event.data.data;
       selectionFromMapRef.current = true;
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAreaName(info.areaFullName || info.areaId || '-');
+      scheduleStateUpdate(() => setAreaName(info.areaFullName || info.areaId || '-'));
       if (info.networkId) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setNetworkName(info.networkFullName || info.networkId);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSelectedNetworkId(info.networkId);
+        scheduleStateUpdate(() => setNetworkName(info.networkFullName || info.networkId));
+        scheduleStateUpdate(() => setSelectedNetworkId(info.networkId));
       } else {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setNetworkName('-');
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSelectedNetworkId(null);
+        scheduleStateUpdate(() => setNetworkName('-'));
+        scheduleStateUpdate(() => setSelectedNetworkId(null));
       }
     };
 
@@ -176,25 +170,26 @@ export function JoinInChoosePage() {
     if (!selectedNetworkId) return;
     const matched = networks.find((n) => n.uniqueId === selectedNetworkId);
     if (matched?.districtId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setExpandedDistricts((prev) => {
-        const next = new Set(prev);
-        matched.districtId
-          ?.split(',')
-          .map((id) => id.trim())
-          .filter(Boolean)
-          .forEach((id) => next.add(id));
-        return next;
-      });
+      scheduleStateUpdate(() =>
+        setExpandedDistricts((prev) => {
+          const next = new Set(prev);
+          matched.districtId
+            ?.split(',')
+            .map((id) => id.trim())
+            .filter(Boolean)
+            .forEach((id) => next.add(id));
+          return next;
+        }),
+      );
       if (areaName === '-') {
         const primaryId = matched.districtId.split(',').map((id) => id.trim()).filter(Boolean)[0];
         const districtName = getDistrictLabel(primaryId, matched.districtFullName);
         if (districtName) {
-          setAreaName(districtName);
+          scheduleStateUpdate(() => setAreaName(districtName));
         }
       }
       if (networkName === '-' && (matched.fullName || matched.uniqueId)) {
-        setNetworkName(matched.fullName ?? matched.uniqueId);
+        scheduleStateUpdate(() => setNetworkName(matched.fullName ?? matched.uniqueId));
       }
     }
   }, [areaName, getDistrictLabel, networkName, networks, selectedNetworkId]);

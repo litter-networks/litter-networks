@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { useNavigate } from 'react-router-dom';
 import { fetchNearbyNetworks, useNetworks, type Network, type NearbyNetwork } from '@/data-sources/networks';
 import { NavDataContext, type NavData } from './NavDataContextBase';
+import { scheduleStateUpdate } from '@/shared/scheduleStateUpdate';
 
 type NetworkUsage = {
   visits: number;
@@ -87,21 +88,21 @@ export function NavDataProvider({ filterStringParam, children }: ProviderProps) 
     try {
       const parsed = JSON.parse(window.localStorage.getItem(USAGE_STORAGE_KEY) ?? '{}');
       if (parsed && typeof parsed === 'object') {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setUsageByNetwork(parsed);
+        scheduleStateUpdate(() => setUsageByNetwork(parsed));
       }
     } catch {
-      setUsageByNetwork({});
+      scheduleStateUpdate(() => setUsageByNetwork({}));
     }
 
     try {
       const favRaw = JSON.parse(window.localStorage.getItem(FAVORITES_STORAGE_KEY) ?? '[]');
       if (Array.isArray(favRaw)) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setFavoriteIds(new Set(favRaw.filter((id) => typeof id === 'string')));
+        scheduleStateUpdate(() =>
+          setFavoriteIds(new Set(favRaw.filter((id) => typeof id === 'string'))),
+        );
       }
     } catch {
-      setFavoriteIds(new Set());
+      scheduleStateUpdate(() => setFavoriteIds(new Set()));
     }
   }, []);
 
@@ -110,25 +111,26 @@ export function NavDataProvider({ filterStringParam, children }: ProviderProps) 
       return;
     }
     const now = Date.now();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setUsageByNetwork((prev) => {
-      const next = {
-        ...prev,
-        [selectedNetwork.uniqueId]: {
-          visits: (prev[selectedNetwork.uniqueId]?.visits ?? 0) + 1,
-          lastVisited: now,
-        },
-      };
-      const entries = Object.entries(next)
-        .sort((a, b) => b[1].lastVisited - a[1].lastVisited)
-        .slice(0, MAX_TRACKED_NETWORKS);
-      const trimmed: Record<string, NetworkUsage> = {};
-      entries.forEach(([id, value]) => {
-        trimmed[id] = value;
-      });
-      window.localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(trimmed));
-      return trimmed;
-    });
+    scheduleStateUpdate(() =>
+      setUsageByNetwork((prev) => {
+        const next = {
+          ...prev,
+          [selectedNetwork.uniqueId]: {
+            visits: (prev[selectedNetwork.uniqueId]?.visits ?? 0) + 1,
+            lastVisited: now,
+          },
+        };
+        const entries = Object.entries(next)
+          .sort((a, b) => b[1].lastVisited - a[1].lastVisited)
+          .slice(0, MAX_TRACKED_NETWORKS);
+        const trimmed: Record<string, NetworkUsage> = {};
+        entries.forEach(([id, value]) => {
+          trimmed[id] = value;
+        });
+        window.localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(trimmed));
+        return trimmed;
+      }),
+    );
   }, [selectedNetwork?.uniqueId]);
 
   const toggleFavorite = useCallback((id: string) => {

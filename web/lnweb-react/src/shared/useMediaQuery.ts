@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { scheduleStateUpdate } from '@/shared/scheduleStateUpdate';
 
 /**
  * Simple hook that matches a media query while providing an SSR-safe default.
@@ -19,8 +20,7 @@ export function useMediaQuery(query: string, defaultMatches = false): boolean {
     }
     const mediaQueryList = window.matchMedia(query);
     // Update to current match once we're on the client even though the hook initialized with defaultMatches.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMatches(mediaQueryList.matches);
+    scheduleStateUpdate(() => setMatches(mediaQueryList.matches));
 
     const updateMatches = (event: MediaQueryListEvent) => setMatches(event.matches);
     if (typeof mediaQueryList.addEventListener === 'function') {
