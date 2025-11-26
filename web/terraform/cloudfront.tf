@@ -135,7 +135,7 @@ resource "aws_cloudfront_origin_access_control" "s3_origin_access_control" {
   name                              = "CloudFrontS3AccessControl"
   description                       = "Origin Access Control for S3 buckets"
   origin_access_control_origin_type = "s3"
-  signing_behavior                  = "never"
+  signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
 
@@ -278,7 +278,7 @@ resource "aws_cloudfront_distribution" "dynamic" {
     default_ttl                = 0
     max_ttl                    = 0
     min_ttl                    = 0
-    origin_request_policy_id   = aws_cloudfront_origin_request_policy.all_viewer.id
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
     smooth_streaming           = false
     target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
     viewer_protocol_policy     = "redirect-to-https"
@@ -350,6 +350,7 @@ resource "aws_cloudfront_distribution" "dynamic" {
     minimum_protocol_version       = "TLSv1.2_2021"
     ssl_support_method             = "sni-only"
   }
+
 }
 
 #########################################
@@ -373,7 +374,7 @@ resource "aws_cloudfront_distribution" "static" {
     default_ttl                = 0
     max_ttl                    = 0
     min_ttl                    = 0
-    origin_request_policy_id   = aws_cloudfront_origin_request_policy.all_viewer.id
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
     smooth_streaming           = false
     target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
     viewer_protocol_policy     = "https-only"
@@ -392,7 +393,7 @@ resource "aws_cloudfront_distribution" "static" {
     default_ttl                = 0
     max_ttl                    = 0
     min_ttl                    = 0
-    origin_request_policy_id   = aws_cloudfront_origin_request_policy.all_viewer.id
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
     path_pattern               = "/images/*"
     smooth_streaming           = false
     target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
@@ -412,7 +413,7 @@ resource "aws_cloudfront_distribution" "static" {
     default_ttl                = 0
     max_ttl                    = 0
     min_ttl                    = 0
-    origin_request_policy_id   = aws_cloudfront_origin_request_policy.all_viewer.id
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
     path_pattern               = "/maps/*"
     smooth_streaming           = false
     target_origin_id           = "lnweb-public.s3.eu-west-2.amazonaws.com"
@@ -432,7 +433,7 @@ resource "aws_cloudfront_distribution" "static" {
     default_ttl                = 0
     max_ttl                    = 0
     min_ttl                    = 0
-    origin_request_policy_id   = aws_cloudfront_origin_request_policy.all_viewer.id
+    origin_request_policy_id   = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
     path_pattern               = "/docs/*"
     smooth_streaming           = false
     target_origin_id           = "lnweb-docs.s3.eu-west-2.amazonaws.com"
@@ -473,6 +474,7 @@ resource "aws_cloudfront_distribution" "static" {
     minimum_protocol_version       = "TLSv1.2_2021"
     ssl_support_method             = "sni-only"
   }
+
 }
 
 #########################################

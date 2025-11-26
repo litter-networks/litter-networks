@@ -6,7 +6,7 @@ function handler(event) {
   var request = event.request;
   var uri = request.uri;
 
-  if (!uri.includes('.') && !uri.endsWith('/')) {
+  if (!uri.includes('.') && (uri === '/' || !uri.endsWith('/'))) {
     request.uri = '/index.html';
   }
 
