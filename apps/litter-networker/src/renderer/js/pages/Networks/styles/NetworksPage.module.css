@@ -392,6 +392,20 @@ th {
   color: #b52323;
 }
 
+.mapAttribution {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  z-index: 1200;
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
 .mapPreviewMeta {
   display: flex;
   justify-content: space-between;

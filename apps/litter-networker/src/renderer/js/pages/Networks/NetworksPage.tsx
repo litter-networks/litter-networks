@@ -169,6 +169,7 @@ function MapPreview({ mapSource, mapFile, uniqueId }: MapPreviewProps) {
             Could not load map.
           </div>
         )}
+        <div className={styles.mapAttribution}>© OpenStreetMap contributors · Leaflet</div>
       </div>
       <div className={styles.mapPreviewMeta}>
         <span>{mapSource ?? "custom"}</span>
