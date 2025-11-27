@@ -37,6 +37,7 @@
 .mapPane {
   width: 100%;
   height: 100%;
+  z-index: 1;
 }
 
 .viewPane {
@@ -61,6 +62,53 @@
   visibility: hidden;
   pointer-events: none;
   z-index: 1;
+}
+
+/* Desktop/large-screen: keep map visible and show list as an overlaid panel on the left. */
+@media (min-width: 1100px) {
+  .viewPane,
+  .viewPaneActive,
+  .viewPaneHiddenLeft,
+  .viewPaneHiddenRight {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: none;
+    position: absolute;
+    inset: 0;
+  }
+
+  .mapPane {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .listSurface {
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    width: 48vw;
+    max-width: 630px;
+    min-width: 360px;
+    margin-left: 20px;
+    margin-top: 40px;
+    height: calc(100% - 140px);
+    max-height: 100%;
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 14px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+    border: 4px solid rgba(127, 173, 116, 0.25);
+    overflow: hidden;
+    padding: 0;
+    z-index: 3;
+  }
+
+  .listScroll {
+    height: 100%;
+    padding: 18px 16px 22px;
+    background: transparent;
+  }
 }
 
 @media (max-width: 520px) {

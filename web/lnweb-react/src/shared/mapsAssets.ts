@@ -11,11 +11,7 @@ const loadedCss = new Set<string>();
 export async function loadMapsAssets() {
   await Promise.all([
     ensureCss('https://cdn.litternetworks.org/3rd-party/leaflet/leaflet.css'),
-    ensureCss(
-      'https://cdn.litternetworks.org/css/maps.css',
-      'sha384-zR6gXLggfih2rRvjpeSGoCPsqkFGPLPzxa58ww943ZomF9uVvTApN2tt0Is9tVgK',
-      'anonymous',
-    ),
+    ensureCss('/css/maps.css'),
   ]);
   await ensureScript('https://cdn.litternetworks.org/3rd-party/leaflet/leaflet.js');
   await ensureScript('/js/maps.js');

@@ -1598,8 +1598,9 @@ async function applySelection(currentSelection) {
     });
 
     // If currentSelection.networkId is specified
-    if (currentSelection.networkId) {
-        await loadNetworkLayers(districtLayer, areaInfoGlobal, mapsSourceDomainGlobal, mapInstance);
+        if (currentSelection.networkId) {
+            removeNetworkLayers(mapInstance);
+            await loadNetworkLayers(districtLayer, areaInfoGlobal, mapsSourceDomainGlobal, mapInstance);
 
         const networkLayer = networkLayers.find(layer => layer.uniqueId === currentSelection.networkId);
         if (networkLayer) {
