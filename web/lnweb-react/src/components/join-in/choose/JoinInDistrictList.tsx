@@ -111,7 +111,7 @@ export function JoinInDistrictList({
       }`}
       style={
         isDesktop
-          ? { width: panelWidth, flex: `0 0 ${panelWidth}px` }
+          ? { width: panelWidth, flex: `0 0 ${panelWidth}px`, maxWidth: '640px' }
           : undefined
       }
     >
