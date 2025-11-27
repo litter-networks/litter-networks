@@ -1647,9 +1647,9 @@ async function createMap(_mode, mapsSourceDomain, _routesGeoJSONUrl, areaInfo, s
 
     initMapTilesWithToggle(map);
 
-    // Add the zoom control in the bottom-left
+    // Add the zoom control in the top-right
     L.control.zoom({
-        position: 'bottomleft'
+        position: 'topright'
     }).addTo(map);
 
     addStreetViewControl(map);
