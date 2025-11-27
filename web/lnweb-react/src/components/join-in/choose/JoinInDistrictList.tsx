@@ -33,81 +33,86 @@ export function JoinInDistrictList({
 
     const selectedButton = document.querySelector<HTMLElement>(`[data-net-id="${selectedNetworkId}"]`);
     if (selectedButton) {
-      selectedButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      selectedButton.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
     }
   }, [viewMode, selectedNetworkId]);
 
-  if (viewMode !== 'list') return null;
   return (
-    <div className={styles.listSurface}>
-      <div className={styles.listSheet}>
-        <div className={styles.listHeader}>
-          Here you can choose any one of the <b>{totalNetworks}</b> Litter Networks across <b>{totalDistricts}</b> local-authority areas!
-        </div>
-        <div className={styles.districtList}>
-          {groupedDistricts.map((group) => {
-            const isOpen = expandedDistricts.has(group.id);
-            const networkCount = group.networks.length;
-            const networkVerb = networkCount === 1 ? 'is' : 'are';
-            const networkLabel = networkCount === 1 ? 'Litter Network' : 'Litter Networks';
-            return (
-              <div key={group.id} className={`${styles.districtCard} ${isOpen ? styles.districtCardOpen : ''}`}>
-                <button
-                  type="button"
-                  className={styles.districtToggle}
-                  onClick={() => toggleDistrict(group.id)}
-                  aria-expanded={isOpen}
-                >
-                  <span className={styles.districtName}>{group.name}</span>
-                  <span className={styles.districtMeta}>
-                    <span className={styles.districtCount}>{group.networks.length}</span>
-                    <img
-                      src="/images/dropdown-icon.png"
-                      alt=""
-                      aria-hidden="true"
-                      className={`${styles.districtDropdownIcon} ${
-                        isOpen ? styles.districtDropdownIconOpen : ''
-                      }`}
-                    />
-                  </span>
-                </button>
-                {isOpen && (
-                  <ul className={styles.networkList}>
-                    <li className={styles.districtIntro}>
-                      <p>
-                        There {networkVerb} currently <b>{networkCount}</b> {networkLabel} in {group.name}.
-                      </p>
-                    </li>
-                    {group.networks
-                      .slice()
-                      .sort((a, b) => (a.fullName ?? a.uniqueId).localeCompare(b.fullName ?? b.uniqueId))
-                      .map((net) => (
-                        <li key={net.uniqueId}>
-                          <button
-                            type="button"
-                            data-net-id={net.uniqueId}
-                            className={`${styles.networkButton} ${
-                              selectedNetworkId === net.uniqueId ? styles.networkButtonActive : ''
-                            }`}
-                            onClick={() => handleListSelect(net.uniqueId)}
-                          >
-                            <span className={styles.networkName}>{net.fullName ?? net.uniqueId}</span>
-                            <span
-                              className={`${styles.networkStatusRegion} ${
-                                net.uniqueId === selectedNetworkId ? styles.networkStatusSelected : ''
+    <div
+      className={`${styles.listSurface} ${styles.viewPane} ${
+        viewMode === 'list' ? styles.viewPaneActive : styles.viewPaneHiddenRight
+      }`}
+    >
+      <div className={styles.listScroll}>
+        <div className={styles.listSheet}>
+          <div className={styles.listHeader}>
+            Here you can choose any one of the <b>{totalNetworks}</b> Litter Networks across <b>{totalDistricts}</b> local-authority areas!
+          </div>
+          <div className={styles.districtList}>
+            {groupedDistricts.map((group) => {
+              const isOpen = expandedDistricts.has(group.id);
+              const networkCount = group.networks.length;
+              const networkVerb = networkCount === 1 ? 'is' : 'are';
+              const networkLabel = networkCount === 1 ? 'Litter Network' : 'Litter Networks';
+              return (
+                <div key={group.id} className={`${styles.districtCard} ${isOpen ? styles.districtCardOpen : ''}`}>
+                  <button
+                    type="button"
+                    className={styles.districtToggle}
+                    onClick={() => toggleDistrict(group.id)}
+                    aria-expanded={isOpen}
+                  >
+                    <span className={styles.districtName}>{group.name}</span>
+                    <span className={styles.districtMeta}>
+                      <span className={styles.districtCount}>{group.networks.length}</span>
+                      <img
+                        src="/images/dropdown-icon.png"
+                        alt=""
+                        aria-hidden="true"
+                        className={`${styles.districtDropdownIcon} ${
+                          isOpen ? styles.districtDropdownIconOpen : ''
+                        }`}
+                      />
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <ul className={styles.networkList}>
+                      <li className={styles.districtIntro}>
+                        <p>
+                          There {networkVerb} currently <b>{networkCount}</b> {networkLabel} in {group.name}.
+                        </p>
+                      </li>
+                      {group.networks
+                        .slice()
+                        .sort((a, b) => (a.fullName ?? a.uniqueId).localeCompare(b.fullName ?? b.uniqueId))
+                        .map((net) => (
+                          <li key={net.uniqueId}>
+                            <button
+                              type="button"
+                              data-net-id={net.uniqueId}
+                              className={`${styles.networkButton} ${
+                                selectedNetworkId === net.uniqueId ? styles.networkButtonActive : ''
                               }`}
-                              aria-hidden="true"
+                              onClick={() => handleListSelect(net.uniqueId)}
                             >
-                              {net.uniqueId === selectedNetworkId ? '✓' : ''}
-                            </span>
-                          </button>
-                        </li>
-                      ))}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
+                              <span className={styles.networkName}>{net.fullName ?? net.uniqueId}</span>
+                              <span
+                                className={`${styles.networkStatusRegion} ${
+                                  net.uniqueId === selectedNetworkId ? styles.networkStatusSelected : ''
+                                }`}
+                                aria-hidden="true"
+                              >
+                                {net.uniqueId === selectedNetworkId ? '✓' : ''}
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

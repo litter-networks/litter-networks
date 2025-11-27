@@ -11,5 +11,6 @@ declare global {
       currentSelection: { districtId?: string; networkId?: string },
       modeIn?: string,
     ) => void;
+    updateMapSelection?: (selection: { districtId?: string; networkId?: string }) => void;
   }
 }

@@ -18,11 +18,7 @@ export async function loadMapsAssets() {
     ),
   ]);
   await ensureScript('https://cdn.litternetworks.org/3rd-party/leaflet/leaflet.js');
-  await ensureScript(
-    'https://cdn.litternetworks.org/js/maps.js',
-    'sha384-fkne35iYTpuzOuGDCawh1eVhyYggV0aufzqHM1OodyIsPbjWVwrBgSoPt6ZN5c/o',
-    'anonymous',
-  );
+  await ensureScript('/js/maps.js');
 }
 
 /**
