@@ -110,13 +110,13 @@
 
 .networkSwitcherItem {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
 }
 
 .networkSwitcherItemLink {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   color: white;
   text-decoration: none;
@@ -143,6 +143,9 @@
 }
 
 .networkSwitcherFavButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: none;
   color: rgba(255, 255, 255, 0.7);
