@@ -1,5 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { DistrictGroup } from '@/pages/join-in/choose-types';
+import { useMediaQuery } from '@/shared/useMediaQuery';
 import type { ViewMode } from '@/pages/join-in/components/ChooserWidget';
 import styles from '@/pages/join-in/styles/join-in-choose.module.css';
 
@@ -14,6 +16,18 @@ type Props = {
   totalDistricts: number;
 };
 
+const WIDTH_STORAGE_KEY = 'ln.choose.listWidth';
+const DEFAULT_PANEL_WIDTH = 420;
+const MIN_PANEL_WIDTH = 320;
+const MAX_PANEL_WIDTH = 640;
+const DESKTOP_BREAKPOINT = 1100;
+const PANEL_LEFT_OFFSET = 120;
+
+const clampWidth = (value: number) => {
+  if (Number.isNaN(value)) return DEFAULT_PANEL_WIDTH;
+  return Math.min(MAX_PANEL_WIDTH, Math.max(MIN_PANEL_WIDTH, value));
+};
+
 export function JoinInDistrictList({
   viewMode,
   groupedDistricts,
@@ -25,6 +39,57 @@ export function JoinInDistrictList({
   totalDistricts,
 }: Props) {
   const previousViewModeRef = useRef<ViewMode>(viewMode);
+  const isDesktop = useMediaQuery(`(min-width: ${DESKTOP_BREAKPOINT}px)`, false);
+  const [panelWidth, setPanelWidth] = useState(() => {
+    if (typeof window === 'undefined') {
+      return DEFAULT_PANEL_WIDTH;
+    }
+    const stored = window.localStorage.getItem(WIDTH_STORAGE_KEY);
+    if (!stored) {
+      return DEFAULT_PANEL_WIDTH;
+    }
+    return clampWidth(Number.parseInt(stored, 10));
+  });
+  const resizingRef = useRef(false);
+
+  const persistWidth = useCallback(
+    (width: number) => {
+      const trimmed = clampWidth(width);
+      setPanelWidth(trimmed);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(WIDTH_STORAGE_KEY, trimmed.toString());
+      }
+    },
+    [setPanelWidth],
+  );
+
+  useEffect(() => {
+    const pointerMove = (event: PointerEvent) => {
+      if (!resizingRef.current || !isDesktop) {
+        return;
+      }
+      const proposed = event.clientX - PANEL_LEFT_OFFSET;
+      persistWidth(proposed);
+    };
+    const pointerUp = () => {
+      resizingRef.current = false;
+    };
+    window.addEventListener('pointermove', pointerMove);
+    window.addEventListener('pointerup', pointerUp);
+    return () => {
+      window.removeEventListener('pointermove', pointerMove);
+      window.removeEventListener('pointerup', pointerUp);
+    };
+  }, [isDesktop, persistWidth]);
+
+  const handleResizerPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (!isDesktop) return;
+      event.preventDefault();
+      resizingRef.current = true;
+    },
+    [isDesktop],
+  );
 
   useEffect(() => {
     const switchedToList = viewMode === 'list' && previousViewModeRef.current !== 'list';
@@ -37,12 +102,20 @@ export function JoinInDistrictList({
     }
   }, [viewMode, selectedNetworkId]);
 
+  const isListVisible = isDesktop || viewMode === 'list';
+
   return (
     <div
       className={`${styles.listSurface} ${styles.viewPane} ${
-        viewMode === 'list' ? styles.viewPaneActive : styles.viewPaneHiddenRight
+        isListVisible ? styles.viewPaneActive : styles.viewPaneHiddenRight
       }`}
+      style={
+        isDesktop
+          ? { width: panelWidth, flex: `0 0 ${panelWidth}px` }
+          : undefined
+      }
     >
+      {isDesktop && <div className={styles.resizer} onPointerDown={handleResizerPointerDown} />}
       <div className={styles.listScroll}>
         <div className={styles.listSheet}>
           <div className={styles.listHeader}>

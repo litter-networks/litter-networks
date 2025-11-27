@@ -262,22 +262,24 @@ export function JoinInChoosePage() {
     <div className={styles.page}>
       <div className={styles.mapContainerShell} data-map-container>
         <div className={styles.mapSurface}>
-          <JoinInMapView
-            mapRef={mapRootRef}
-            viewMode={viewMode}
-            mapSelection={mapSelection}
-            selectionFromMapRef={selectionFromMapRef}
-          />
-          <JoinInDistrictList
-            viewMode={viewMode}
-            groupedDistricts={groupedDistricts}
-            expandedDistricts={expandedDistricts}
-            toggleDistrict={toggleDistrict}
-            handleListSelect={handleListSelect}
-            selectedNetworkId={selectedNetworkId}
-            totalNetworks={totalNetworks}
-            totalDistricts={totalDistricts}
-          />
+          <div className={styles.splitLayout}>
+            <JoinInDistrictList
+              viewMode={viewMode}
+              groupedDistricts={groupedDistricts}
+              expandedDistricts={expandedDistricts}
+              toggleDistrict={toggleDistrict}
+              handleListSelect={handleListSelect}
+              selectedNetworkId={selectedNetworkId}
+              totalNetworks={totalNetworks}
+              totalDistricts={totalDistricts}
+            />
+            <JoinInMapView
+              mapRef={mapRootRef}
+              viewMode={viewMode}
+              mapSelection={mapSelection}
+              selectionFromMapRef={selectionFromMapRef}
+            />
+          </div>
         </div>
 
         <ChooserWidget

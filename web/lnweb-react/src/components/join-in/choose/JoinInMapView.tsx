@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { fetchAreaInfo } from '@/data-sources/maps';
 import { loadMapsAssets } from '@/shared/mapsAssets';
+import { useMediaQuery } from '@/shared/useMediaQuery';
 import type { ViewMode } from '@/pages/join-in/components/ChooserWidget';
 import styles from '@/pages/join-in/styles/join-in-choose.module.css';
 
@@ -26,6 +27,7 @@ export function JoinInMapView({ mapRef, viewMode, mapSelection, selectionFromMap
   const [mapReady, setMapReady] = useState(false);
   const initialisedRef = useRef(false);
   const initialSelectionRef = useRef<MapSelection>(mapSelection);
+  const isDesktop = useMediaQuery('(min-width: 1100px)', false);
 
   // Keep the initial selection up to date before the map initializes.
   useEffect(() => {
@@ -102,14 +104,16 @@ export function JoinInMapView({ mapRef, viewMode, mapSelection, selectionFromMap
     }
   }, [mapSelection, selectionFromMapRef]);
 
+  const shouldShow = isDesktop || viewMode === 'map';
+
   return (
     <div
       className={`${styles.mapPane} ${styles.viewPane} ${
-        viewMode === 'map' ? styles.viewPaneActive : styles.viewPaneHiddenLeft
+        shouldShow ? styles.viewPaneActive : styles.viewPaneHiddenLeft
       }`}
     >
       <div id="map" ref={mapRef} className={styles.mapRoot} />
-      {viewMode === 'map' && !mapReady && <div className={styles.mapFrame}>Loading map…</div>}
+      {shouldShow && !mapReady && <div className={styles.mapFrame}>Loading map…</div>}
     </div>
   );
 }
