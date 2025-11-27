@@ -104,7 +104,7 @@
   display: block;
   padding: 8px 12px;
   color: white;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
 }
 
@@ -142,12 +142,6 @@
   min-width: 0;
 }
 
-.networkSwitcherItemMeta {
-  margin-left: auto;
-  font-size: 0.85rem;
-  opacity: 0.85;
-}
-
 .networkSwitcherFavButton {
   background: transparent;
   border: none;
@@ -178,5 +172,23 @@
 @media (max-width: 768px) {
   .networkSwitcherChevron {
     height: calc(24px * var(--brand-scale, 1));
+  }
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+  .networkSwitcherItemText {
+    font-size: 1.4rem;
+  }
+
+  .networkSwitcherSectionLabel {
+    font-size: 1.2rem;
+  }
+
+  .networkSwitcherSearchInput {
+    font-size: 1.0rem;
+  }
+
+  .networkSwitcherFavButton {
+    font-size: 28px;
   }
 }
