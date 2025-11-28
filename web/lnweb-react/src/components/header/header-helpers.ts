@@ -1,4 +1,4 @@
-import { getSectionFromPath } from '@/shared/sections';
+import { getSectionFromPath } from '@/shared/utils/sections';
 import styles from './styles/header.module.css';
 
 type Section = ReturnType<typeof getSectionFromPath>;

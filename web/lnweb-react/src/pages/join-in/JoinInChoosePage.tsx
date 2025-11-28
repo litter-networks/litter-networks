@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
-import { usePageTitle } from '@/shared/usePageTitle';
+import { usePageTitle } from '@/shared/hooks/usePageTitle';
 import { fetchDistrictsCsv, type DistrictCsvRow } from '@/data-sources/districts';
-import { scheduleStateUpdate } from '@/shared/scheduleStateUpdate';
+import { scheduleStateUpdate } from '@/shared/utils/scheduleStateUpdate';
 import { ChooserWidget, type ViewMode } from './components/ChooserWidget';
 import { JoinInMapView } from '@/components/join-in/choose/JoinInMapView';
 import { JoinInDistrictList } from '@/components/join-in/choose/JoinInDistrictList';
 import styles from './styles/join-in-choose.module.css';
 import type { DistrictGroup } from './choose-types';
-import { useMediaQuery } from '@/shared/useMediaQuery';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 
 const VIEW_MODE_STORAGE_KEY = 'ln.choose.viewMode';
 const UNKNOWN_DISTRICT_KEY = 'unknown';

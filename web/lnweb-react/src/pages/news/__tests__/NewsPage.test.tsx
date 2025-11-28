@@ -8,7 +8,7 @@ vi.mock('@/data-sources/news', () => ({
   formatNewsDate: (date: string) => `formatted-${date}`,
 }));
 
-vi.mock('@/shared/usePageTitle', () => ({
+vi.mock('@/shared/hooks/usePageTitle', () => ({
   usePageTitle: vi.fn(),
 }));
 

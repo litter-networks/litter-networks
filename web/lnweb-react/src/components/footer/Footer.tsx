@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
-import { getSectionFromPath } from '@/shared/sections';
+import { getSectionFromPath } from '@/shared/utils/sections';
 import styles from './styles/footer.module.css';
 
 /**

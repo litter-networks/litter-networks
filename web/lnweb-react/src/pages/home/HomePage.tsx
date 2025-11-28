@@ -3,8 +3,8 @@ import { appEnv } from '@/config/env';
 import { useNavData } from '@/features/nav/useNavData';
 import type { Network } from '@/data-sources/networks';
 import { StatsBoardImage } from '@/components/stats/StatsBoardImage';
-import { usePageTitle } from '@/shared/usePageTitle';
-import { useMediaQuery } from '@/shared/useMediaQuery';
+import { usePageTitle } from '@/shared/hooks/usePageTitle';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import styles from './styles/home.module.css';
 
 type BlockType = 'knowledge' | 'join-in' | 'news';

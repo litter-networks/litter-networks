@@ -1,4 +1,8 @@
-﻿/* global L */
+// @ts-nocheck
+import 'leaflet/dist/leaflet.css';
+import './maps.module.css';
+
+/* global L */
 
 let mapInstance = null;
 let areaLayers = [];

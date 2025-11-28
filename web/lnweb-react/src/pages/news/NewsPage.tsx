@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchNewsItems, formatNewsDate, type NewsItem } from '@/data-sources/news';
-import { usePageTitle } from '@/shared/usePageTitle';
+import { usePageTitle } from '@/shared/hooks/usePageTitle';
 import styles from './styles/news.module.css';
 
 /**

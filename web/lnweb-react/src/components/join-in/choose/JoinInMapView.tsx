@@ -6,8 +6,8 @@ import {
   type RefObject,
 } from 'react';
 import { fetchAreaInfo } from '@/data-sources/maps';
-import { loadMapsAssets } from '@/shared/mapsAssets';
-import { useMediaQuery } from '@/shared/useMediaQuery';
+import { loadMapsAssets } from '@/shared/maps/mapsAssets';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import type { ViewMode } from '@/pages/join-in/components/ChooserWidget';
 import styles from '@/pages/join-in/styles/join-in-choose.module.css';
 

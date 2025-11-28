@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { scheduleStateUpdate } from '@/shared/scheduleStateUpdate';
+import { scheduleStateUpdate } from '@/shared/utils/scheduleStateUpdate';
 
 /**
  * Simple hook that matches a media query while providing an SSR-safe default.

@@ -3,8 +3,8 @@ import { useNavData } from '@/features/nav/useNavData';
 import { fetchDistrictLocalInfo, type DistrictLocalInfo } from '@/data-sources/joinIn';
 import { fetchDistrictsCsv, type DistrictCsvRow } from '@/data-sources/districts';
 import type { Network } from '@/data-sources/networks';
-import { usePageTitle } from '@/shared/usePageTitle';
-import { getPrimaryDistrictId } from '@/shared/districtIds';
+import { usePageTitle } from '@/shared/hooks/usePageTitle';
+import { getPrimaryDistrictId } from '@/shared/utils/districtIds';
 import styles from './styles/join-in.module.css';
 
 interface InfoBlock {

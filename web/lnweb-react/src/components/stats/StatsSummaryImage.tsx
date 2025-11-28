@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import type { StatsSummary } from '@/data-sources/stats';
-import { loadHtml2Canvas } from '@/shared/loadHtml2Canvas';
+import { loadHtml2Canvas } from '@/shared/utils/loadHtml2Canvas';
 import boardStyles from './styles/join-in-summary-board.module.css';
 
 interface StatsSummaryImageProps {

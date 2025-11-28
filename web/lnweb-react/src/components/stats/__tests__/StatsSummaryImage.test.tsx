@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { StatsSummaryImage } from '../StatsSummaryImage';
-import { loadHtml2Canvas } from '@/shared/loadHtml2Canvas';
+import { loadHtml2Canvas } from '@/shared/utils/loadHtml2Canvas';
 
-vi.mock('@/shared/loadHtml2Canvas', () => ({
+vi.mock('@/shared/utils/loadHtml2Canvas', () => ({
   loadHtml2Canvas: vi.fn(),
 }));
 

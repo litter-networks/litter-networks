@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { fetchAreaInfo } from '@/data-sources/maps';
-import { loadMapsAssets } from '@/shared/mapsAssets';
+import { loadMapsAssets } from '@/shared/maps/mapsAssets';
 import styles from './styles/map-area.module.css';
 
 /**

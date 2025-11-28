@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { DistrictGroup } from '@/pages/join-in/choose-types';
-import { useMediaQuery } from '@/shared/useMediaQuery';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import type { ViewMode } from '@/pages/join-in/components/ChooserWidget';
 import styles from '@/pages/join-in/styles/join-in-choose.module.css';
 

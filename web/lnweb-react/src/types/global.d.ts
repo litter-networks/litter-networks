@@ -12,5 +12,6 @@ declare global {
       modeIn?: string,
     ) => void;
     updateMapSelection?: (selection: { districtId?: string; networkId?: string }) => void;
+    fetchGeoJSON?: (url: string) => Promise<unknown>;
   }
 }

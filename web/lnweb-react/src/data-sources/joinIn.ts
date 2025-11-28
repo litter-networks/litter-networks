@@ -1,5 +1,5 @@
 import { apiRequest } from '@/lib/httpClient';
-import { getPrimaryDistrictId } from '@/shared/districtIds';
+import { getPrimaryDistrictId } from '@/shared/utils/districtIds';
 
 export interface DistrictLocalInfo {
   uniqueId: string;

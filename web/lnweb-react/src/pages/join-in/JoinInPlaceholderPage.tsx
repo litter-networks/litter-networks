@@ -1,4 +1,4 @@
-import { usePageTitle } from '@/shared/usePageTitle';
+import { usePageTitle } from '@/shared/hooks/usePageTitle';
 import styles from './styles/join-in.module.css';
 
 interface JoinInPlaceholderPageProps {

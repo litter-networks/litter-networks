@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
 import { NetworkSwitcher } from '@/components/network-switcher/NetworkSwitcher';
-import { getSectionFromPath } from '@/shared/sections';
+import { getSectionFromPath } from '@/shared/utils/sections';
 import { getHeaderColorClass, getSearchColorClass } from './header-helpers';
 import styles from './styles/header.module.css';
 

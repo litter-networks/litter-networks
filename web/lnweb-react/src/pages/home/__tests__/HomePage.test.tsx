@@ -13,7 +13,7 @@ vi.mock('@/components/stats/StatsBoardImage', () => ({
   ),
 }));
 
-vi.mock('@/shared/usePageTitle', () => ({
+vi.mock('@/shared/hooks/usePageTitle', () => ({
   usePageTitle: vi.fn(),
 }));
 
