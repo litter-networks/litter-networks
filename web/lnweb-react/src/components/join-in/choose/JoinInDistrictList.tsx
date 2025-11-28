@@ -21,8 +21,6 @@ const DEFAULT_PANEL_WIDTH = 420;
 const MIN_PANEL_WIDTH = 320;
 const MAX_PANEL_WIDTH = 640;
 const DESKTOP_BREAKPOINT = 1100;
-const PANEL_LEFT_OFFSET = 120;
-
 const clampWidth = (value: number) => {
   if (Number.isNaN(value)) return DEFAULT_PANEL_WIDTH;
   return Math.min(MAX_PANEL_WIDTH, Math.max(MIN_PANEL_WIDTH, value));
@@ -50,7 +48,7 @@ export function JoinInDistrictList({
     }
     return clampWidth(Number.parseInt(stored, 10));
   });
-  const resizingRef = useRef(false);
+  const resizingStateRef = useRef<{ startX: number; startWidth: number } | null>(null);
 
   const persistWidth = useCallback(
     (width: number) => {
@@ -65,14 +63,15 @@ export function JoinInDistrictList({
 
   useEffect(() => {
     const pointerMove = (event: PointerEvent) => {
-      if (!resizingRef.current || !isDesktop) {
+      if (!resizingStateRef.current || !isDesktop) {
         return;
       }
-      const proposed = event.clientX - PANEL_LEFT_OFFSET;
+      const delta = event.clientX - resizingStateRef.current.startX;
+      const proposed = resizingStateRef.current.startWidth + delta;
       persistWidth(proposed);
     };
     const pointerUp = () => {
-      resizingRef.current = false;
+      resizingStateRef.current = null;
     };
     window.addEventListener('pointermove', pointerMove);
     window.addEventListener('pointerup', pointerUp);
@@ -86,9 +85,12 @@ export function JoinInDistrictList({
     (event: ReactPointerEvent<HTMLDivElement>) => {
       if (!isDesktop) return;
       event.preventDefault();
-      resizingRef.current = true;
+      resizingStateRef.current = {
+        startX: event.clientX,
+        startWidth: panelWidth,
+      };
     },
-    [isDesktop],
+    [isDesktop, panelWidth],
   );
 
   useEffect(() => {

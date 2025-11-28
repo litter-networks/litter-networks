@@ -100,13 +100,22 @@
 .resizer {
   position: absolute;
   top: 0;
-  right: 0;
-  width: 14px;
+  right: -10px;
+  width: 16px;
   height: 100%;
   cursor: ew-resize;
   display: none;
   z-index: 4;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(39, 62, 42, 0.25), rgba(0, 0, 0, 0));
+  border-radius: 999px;
+  box-shadow: 0 0 8px rgba(120, 180, 255, 0.3);
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+
+.resizer:hover {
+  border: 1px solid rgba(120, 173, 255, 0.4);
+  background: linear-gradient(180deg, rgba(108, 143, 238, 0.35), rgba(70, 112, 205, 0.35));
+  box-shadow: 0 0 16px rgba(160, 220, 255, 0.85), 0 0 4px rgba(122, 180, 255, 0.6);
+  transform: scaleX(1.05);
 }
 
 .listSheet {
@@ -371,9 +380,9 @@
     position: relative;
     inset: auto;
     width: auto;
+    padding-right: 16px;
     background: rgba(255, 255, 255, 0.96);
     border: none;
-    border-right: 4px solid rgba(127, 173, 116, 0.25);
     border-radius: 0;
     box-shadow: none;
     z-index: 2;
