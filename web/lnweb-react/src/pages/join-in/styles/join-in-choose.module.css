@@ -324,11 +324,16 @@
   height: 320px;
 }
 
-@media (max-width: 768px) and (orientation: portrait) {
+@media (max-width: 1099px) {
   .listSurface {
-    padding-top: 220px;
+    padding-top: 0px;
+  }
+
+  .splitLayout {
+    display: block;
   }
 }
+
 
 @media (min-width: 1100px) {
   .mapContainerShell {
@@ -382,12 +387,6 @@
   }
 
   .resizer {
-    display: block;
-  }
-}
-
-@media (max-width: 1099px) {
-  .splitLayout {
     display: block;
   }
 }
