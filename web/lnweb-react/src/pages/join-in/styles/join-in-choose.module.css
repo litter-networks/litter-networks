@@ -114,7 +114,8 @@
   transition: opacity 140ms ease, box-shadow 140ms ease, transform 140ms ease, background 140ms ease;
 }
 
-.resizer:hover {
+.resizer:hover,
+.resizer[data-active="true"] {
   opacity: 1;
   background: var(--splitter-color);
   box-shadow: 0 0 18px color-mix(in srgb, var(--splitter-color) 70%, white), 0 0 6px color-mix(in srgb, var(--splitter-color) 55%, transparent);

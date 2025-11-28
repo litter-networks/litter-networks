@@ -38,6 +38,7 @@ export function JoinInDistrictList({
 }: Props) {
   const previousViewModeRef = useRef<ViewMode>(viewMode);
   const isDesktop = useMediaQuery(`(min-width: ${DESKTOP_BREAKPOINT}px)`, false);
+  const [isResizing, setIsResizing] = useState(false);
   const [panelWidth, setPanelWidth] = useState(() => {
     if (typeof window === 'undefined') {
       return DEFAULT_PANEL_WIDTH;
@@ -72,6 +73,7 @@ export function JoinInDistrictList({
     };
     const pointerUp = () => {
       resizingStateRef.current = null;
+      setIsResizing(false);
     };
     window.addEventListener('pointermove', pointerMove);
     window.addEventListener('pointerup', pointerUp);
@@ -79,7 +81,7 @@ export function JoinInDistrictList({
       window.removeEventListener('pointermove', pointerMove);
       window.removeEventListener('pointerup', pointerUp);
     };
-  }, [isDesktop, persistWidth]);
+  }, [isDesktop, persistWidth, setIsResizing]);
 
   const handleResizerPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -89,6 +91,7 @@ export function JoinInDistrictList({
         startX: event.clientX,
         startWidth: panelWidth,
       };
+      setIsResizing(true);
     },
     [isDesktop, panelWidth],
   );
@@ -117,7 +120,13 @@ export function JoinInDistrictList({
           : undefined
       }
     >
-      {isDesktop && <div className={styles.resizer} onPointerDown={handleResizerPointerDown} />}
+      {isDesktop && (
+        <div
+          className={styles.resizer}
+          data-active={isResizing ? 'true' : undefined}
+          onPointerDown={handleResizerPointerDown}
+        />
+      )}
       <div className={styles.listScroll} data-joinin-list-scroll>
         <div className={styles.listSheet}>
           <div className={styles.listHeader}>
