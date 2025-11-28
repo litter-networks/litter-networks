@@ -15,9 +15,9 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-top: -70px;
+  margin-top: -55px;
   flex: 1;
-  min-height: calc(100vh - 160px);
+  min-height: calc(100vh - 98px);
 }
 
 .splitLayout {
@@ -31,13 +31,14 @@
   position: relative;
   overflow: hidden;
   background-color: #fff;
+  min-height: 0;
 }
 
 .mapRoot,
 .mapSurface :global(#map) {
   width: 100%;
   height: 100%;
-  min-height: calc(100vh - 40px);
+  min-height: 0;
 }
 
 .mapPane {
@@ -81,6 +82,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 .listScroll {
@@ -329,10 +331,16 @@
 }
 
 @media (min-width: 1100px) {
+  .mapContainerShell {
+    height: calc(100vh - 160px);
+    max-height: calc(100vh - 160px);
+  }
+
   .splitLayout {
     display: flex;
     align-items: stretch;
     gap: 0;
+    min-height: 0;
   }
 
   .viewPane,
@@ -364,6 +372,8 @@
     border-radius: 0;
     box-shadow: none;
     z-index: 2;
+    height: 100%;
+    max-height: 100%;
   }
 
   .listScroll {

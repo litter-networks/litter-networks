@@ -713,7 +713,7 @@ function sendMessageToParent(areaId, networkId, e) {
 }
 
 function fitMapToBounds(map, allBounds, doAnimate=false) {
-    const scaledBounds = scaleBounds(allBounds, 1.025);
+    const scaledBounds = scaleBounds(allBounds, 1.25);
     map.fitBounds(scaledBounds, { animate: doAnimate });
 }
 
