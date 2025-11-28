@@ -98,6 +98,7 @@
 }
 
 .resizer {
+  --splitter-color: rgb(99, 154, 255);
   position: absolute;
   top: 0;
   right: -10px;
@@ -106,16 +107,18 @@
   cursor: ew-resize;
   display: none;
   z-index: 4;
-  border-radius: 999px;
-  box-shadow: 0 0 8px rgba(120, 180, 255, 0.3);
-  transition: box-shadow 150ms ease, transform 150ms ease;
+  border: 1px solid color-mix(in srgb, var(--splitter-color) 60%, transparent);
+  background: color-mix(in srgb, var(--splitter-color) 12%, transparent);
+  opacity: 0;
+  box-shadow: none;
+  transition: opacity 140ms ease, box-shadow 140ms ease, transform 140ms ease, background 140ms ease;
 }
 
 .resizer:hover {
-  border: 1px solid rgba(120, 173, 255, 0.4);
-  background: linear-gradient(180deg, rgba(108, 143, 238, 0.35), rgba(70, 112, 205, 0.35));
-  box-shadow: 0 0 16px rgba(160, 220, 255, 0.85), 0 0 4px rgba(122, 180, 255, 0.6);
-  transform: scaleX(1.05);
+  opacity: 1;
+  background: var(--splitter-color);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--splitter-color) 70%, white), 0 0 6px color-mix(in srgb, var(--splitter-color) 55%, transparent);
+  transform: scaleX(1.08);
 }
 
 .listSheet {
