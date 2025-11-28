@@ -9,6 +9,7 @@ import { JoinInMapView } from '@/components/join-in/choose/JoinInMapView';
 import { JoinInDistrictList } from '@/components/join-in/choose/JoinInDistrictList';
 import styles from './styles/join-in-choose.module.css';
 import type { DistrictGroup } from './choose-types';
+import { useMediaQuery } from '@/shared/useMediaQuery';
 
 const VIEW_MODE_STORAGE_KEY = 'ln.choose.viewMode';
 const UNKNOWN_DISTRICT_KEY = 'unknown';
@@ -23,10 +24,15 @@ interface LayerClickMessage {
   };
 }
 
+type ScrollTarget =
+  | { type: 'district'; id: string }
+  | { type: 'network'; id: string; districtId?: string };
+
 export function JoinInChoosePage() {
   const { network, networks } = useNavData();
   const navigate = useNavigate();
   const location = useLocation();
+  const isDesktop = useMediaQuery('(min-width: 1100px)', false);
   usePageTitle('Join In | Choose');
 
   const [areaName, setAreaName] = useState('-');
@@ -36,6 +42,7 @@ export function JoinInChoosePage() {
   const [districtMeta, setDistrictMeta] = useState<Record<string, DistrictCsvRow>>({});
   const mapRootRef = useRef<HTMLDivElement>(null);
   const selectionFromMapRef = useRef(false);
+  const [scrollTarget, setScrollTarget] = useState<ScrollTarget | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     if (typeof window === 'undefined') return 'map';
     const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
@@ -163,11 +170,61 @@ export function JoinInChoosePage() {
         scheduleStateUpdate(() => setNetworkName('-'));
         scheduleStateUpdate(() => setSelectedNetworkId(null));
       }
+      const scrollCandidate =
+        typeof networkId === 'string' && networkId.length
+          ? { type: 'network', id: networkId, districtId: info.areaId }
+          : typeof info.areaId === 'string' && info.areaId.length
+          ? { type: 'district', id: info.areaId }
+          : null;
+      if (scrollCandidate) {
+        setScrollTarget(scrollCandidate);
+      }
     };
 
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
   }, []);
+  useEffect(() => {
+    if (!scrollTarget) {
+      return;
+    }
+    if (!(isDesktop || viewMode === 'list')) {
+      return;
+    }
+    if (scrollTarget.type === 'network' && scrollTarget.districtId && !expandedDistricts.has(scrollTarget.districtId)) {
+      return;
+    }
+
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const selector =
+      scrollTarget.type === 'network'
+        ? `[data-net-id="${scrollTarget.id}"]`
+        : `[data-district-id="${scrollTarget.id}"]`;
+    const element = document.querySelector<HTMLElement>(selector);
+    if (!element) {
+      return;
+    }
+
+    const scrollContainer = document.querySelector<HTMLElement>('[data-joinin-list-scroll]');
+    const margin = 64;
+    if (scrollContainer) {
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      const targetTop =
+        scrollContainer.scrollTop + (elementRect.top - containerRect.top) - margin;
+      scrollContainer.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: 'smooth',
+      });
+    } else {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    }
+
+    setScrollTarget(null);
+  }, [scrollTarget, viewMode, isDesktop, expandedDistricts]);
   useEffect(() => {
     if (!selectedNetworkId) return;
     const matched = networks.find((n) => n.uniqueId === selectedNetworkId);

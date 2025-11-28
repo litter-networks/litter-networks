@@ -116,7 +116,7 @@ export function JoinInDistrictList({
       }
     >
       {isDesktop && <div className={styles.resizer} onPointerDown={handleResizerPointerDown} />}
-      <div className={styles.listScroll}>
+      <div className={styles.listScroll} data-joinin-list-scroll>
         <div className={styles.listSheet}>
           <div className={styles.listHeader}>
             Here you can choose any one of the <b>{totalNetworks}</b> Litter Networks across <b>{totalDistricts}</b> local-authority areas!
@@ -128,7 +128,11 @@ export function JoinInDistrictList({
               const networkVerb = networkCount === 1 ? 'is' : 'are';
               const networkLabel = networkCount === 1 ? 'Litter Network' : 'Litter Networks';
               return (
-                <div key={group.id} className={`${styles.districtCard} ${isOpen ? styles.districtCardOpen : ''}`}>
+                <div
+                  key={group.id}
+                  data-district-id={group.id}
+                  className={`${styles.districtCard} ${isOpen ? styles.districtCardOpen : ''}`}
+                >
                   <button
                     type="button"
                     className={styles.districtToggle}
