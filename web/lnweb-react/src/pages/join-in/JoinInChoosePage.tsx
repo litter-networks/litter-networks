@@ -154,9 +154,11 @@ export function JoinInChoosePage() {
       const info = event.data.data;
       selectionFromMapRef.current = true;
       scheduleStateUpdate(() => setAreaName(info.areaFullName || info.areaId || '-'));
-      if (info.networkId) {
-        scheduleStateUpdate(() => setNetworkName(info.networkFullName || info.networkId));
-        scheduleStateUpdate(() => setSelectedNetworkId(info.networkId));
+      const { networkFullName, networkId } = info;
+      if (typeof networkId === 'string' && networkId.length > 0) {
+        const resolvedName = networkFullName ?? networkId;
+        scheduleStateUpdate(() => setNetworkName(resolvedName));
+        scheduleStateUpdate(() => setSelectedNetworkId(networkId));
       } else {
         scheduleStateUpdate(() => setNetworkName('-'));
         scheduleStateUpdate(() => setSelectedNetworkId(null));

@@ -8,6 +8,9 @@ if command -v tput >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != "dumb
   clear
 fi
 
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+pushd "${SCRIPT_DIR}" >/dev/null
+
 export AWS_PROFILE="${AWS_PROFILE:-ln}"
 export DEPLOY_BUCKET="lnweb-public"
 export DISTRIBUTION_ID="${DISTRIBUTION_ID:-E38XGOGM7XNRC5}"
@@ -54,6 +57,8 @@ run_stage "Vite build" npm run build
 
 run_stage "S3 sync + metadata" \
   python3 scripts/sync_s3_with_metadata.py
+
+popd >/dev/null
 
 total_end_time=$(date +%s)
 total_elapsed=$(( total_end_time - start_time ))
