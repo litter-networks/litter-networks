@@ -77,6 +77,34 @@ function scaleBounds(bounds, scaleFactor) {
     return newBounds;
 }
 
+const ALL_BOUNDS_SCALE = 1.05;
+const AREA_BOUNDS_SCALE = 1.05;
+const NETWORK_BOUNDS_SCALE = 1.25;
+
+function fitMapToAllBounds(map, bounds, options = {}) {
+    if (!map || !bounds) {
+        return;
+    }
+    const scaledBounds = scaleBounds(bounds, ALL_BOUNDS_SCALE);
+    map.fitBounds(scaledBounds, { animate: false, ...options });
+}
+
+function fitMapToAreaBounds(map, bounds, options = {}) {
+    if (!map || !bounds) {
+        return;
+    }
+    const scaledBounds = scaleBounds(bounds, AREA_BOUNDS_SCALE);
+    map.fitBounds(scaledBounds, { animate: false, ...options });
+}
+
+function fitMapToNetworkBounds(map, bounds, options = {}) {
+    if (!map || !bounds) {
+        return;
+    }
+    const scaledBounds = scaleBounds(bounds, NETWORK_BOUNDS_SCALE);
+    map.fitBounds(scaledBounds, { animate: false, ...options });
+}
+
 
 function addToggleSnapControl(map) {
     var locateControl = L.Control.extend({
@@ -153,9 +181,9 @@ function addFrameAllButton(map, allBounds) {
             container.style.cursor = 'pointer';
             container.style.userSelect = 'none';
 
-            // Add the click event to call fitMapToBounds with allBounds
+            // Add the click event to call fitMapToAllBounds with allBounds
             container.onclick = function (e) {
-                fitMapToBounds(map, allBounds, true);
+                fitMapToAllBounds(map, allBounds, { animate: true });
                 L.DomEvent.stopPropagation(e); // Prevents event propagation to the map
             };
 
@@ -183,10 +211,10 @@ function addFrameSelectedAreaButton(map) {
             frameAreaButton.style.cursor = 'pointer';
             frameAreaButton.style.userSelect = 'none';
 
-            // Add the click event to call fitMapToBounds with area-bounds
+            // Add the click event to call fitMapToAreaBounds with area-bounds
             frameAreaButton.onclick = function (e) {
                 if (activeAreaLayer)
-                    fitMapToBounds(map, activeAreaLayer.getBounds(), true);
+                    fitMapToAreaBounds(map, activeAreaLayer.getBounds(), { animate: true });
                 L.DomEvent.stopPropagation(e); // Prevents event propagation to the map
             };
 
@@ -230,10 +258,10 @@ function addFrameSelectedNetworkButton(map) {
             frameNetworkButton.style.cursor = 'pointer';
             frameNetworkButton.style.userSelect = 'none';
 
-            // Add the click event to call fitMapToBounds with area-bounds
+            // Add the click event to call fitMapToNetworkBounds with network-bounds
             frameNetworkButton.onclick = function (e) {
                 if (activeNetworkLayer)
-                    fitMapToBounds(map, activeNetworkLayer.getBounds(), true);
+                    fitMapToNetworkBounds(map, activeNetworkLayer.getBounds(), { animate: true });
                 L.DomEvent.stopPropagation(e); // Prevents event propagation to the map
             };
 
@@ -265,7 +293,7 @@ async function addGeoJSONLayers(map, areaInfo, mapsSourceDomain, showNetworks) {
     try {
         const geojsonData = await fetchAllGeoJSON(areaInfo, mapsSourceDomain);
         const { allBounds, layers } = createLayers(geojsonData, areaInfo, map, mapsSourceDomain, showNetworks);
-        fitMapToBounds(map, allBounds);
+        fitMapToAllBounds(map, allBounds);
         document.getElementById('map').style.display = 'block';
 
         if (mode === MODE_DEFAULT) {
@@ -483,8 +511,7 @@ function addAreaDoubleClickEventListener(layer, map) {
         if (layer.uniqueId) {
             e.originalEvent.stopPropagation();
             e.originalEvent.preventDefault();
-            var layerBounds = scaleBounds(layer.getBounds(), 1.025);
-            map.fitBounds(layerBounds, { animate: true });
+            fitMapToAreaBounds(map, layer.getBounds(), { animate: true });
         }
     });
 }
@@ -594,8 +621,7 @@ function addNetworkDoubleClickEventListener(layer, map) {
         e.originalEvent.preventDefault();
 
         if (layer.uniqueId) {
-            var layerBounds = scaleBounds(layer.getBounds(), 1.025);
-            map.fitBounds(layerBounds, { animate: true });
+            fitMapToNetworkBounds(map, layer.getBounds(), { animate: true });
         }
     });
 }
@@ -710,11 +736,6 @@ function sendMessageToParent(areaId, networkId, e) {
             lng: e.latlng.lng
         }
     }, '*'); // Replace '*' with a specific domain for security if needed
-}
-
-function fitMapToBounds(map, allBounds, doAnimate=false) {
-    const scaledBounds = scaleBounds(allBounds, 1.25);
-    map.fitBounds(scaledBounds, { animate: doAnimate });
 }
 
 let selectionTimeout;
@@ -1612,8 +1633,7 @@ async function applySelection(currentSelection) {
                 });
             }
 
-            const layerBounds = scaleBounds(networkLayer.getBounds(), 1.025);
-            mapInstance.fitBounds(layerBounds, { animate: true, duration: 1 });
+            fitMapToNetworkBounds(mapInstance, networkLayer.getBounds(), { animate: true, duration: 1 });
         }
     }
 }
