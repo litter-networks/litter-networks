@@ -213,12 +213,17 @@ export function JoinInChoosePage() {
     if (scrollContainer) {
       const containerRect = scrollContainer.getBoundingClientRect();
       const elementRect = element.getBoundingClientRect();
-      const targetTop =
-        scrollContainer.scrollTop + (elementRect.top - containerRect.top) - margin;
-      scrollContainer.scrollTo({
-        top: Math.max(0, targetTop),
-        behavior: 'smooth',
-      });
+      const isFullyVisible =
+        elementRect.top >= containerRect.top + margin &&
+        elementRect.bottom <= containerRect.bottom;
+      if (!isFullyVisible) {
+        const targetTop =
+          scrollContainer.scrollTop + (elementRect.top - containerRect.top) - margin;
+        scrollContainer.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: 'smooth',
+        });
+      }
     } else {
       element.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
     }

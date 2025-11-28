@@ -119,7 +119,7 @@ export function JoinInDistrictList({
       <div className={styles.listScroll} data-joinin-list-scroll>
         <div className={styles.listSheet}>
           <div className={styles.listHeader}>
-            Here you can choose any one of the <b>{totalNetworks}</b> Litter Networks across <b>{totalDistricts}</b> local-authority areas!
+            Here you can choose from any of the <b>{totalNetworks}</b> Litter Networks across <b>{totalDistricts}</b> local-authority areas!
           </div>
           <div className={styles.districtList}>
             {groupedDistricts.map((group) => {
@@ -156,7 +156,7 @@ export function JoinInDistrictList({
                     <ul className={styles.networkList}>
                       <li className={styles.districtIntro}>
                         <p>
-                          There {networkVerb} currently <b>{networkCount}</b> {networkLabel} in {group.name}.
+                          There {networkVerb} <b>{networkCount}</b> {networkLabel} in {group.name}.
                         </p>
                       </li>
                       {group.networks
