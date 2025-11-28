@@ -349,20 +349,26 @@ function createLayers(geojsonData, areaInfo, map, mapsSourceDomain, showNetworks
     return { allBounds, layers };
 }
 
+function geometryHasFilledSurface(geometry) {
+    if (!geometry) {
+        return false;
+    }
+    const type = geometry.type;
+    if (type === 'Polygon' || type === 'MultiPolygon') {
+        return true;
+    }
+    if (type === 'GeometryCollection' && Array.isArray(geometry.geometries)) {
+        return geometry.geometries.some(child => geometryHasFilledSurface(child));
+    }
+    return false;
+}
+
 function createLayer(geoJSONData, colorClass, uniqueId) {
 
     const layer = L.geoJSON(geoJSONData, {
         style: function (feature) {
-            // Check the geometry type
-            const geometryType = feature.geometry.type;
-            
-            // Define a base style
-            let style = { className: colorClass + "-nofill" };
-
-            // Apply fill only for Polygon or MultiPolygon
-            if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
-                style = { className: colorClass };
-            }
+            const shouldFill = geometryHasFilledSurface(feature.geometry);
+            let style = { className: shouldFill ? colorClass : colorClass + "-nofill" };
 
             if (mode !== MODE_DEFAULT) {
                 // Make the layer invisible (but still present)
@@ -697,12 +703,10 @@ function classifyAsAreaBased(networkData) {
     // Check if all geometries are of type 'Polygon' or 'MultiPolygon'
     if (networkData.type === 'FeatureCollection') {
         return networkData.features.every(feature => {
-            const geomType = feature.geometry.type;
-            return geomType === 'Polygon' || geomType === 'MultiPolygon';
+            return geometryHasFilledSurface(feature.geometry);
         });
     } else if (networkData.type === 'Feature') {
-        const geomType = networkData.geometry.type;
-        return geomType === 'Polygon' || geomType === 'MultiPolygon';
+        return geometryHasFilledSurface(networkData.geometry);
     }
     return false;
 }
