@@ -170,7 +170,7 @@ export function JoinInChoosePage() {
         scheduleStateUpdate(() => setNetworkName('-'));
         scheduleStateUpdate(() => setSelectedNetworkId(null));
       }
-      const scrollCandidate =
+      const scrollCandidate: ScrollTarget | null =
         typeof networkId === 'string' && networkId.length
           ? { type: 'network', id: networkId, districtId: info.areaId }
           : typeof info.areaId === 'string' && info.areaId.length
@@ -228,7 +228,7 @@ export function JoinInChoosePage() {
       element.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
     }
 
-    setScrollTarget(null);
+    scheduleStateUpdate(() => setScrollTarget(null));
   }, [scrollTarget, viewMode, isDesktop, expandedDistricts]);
   useEffect(() => {
     if (!selectedNetworkId) return;

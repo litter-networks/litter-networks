@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import 'leaflet/dist/leaflet.css';
-import './maps.module.css';
+import './maps.css';
 
 /* global L */
 
@@ -64,8 +65,8 @@ function setActiveNetworkLayer(layer) {
 }
 
 function scaleBounds(bounds, scaleFactor) {
-    var center = bounds.getCenter();
-    var newBounds = L.latLngBounds(
+    const center = bounds.getCenter();
+    const newBounds = L.latLngBounds(
         [
             [
                 center.lat + (bounds.getNorth() - center.lat) * scaleFactor,
@@ -111,12 +112,12 @@ function fitMapToNetworkBounds(map, bounds, options = {}) {
 
 
 function addToggleSnapControl(map) {
-    var locateControl = L.Control.extend({
+    const locateControl = L.Control.extend({
         options: {
             position: 'bottomleft'
         },
         onAdd: function () {
-            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-size  leaflet-control-frame-all');
+            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-size  leaflet-control-frame-all');
             container.innerHTML = '<div>Disable Snap</div>';
 
             // Add the following styles
@@ -142,12 +143,12 @@ function addToggleSnapControl(map) {
 }
 
 function addGeolocationControl(map) {
-    var locateControl = L.Control.extend({
+    const locateControl = L.Control.extend({
         options: {
             position: 'bottomright'
         },
         onAdd: function (map) {
-            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-size leaflet-control-locate');
+            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-size leaflet-control-locate');
             container.title = 'Show My Location';
 
             container.onclick = function () {
@@ -324,7 +325,7 @@ async function fetchAllGeoJSON(areaInfo, mapsSourceDomain) {
 }
 
 function createLayers(geojsonData, areaInfo, map, mapsSourceDomain, showNetworks) {
-    var allBounds = L.latLngBounds();
+    const allBounds = L.latLngBounds();
     const layers = [];
 
     geojsonData.forEach((data, index) => {
@@ -553,7 +554,7 @@ function applyInverseOverlay(map, layerGroup) {
         [90, -180]
     ];
 
-    let holes = [];
+    const holes = [];
 
     // Collect latLngs for all polygons in the LayerGroup
     layerGroup.eachLayer(layer => {
@@ -592,7 +593,7 @@ function applyInverseOverlay(map, layerGroup) {
 
 // Function to flatten latLngs to an array of linear rings
 function flattenLatLngsToRings(latLngs) {
-    let rings = [];
+    const rings = [];
 
     function processLatLngs(latLngs) {
         if (Array.isArray(latLngs) && latLngs.length > 0) {
@@ -795,12 +796,12 @@ function openStreetViewAtLocation(latlng) {
 }
 
 function addStreetViewControl(map) {
-    var streetViewControl = L.Control.extend({
+    const streetViewControl = L.Control.extend({
         options: {
             position: 'bottomright'
         },
         onAdd: function (map) {
-            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-size leaflet-control-frame-all');
+            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-size leaflet-control-frame-all');
             container.title = 'Select Location for Street View';
 
             // Add the text or icon for Street View
@@ -1262,7 +1263,6 @@ function initDrawSystem(map) {
                 currentName !== previousName // Current name is different
             ) {
                 // Skip this sequence as it's a temporary deviation
-                console.log(`Skipping points ${i} to ${j - 1} due to temporary deviation.`);
             } else {
                 // Include this sequence in the adjusted locations
                 for (let k = i; k < j; k++) {
@@ -1597,7 +1597,7 @@ function notifyUserDataChanged() {
 
     // Remove empty fields from the data object
     const filteredData = Object.fromEntries(
-        Object.entries(data).filter(([_, value]) => value.length > 0) // Only keep non-empty arrays
+        Object.entries(data).filter(([, value]) => value.length > 0) // Only keep non-empty arrays
     );
 
     // Convert the filtered data object to JSON
