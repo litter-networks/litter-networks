@@ -12,9 +12,9 @@ const env = { ...process.env };
 delete env.ELECTRON_RUN_AS_NODE;
 delete env.ELECTRON_NO_ATTACH_CONSOLE;
 
-if (!env.VITE_DEV_SERVER_URL) {
-  env.VITE_DEV_SERVER_URL = "http://localhost:5173";
-}
+const port = env.VITE_DEV_SERVER_PORT ? env.VITE_DEV_SERVER_PORT : "5173";
+const defaultUrl = `http://localhost:${port}`;
+env.VITE_DEV_SERVER_URL = env.VITE_DEV_SERVER_URL ?? defaultUrl;
 
 const args = process.argv.slice(2);
 const electronArgs = [...args, "."]; // Path to the Electron app goes last.
