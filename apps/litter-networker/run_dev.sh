@@ -21,4 +21,7 @@ if lsof -iTCP:"$PORT" -sTCP:LISTEN -Pn >/dev/null 2>&1; then
   exit 1
 fi
 
+echo "[info] Running full test suite (build + tests)..."
+npm run test:full
+
 npm run dev

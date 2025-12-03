@@ -1,5 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { CloudFrontClient, CreateInvalidationCommand, waitUntilInvalidationCompleted } from "@aws-sdk/client-cloudfront";
 import { fromIni } from "@aws-sdk/credential-providers";
 import os from "node:os";
 import crypto from "node:crypto";
@@ -33,6 +34,11 @@ const dynamoClient = DynamoDBDocumentClient.from(
     credentials: fromIni({ profile: AWS_PROFILE })
   })
 );
+
+const defaultCloudFrontClient = new CloudFrontClient({
+  region: AWS_REGION,
+  credentials: fromIni({ profile: AWS_PROFILE })
+});
 
 const MODE_CONFIG: Record<Exclude<BagMode, BagMode.Mock>, ModeConfig> = {
   [BagMode.Prod]: {
@@ -100,7 +106,10 @@ export class BagCountService {
   private mode: BagMode = BAG_MODE;
   private mockEntries: Array<{ id: string; payload: ApplyBagCountPayload; timestamp: number }> = [];
 
-  constructor() {}
+  constructor(
+    private cloudFrontClient = defaultCloudFrontClient,
+    private waitForInvalidation = waitUntilInvalidationCompleted
+  ) {}
 
   getMode() {
     return this.mode;
@@ -364,6 +373,26 @@ export class BagCountService {
   }
 
   private async invalidateCloudfront(distributionId: string) {
-    console.info(`CloudFront invalidation requested for ${distributionId} (skipped in this build).`);
+    const command = new CreateInvalidationCommand({
+      DistributionId: distributionId,
+      InvalidationBatch: {
+        CallerReference: `${distributionId}-${Date.now()}`,
+        Paths: {
+          Quantity: 1,
+          Items: ["/*"]
+        }
+      }
+    });
+
+    const response = await this.cloudFrontClient.send(command);
+    const invalidationId = response.Invalidation?.Id;
+    if (!invalidationId) {
+      throw new Error("CloudFront invalidation did not return an Id.");
+    }
+
+    await this.waitForInvalidation(
+      { client: this.cloudFrontClient, maxWaitTime: 300, minDelay: 5 },
+      { DistributionId: distributionId, Id: invalidationId }
+    );
   }
 }

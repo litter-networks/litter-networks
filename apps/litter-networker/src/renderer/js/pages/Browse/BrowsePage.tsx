@@ -431,29 +431,31 @@ export default function BrowsePage() {
           prefetchStatus={prefetchStatus}
         />
 
-      {selectedNetwork !== HOME_NETWORK_ID && selectedNetwork ? (
-        <div className={styles.counterGroup}>
-          <CloudfrontInvalidation onInvalidate={handleInvalidateDistribution} />
-          <MemberCounter
-            inputValue={memberInput}
-            onChange={setMemberInput}
-            memberCount={memberRegistered}
-            sinceLabel={memberSinceLabel}
-            onApply={handleMemberApply}
-            onAdvance={handleMemberAdvance}
-            applying={memberApplying}
-          />
-          <BagCounter
-            inputValue={bagInput}
-            onChange={setBagInput}
-            sessionCount={sessionCount}
-            totalLabel={totalLabel}
-            sinceLabel={sinceLabel}
-            onApply={handleApply}
-            applying={applying}
-          />
-        </div>
-      ) : null}
+      <div className={styles.counterGroup}>
+        {selectedNetwork !== HOME_NETWORK_ID && selectedNetwork ? (
+          <>
+            <MemberCounter
+              inputValue={memberInput}
+              onChange={setMemberInput}
+              memberCount={memberRegistered}
+              sinceLabel={memberSinceLabel}
+              onApply={handleMemberApply}
+              onAdvance={handleMemberAdvance}
+              applying={memberApplying}
+            />
+            <BagCounter
+              inputValue={bagInput}
+              onChange={setBagInput}
+              sessionCount={sessionCount}
+              totalLabel={totalLabel}
+              sinceLabel={sinceLabel}
+              onApply={handleApply}
+              applying={applying}
+            />
+          </>
+        ) : null}
+        <CloudfrontInvalidation onInvalidate={handleInvalidateDistribution} />
+      </div>
       </div>
 
       {loading || !snapshot ? (
