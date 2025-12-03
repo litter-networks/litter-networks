@@ -261,12 +261,12 @@ function createDefaultColumns(): WelcomeBlock[][] {
       description: 'Welcome! Learn how we use a Litter Network!',
     },
     {
-      link: 'join-in/choose',
-      blockType: 'join-in',
-      title: 'Join In',
-      description: 'Choose a network and get started!',
-      imageUrl: `${appEnv.staticAssetsBaseUrl}/images/mockup_map.jpg`,
-      classEx: 'block-image-cover-30vh',
+      link: 'news',
+      blockType: 'news',
+      title: 'News',
+      description: 'Read all about it!',
+      imageUrl: 'news-block-gallery',
+      classEx: 'block-image-cover-40vh',
     },
     {
       link: 'join-in',
@@ -277,12 +277,12 @@ function createDefaultColumns(): WelcomeBlock[][] {
   ];
   const right: WelcomeBlock[] = [
     {
-      link: 'news',
-      blockType: 'news',
-      title: 'News',
-      description: 'Read all about it!',
-      imageUrl: 'news-block-gallery',
-      classEx: 'block-image-cover-40vh',
+      link: 'join-in/choose',
+      blockType: 'join-in',
+      title: 'Join In',
+      description: 'Choose a network and get started!',
+      imageUrl: `${appEnv.staticAssetsBaseUrl}/images/mockup_map.jpg`,
+      classEx: 'block-image-cover-30vh',
     },
     {
       link: 'knowledge/our-organisation/about-us',
