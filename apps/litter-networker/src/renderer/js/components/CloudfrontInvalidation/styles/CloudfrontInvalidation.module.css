@@ -1,47 +1,20 @@
 .widget {
   display: flex;
-  flex-direction: row;
   flex: 1;
+  gap: 12px;
+  align-items: center;
 }
 
 .buttonRow {
   display: flex;
   gap: 8px;
   width: 100%;
+  justify-content: center;
 }
 
 .button {
-  text-align: left;
-  border-radius: 12px;
   border: 2px solid rgba(55, 181, 119, 0.8);
-  background: #fff;
-  color: #1e5b33;
-  padding: 10px 14px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background 0.2s ease, transform 0.15s ease;
-}
-
-.button:disabled {
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-
-.button:hover:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.label {
-  font-size: 14px;
-  letter-spacing: 0.08em;
-}
-
-.loading {
-  position: relative;
+  height: 36px;
 }
 
 .spinner {

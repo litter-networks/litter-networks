@@ -1,4 +1,4 @@
-.bagInline {
+.widgetInline {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -15,35 +15,30 @@
   flex-direction: column;
   gap: 4px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .titleRow {
-  font-weight: 500;
+  font-weight: 700;
   text-transform: none;
-  color: var(--color-text-primary);
   text-align: center;
-  margin-bottom: 4px;
+  letter-spacing: 0.04em;
 }
 
 .title {
-  font-size: 16px;
-  letter-spacing: 0;
-  text-transform: none;
+  font-size: 14px;
 }
 
 .statRow {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
   justify-content: center;
-  width: 100%;
 }
 
 .sinceRow {
   color: var(--color-text-secondary);
   text-align: center;
-  width: 100%;
-  margin-top: -6px;
 }
 
 .eyebrow {
@@ -116,4 +111,26 @@
   color: #1e5b33;
   border: 2px solid rgba(55, 181, 119, 0.6) !important;
   box-shadow: none;
+}
+.titleRow {
+  font-weight: 700;
+  text-transform: none;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.title {
+  font-size: 14px;
+}
+
+.statRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.sinceRow {
+  color: var(--color-text-secondary);
+  text-align: center;
 }

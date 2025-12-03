@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import bagStyles from "../BagCounter/styles/BagCounter.module.css";
+import widgetStyles from "../WidgetBase/styles/WidgetBase.module.css";
 import styles from "./styles/CloudfrontInvalidation.module.css";
 
 const TARGETS = [
@@ -30,10 +30,10 @@ const CloudfrontInvalidation = ({ onInvalidate }: Props) => {
   );
 
   return (
-    <div className={`${bagStyles.bagInline} ${styles.widget}`}>
-      <div className={bagStyles.stats}>
-        <div className={bagStyles.titleRow}>
-          <span className={bagStyles.title}>Refresh CDN</span>
+    <div className={`${widgetStyles.widgetInline} ${styles.widget}`}>
+      <div className={widgetStyles.stats}>
+        <div className={widgetStyles.titleRow}>
+          <span className={widgetStyles.title}>Refresh Cloudfront</span>
         </div>
         <div className={styles.buttonRow}>
           {TARGETS.map((target) => {
