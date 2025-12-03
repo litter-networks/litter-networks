@@ -13,6 +13,9 @@ fi
 export NODE_PATH="$SCRIPT_DIR/lambda-layer/nodejs/node_modules:$SCRIPT_DIR/node_modules"
 export AWS_PROFILE="${AWS_PROFILE:-ln}"
 
+echo "Running API unit tests..."
+npm run test
+
 echo "Building TypeScript (if any) ..."
 npm run build
 
