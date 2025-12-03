@@ -5,6 +5,7 @@
   "main": "dist/electron/electron/main/main.js",
   "scripts": {
     "test": "npm run typecheck",
+    "test:unit": "vitest run",
     "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\" \"npm:start:electron\"",
     "dev:background": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
     "dev:renderer": "vite dev --host",
@@ -43,7 +44,10 @@
     "electron-builder": "^24.6.0",
     "typescript": "^5.4.5",
     "vite": "^5.2.0",
-    "wait-on": "^7.0.1"
+    "wait-on": "^7.0.1",
+    "vitest": "^4.0.15",
+    "@testing-library/react": "^14.0.0",
+    "jsdom": "^21.1.0"
   },
   "build": {
     "appId": "org.litternetworks.litter-networker",

@@ -28,6 +28,12 @@ const api = {
       all: { session: number; lastUpdated?: string };
       network: { session: number; lastUpdated?: string };
     }>,
+  applyMemberCount: (payload: { networkId: string; memberCount: number; dataSource?: string }) =>
+    ipcRenderer.invoke("member:apply", payload),
+  getMemberCount: (networkId: string) =>
+    ipcRenderer.invoke("member:getCurrent", networkId) as Promise<
+      { memberCount: number; sampleTime: number; dataSource?: string; reviewAdjustments?: unknown[] } | null
+    >,
   getMonthlyCosts: () => ipcRenderer.invoke("costs:getMonthly") as Promise<MonthlyCostsReport | null>,
   getNetworks: () => ipcRenderer.invoke("networks:get") as Promise<NetworksResponse>,
   updateNetworkRow: (payload: { uniqueId: string; changes: Record<string, string> }) =>

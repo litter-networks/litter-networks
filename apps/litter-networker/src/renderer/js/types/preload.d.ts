@@ -21,6 +21,16 @@ declare global {
       getBagStats: (
         networkId: string
       ) => Promise<{ all: { session: number; lastUpdated?: string }; network: { session: number; lastUpdated?: string } }>;
+      applyMemberCount: (payload: { networkId: string; memberCount: number; dataSource?: string }) => Promise<{
+        uniqueId: string;
+        memberCount: number;
+        sampleTime: number;
+        dataSource: string;
+        reviewAdjustments: unknown[];
+      }>;
+      getMemberCount: (
+        networkId: string
+      ) => Promise<{ memberCount: number; sampleTime: number; dataSource?: string; reviewAdjustments?: unknown[] } | null>;
       getMonthlyCosts: () => Promise<MonthlyCostsReport | null>;
       getNetworks: () => Promise<NetworksResponse>;
       updateNetworkRow: (payload: { uniqueId: string; changes: Record<string, string> }) => Promise<void>;

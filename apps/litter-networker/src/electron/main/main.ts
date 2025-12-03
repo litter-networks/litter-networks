@@ -7,6 +7,7 @@ import { BagCountService } from "../shared-services/bagCounts";
 import { CostService } from "../shared-services/costs";
 import { ContentJobParams, ContentService } from "../shared-services/content";
 import { NetworksService } from "../shared-services/networks";
+import { MemberCountService, type ApplyMemberCountPayload } from "../shared-services/memberCounts";
 
 const DEFAULT_SPLIT_RATIO = 0.75;
 const ENABLE_BROWSER_CONTEXT_MENU = process.env.NODE_ENV !== "production";
@@ -18,6 +19,7 @@ let bagCountService: BagCountService | null = null;
 let costService: CostService | null = null;
 let networksService: NetworksService | null = null;
 let contentService: ContentService | null = null;
+let memberCountService: MemberCountService | null = null;
 
 const ensureMockServer = async () => {
   if (mockServer) return mockServer.urlBase;
@@ -205,6 +207,7 @@ app.whenReady().then(async () => {
   costService = new CostService();
   networksService = new NetworksService();
   contentService = new ContentService();
+  memberCountService = new MemberCountService();
 
   ipcMain.handle("appData:getSnapshot", () => getAppSnapshot());
   ipcMain.handle("appData:getSplitRatio", () => settingsStore?.getSplitRatio(DEFAULT_SPLIT_RATIO) ?? DEFAULT_SPLIT_RATIO);
@@ -231,6 +234,14 @@ app.whenReady().then(async () => {
   ipcMain.handle("bag:getStats", async (_event, networkId: string) => {
     if (!bagCountService) throw new Error("BagCountService unavailable");
     return bagCountService.getStats(networkId);
+  });
+  ipcMain.handle("member:getCurrent", async (_event, networkId: string) => {
+    if (!memberCountService) throw new Error("MemberCountService unavailable");
+    return memberCountService.getLatestCount(networkId);
+  });
+  ipcMain.handle("member:apply", async (_event, payload: ApplyMemberCountPayload) => {
+    if (!memberCountService) throw new Error("MemberCountService unavailable");
+    return memberCountService.apply(payload);
   });
   ipcMain.handle("costs:getMonthly", async () => {
     if (!costService) throw new Error("CostService unavailable");

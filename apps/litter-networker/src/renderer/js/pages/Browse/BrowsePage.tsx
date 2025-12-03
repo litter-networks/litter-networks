@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import BagCounter from "../../components/BagCounter/BagCounter";
+import MemberCounter from "../../components/MemberCounter/MemberCounter";
 import DualPaneView from "../../components/DualPaneView/DualPaneView";
 import { useAppSnapshot } from "../../data-sources/useAppSnapshot";
 import styles from "./styles/BrowsePage.module.css";
@@ -32,6 +33,10 @@ export default function BrowsePage() {
   const [totalLabel, setTotalLabel] = useState("All 0");
   const [sessionCount, setSessionCount] = useState(0);
   const [lastUpdated, setLastUpdated] = useState<string>();
+  const [memberInput, setMemberInput] = useState(0);
+  const [memberRegistered, setMemberRegistered] = useState<number | null>(null);
+  const [memberApplying, setMemberApplying] = useState(false);
+  const [memberUpdatedLabel, setMemberUpdatedLabel] = useState("--");
   const [arrowLockEnabled, setArrowLockEnabled] = useState(true);
   const [prefetchStatus, setPrefetchStatus] = useState({
     prevReady: false,
@@ -44,6 +49,20 @@ export default function BrowsePage() {
   });
   const [mockSyncing, setMockSyncing] = useState(false);
   const [applying, setApplying] = useState(false);
+
+  const formatSampleTimeLabel = (value?: number | null) => {
+    if (!value || !Number.isFinite(value)) {
+      return "--";
+    }
+    return new Date(value * 1000).toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
+  };
 
   const previousNetwork = useRef<string | null>(null);
   const lastBaseUrl = useRef<string | null>(null);
@@ -67,6 +86,29 @@ export default function BrowsePage() {
     },
     [snapshot]
   );
+
+  const handleMemberApply = useCallback(async () => {
+    if (!selectedNetwork) return;
+    setMemberApplying(true);
+    try {
+      const nextValue = Math.max(0, Math.round(memberInput));
+      await window.appApi.applyMemberCount?.({
+        networkId: selectedNetwork,
+        memberCount: nextValue
+      });
+      const response = await window.appApi.getMemberCount?.(selectedNetwork);
+      if (response) {
+        const normalized = Math.max(0, Math.round(response.memberCount ?? 0));
+        setMemberRegistered(normalized);
+        setMemberInput(normalized);
+        setMemberUpdatedLabel(formatSampleTimeLabel(response.sampleTime));
+      }
+    } catch (error) {
+      console.error("Failed to apply member count", error);
+    } finally {
+      setMemberApplying(false);
+    }
+  }, [memberInput, selectedNetwork]);
 
   const selectNetwork = useCallback(
     (networkId: string, preserve = false) => {
@@ -191,6 +233,37 @@ export default function BrowsePage() {
         setTotalLabel(`All ${stats.all.session.toFixed(0)}`);
       })
       .catch((error) => console.error("Failed to fetch bag stats", error));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedNetwork]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedNetwork || selectedNetwork === HOME_NETWORK_ID) {
+      setMemberRegistered(null);
+      setMemberInput(0);
+      setMemberUpdatedLabel("--");
+      return;
+    }
+
+    window.appApi
+      .getMemberCount?.(selectedNetwork)
+      ?.then((result) => {
+        if (cancelled) return;
+        const normalized = Math.max(0, Math.round(result?.memberCount ?? 0));
+        setMemberRegistered(normalized);
+        setMemberInput(normalized);
+        setMemberUpdatedLabel(formatSampleTimeLabel(result?.sampleTime));
+      })
+      .catch((error) => {
+        console.error("Failed to fetch member count", error);
+        if (!cancelled) {
+          setMemberRegistered(null);
+          setMemberUpdatedLabel("--");
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -343,7 +416,16 @@ export default function BrowsePage() {
           prefetchStatus={prefetchStatus}
         />
 
-        {selectedNetwork !== HOME_NETWORK_ID && selectedNetwork ? (
+      {selectedNetwork !== HOME_NETWORK_ID && selectedNetwork ? (
+        <div className={styles.counterGroup}>
+          <MemberCounter
+            inputValue={memberInput}
+            onChange={setMemberInput}
+            memberCount={memberRegistered}
+            lastUpdatedLabel={memberUpdatedLabel}
+            onApply={handleMemberApply}
+            applying={memberApplying}
+          />
           <BagCounter
             inputValue={bagInput}
             onChange={setBagInput}
@@ -353,7 +435,8 @@ export default function BrowsePage() {
             onApply={handleApply}
             applying={applying}
           />
-        ) : null}
+        </div>
+      ) : null}
       </div>
 
       {loading || !snapshot ? (
