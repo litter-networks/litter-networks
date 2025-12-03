@@ -6,10 +6,11 @@ type Props = {
   memberCount: number | null;
   sinceLabel: string;
   onApply: () => void;
+  onAdvance: () => void;
   applying: boolean;
 };
 
-const MemberCounter = ({ inputValue, onChange, memberCount, sinceLabel, onApply, applying }: Props) => {
+const MemberCounter = ({ inputValue, onChange, memberCount, sinceLabel, onApply, onAdvance, applying }: Props) => {
   const adjust = (delta: number) => {
     onChange(Math.max(0, Math.round(inputValue + delta)));
   };
@@ -25,7 +26,7 @@ const MemberCounter = ({ inputValue, onChange, memberCount, sinceLabel, onApply,
           <span className={bagStyles.eyebrow}>Last Count {memberCount?.toFixed(0) ?? "0"}</span>
         </div>
         <div className={bagStyles.sinceRow}>
-          <span className={bagStyles.eyebrow}>on {sinceLabel}</span>
+          <span className={bagStyles.eyebrow}>Since {sinceLabel}</span>
         </div>
       </div>
       <div className={bagStyles.controls}>
@@ -41,6 +42,14 @@ const MemberCounter = ({ inputValue, onChange, memberCount, sinceLabel, onApply,
         </button>
         <button className={bagStyles.deltaButton} onClick={() => adjust(5)}>
           +5
+        </button>
+        <button
+          className={`${bagStyles.cta} ${bagStyles.ctaGo}`}
+          aria-label="Apply member count and go to next network"
+          onClick={onAdvance}
+          disabled={disabled}
+        >
+          ✓+►
         </button>
         <button
           className={`${bagStyles.cta} ${bagStyles.ctaTick}`}

@@ -11,6 +11,7 @@ describe("MemberCounter", () => {
         memberCount={10}
         sinceLabel="Sample Label"
         onApply={() => {}}
+        onAdvance={() => {}}
         applying={false}
       />
     );

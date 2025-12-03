@@ -11,7 +11,9 @@
 }
 
 .selector {
-  min-width: 240px;
+  flex: 0 0 66%;
+  min-width: 180px;
+  max-width: 280px;
 }
 
 .prefetch {

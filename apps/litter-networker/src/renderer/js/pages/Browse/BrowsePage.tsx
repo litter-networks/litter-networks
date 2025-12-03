@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import BagCounter from "../../components/BagCounter/BagCounter";
+import CloudfrontInvalidation from "../../components/CloudfrontInvalidation/CloudfrontInvalidation";
 import MemberCounter from "../../components/MemberCounter/MemberCounter";
 import DualPaneView from "../../components/DualPaneView/DualPaneView";
 import { useAppSnapshot } from "../../data-sources/useAppSnapshot";
@@ -97,18 +98,27 @@ export default function BrowsePage() {
         memberCount: nextValue
       });
       const response = await window.appApi.getMemberCount?.(selectedNetwork);
-    if (response) {
-      const normalized = Math.max(0, Math.round(response.memberCount ?? 0));
-      setMemberRegistered(normalized);
-      setMemberInput(normalized);
-      setMemberSinceLabel(formatSampleTimeLabel(response.sampleTime));
-    }
+      if (response) {
+        const normalized = Math.max(0, Math.round(response.memberCount ?? 0));
+        setMemberRegistered(normalized);
+        setMemberInput(normalized);
+        setMemberSinceLabel(formatSampleTimeLabel(response.sampleTime));
+      }
     } catch (error) {
       console.error("Failed to apply member count", error);
     } finally {
       setMemberApplying(false);
     }
   }, [memberInput, selectedNetwork]);
+
+  const handleInvalidateDistribution = useCallback(async (distributionId: string) => {
+    try {
+      await window.appApi.invalidateDistribution?.(distributionId);
+    } catch (error) {
+      console.error("Failed to invalidate CloudFront distribution", error);
+    }
+  }, []);
+
 
   const selectNetwork = useCallback(
     (networkId: string, preserve = false) => {
@@ -192,6 +202,11 @@ export default function BrowsePage() {
     },
     [snapshot, selectedNetwork, bagInput, refresh, moveToNextNetwork]
   );
+
+  const handleMemberAdvance = useCallback(async () => {
+    await handleMemberApply();
+    await handleApply(true);
+  }, [handleMemberApply, handleApply]);
 
   useEffect(() => {
     if (!snapshot) return;
@@ -418,12 +433,14 @@ export default function BrowsePage() {
 
       {selectedNetwork !== HOME_NETWORK_ID && selectedNetwork ? (
         <div className={styles.counterGroup}>
+          <CloudfrontInvalidation onInvalidate={handleInvalidateDistribution} />
           <MemberCounter
             inputValue={memberInput}
             onChange={setMemberInput}
             memberCount={memberRegistered}
             sinceLabel={memberSinceLabel}
             onApply={handleMemberApply}
+            onAdvance={handleMemberAdvance}
             applying={memberApplying}
           />
           <BagCounter

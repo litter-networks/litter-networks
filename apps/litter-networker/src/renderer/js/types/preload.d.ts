@@ -31,6 +31,7 @@ declare global {
       getMemberCount: (
         networkId: string
       ) => Promise<{ memberCount: number; sampleTime: number; dataSource?: string; reviewAdjustments?: unknown[] } | null>;
+      invalidateDistribution: (distributionId: string) => Promise<void>;
       getMonthlyCosts: () => Promise<MonthlyCostsReport | null>;
       getNetworks: () => Promise<NetworksResponse>;
       updateNetworkRow: (payload: { uniqueId: string; changes: Record<string, string> }) => Promise<void>;

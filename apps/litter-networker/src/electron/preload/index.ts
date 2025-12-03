@@ -28,6 +28,8 @@ const api = {
       all: { session: number; lastUpdated?: string };
       network: { session: number; lastUpdated?: string };
     }>,
+  invalidateDistribution: (distributionId: string) =>
+    ipcRenderer.invoke("bag:invalidateDistribution", distributionId) as Promise<void>,
   applyMemberCount: (payload: { networkId: string; memberCount: number; dataSource?: string }) =>
     ipcRenderer.invoke("member:apply", payload),
   getMemberCount: (networkId: string) =>

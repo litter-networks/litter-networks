@@ -356,6 +356,13 @@ export class BagCountService {
     return result.Item as { thisYear?: number; mostRecentPost?: string } | undefined;
   }
 
+  async invalidateDistribution(distributionId: string) {
+    if (!distributionId) {
+      throw new Error("DistributionId is required for invalidation.");
+    }
+    await this.invalidateCloudfront(distributionId);
+  }
+
   private async invalidateCloudfront(distributionId: string) {
     console.info(`CloudFront invalidation requested for ${distributionId} (skipped in this build).`);
   }
