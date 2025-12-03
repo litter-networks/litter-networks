@@ -1,4 +1,5 @@
-import { ComponentType, forwardRef } from 'react';
+import type { ComponentType } from 'react';
+import { forwardRef } from 'react';
 import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 
 export function withErrorBoundary<P>(Component: ComponentType<P>, name: string) {
