@@ -4,19 +4,12 @@ type Props = {
   inputValue: number;
   onChange: (next: number) => void;
   memberCount: number | null;
-  lastUpdatedLabel: string;
+  sinceLabel: string;
   onApply: () => void;
   applying: boolean;
 };
 
-const MemberCounter = ({
-  inputValue,
-  onChange,
-  memberCount,
-  lastUpdatedLabel,
-  onApply,
-  applying
-}: Props) => {
+const MemberCounter = ({ inputValue, onChange, memberCount, sinceLabel, onApply, applying }: Props) => {
   const adjust = (delta: number) => {
     onChange(Math.max(0, Math.round(inputValue + delta)));
   };
@@ -25,8 +18,15 @@ const MemberCounter = ({
   return (
     <div className={bagStyles.bagInline}>
       <div className={bagStyles.stats}>
-        <span className={bagStyles.eyebrow}>Registered {memberCount?.toFixed(0) ?? "0"}</span>
-        <span className={bagStyles.eyebrow}>Updated {lastUpdatedLabel}</span>
+        <div className={bagStyles.titleRow}>
+          <span className={bagStyles.title}>Member Count</span>
+        </div>
+        <div className={bagStyles.statRow}>
+          <span className={bagStyles.eyebrow}>Last Count {memberCount?.toFixed(0) ?? "0"}</span>
+        </div>
+        <div className={bagStyles.sinceRow}>
+          <span className={bagStyles.eyebrow}>on {sinceLabel}</span>
+        </div>
       </div>
       <div className={bagStyles.controls}>
         <button className={bagStyles.deltaButton} onClick={() => adjust(-5)}>

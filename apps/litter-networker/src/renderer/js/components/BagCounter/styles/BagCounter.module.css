@@ -12,8 +12,38 @@
 
 .stats {
   display: flex;
-  gap: 14px;
+  flex-direction: column;
+  gap: 4px;
   flex-wrap: wrap;
+}
+
+.titleRow {
+  font-weight: 700;
+  text-transform: none;
+  color: var(--color-text-primary);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.statRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.sinceRow {
+  color: var(--color-text-secondary);
+  text-align: center;
+  width: 100%;
+  margin-top: -6px;
 }
 
 .eyebrow {

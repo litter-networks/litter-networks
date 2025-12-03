@@ -32,11 +32,11 @@ export default function BrowsePage() {
   const [bagInput, setBagInput] = useState(0);
   const [totalLabel, setTotalLabel] = useState("All 0");
   const [sessionCount, setSessionCount] = useState(0);
-  const [lastUpdated, setLastUpdated] = useState<string>();
+  const [sinceLabel, setSinceLabel] = useState<string>();
   const [memberInput, setMemberInput] = useState(0);
   const [memberRegistered, setMemberRegistered] = useState<number | null>(null);
   const [memberApplying, setMemberApplying] = useState(false);
-  const [memberUpdatedLabel, setMemberUpdatedLabel] = useState("--");
+  const [memberSinceLabel, setMemberSinceLabel] = useState("--");
   const [arrowLockEnabled, setArrowLockEnabled] = useState(true);
   const [prefetchStatus, setPrefetchStatus] = useState({
     prevReady: false,
@@ -97,12 +97,12 @@ export default function BrowsePage() {
         memberCount: nextValue
       });
       const response = await window.appApi.getMemberCount?.(selectedNetwork);
-      if (response) {
-        const normalized = Math.max(0, Math.round(response.memberCount ?? 0));
-        setMemberRegistered(normalized);
-        setMemberInput(normalized);
-        setMemberUpdatedLabel(formatSampleTimeLabel(response.sampleTime));
-      }
+    if (response) {
+      const normalized = Math.max(0, Math.round(response.memberCount ?? 0));
+      setMemberRegistered(normalized);
+      setMemberInput(normalized);
+      setMemberSinceLabel(formatSampleTimeLabel(response.sampleTime));
+    }
     } catch (error) {
       console.error("Failed to apply member count", error);
     } finally {
@@ -162,7 +162,7 @@ export default function BrowsePage() {
           hour12: false
         });
         setSessionCount((prev) => prev + appliedAmount);
-        setLastUpdated(nowLabel);
+        setSinceLabel(nowLabel);
         setTotalLabel((prev) => {
           const match = prev.match(/All\s+([0-9.]+)/i);
           const current = match ? Number(match[1]) : 0;
@@ -176,13 +176,13 @@ export default function BrowsePage() {
       }
       applyPromise
         ?.then(() => window.appApi.getBagStats?.(refreshTargetId))
-        .then((stats) => {
-          if (!stats) return;
-          if (selectedNetworkRef.current !== refreshTargetId) return;
-          setSessionCount(stats.network.session);
-          setLastUpdated(stats.network.lastUpdated);
-          setTotalLabel(`All ${stats.all.session.toFixed(0)}`);
-        })
+          .then((stats) => {
+            if (!stats) return;
+            if (selectedNetworkRef.current !== refreshTargetId) return;
+            setSessionCount(stats.network.session);
+            setSinceLabel(stats.network.lastUpdated);
+            setTotalLabel(`All ${stats.all.session.toFixed(0)}`);
+          })
         .catch((error) => console.error("Failed to refresh bag stats", error));
     } catch (error) {
       console.error("Failed to apply bag count", error);
@@ -219,7 +219,7 @@ export default function BrowsePage() {
     let cancelled = false;
     if (!selectedNetwork || selectedNetwork === HOME_NETWORK_ID) {
       setSessionCount(0);
-      setLastUpdated(undefined);
+      setSinceLabel(undefined);
       return;
     }
 
@@ -229,7 +229,7 @@ export default function BrowsePage() {
         if (!stats || cancelled) return;
         if (selectedNetworkRef.current !== selectedNetwork) return;
         setSessionCount(stats.network.session);
-        setLastUpdated(stats.network.lastUpdated);
+        setSinceLabel(stats.network.lastUpdated);
         setTotalLabel(`All ${stats.all.session.toFixed(0)}`);
       })
       .catch((error) => console.error("Failed to fetch bag stats", error));
@@ -244,7 +244,7 @@ export default function BrowsePage() {
     if (!selectedNetwork || selectedNetwork === HOME_NETWORK_ID) {
       setMemberRegistered(null);
       setMemberInput(0);
-      setMemberUpdatedLabel("--");
+      setMemberSinceLabel("--");
       return;
     }
 
@@ -255,13 +255,13 @@ export default function BrowsePage() {
         const normalized = Math.max(0, Math.round(result?.memberCount ?? 0));
         setMemberRegistered(normalized);
         setMemberInput(normalized);
-        setMemberUpdatedLabel(formatSampleTimeLabel(result?.sampleTime));
+        setMemberSinceLabel(formatSampleTimeLabel(result?.sampleTime));
       })
       .catch((error) => {
         console.error("Failed to fetch member count", error);
         if (!cancelled) {
           setMemberRegistered(null);
-          setMemberUpdatedLabel("--");
+          setMemberSinceLabel("--");
         }
       });
 
@@ -422,7 +422,7 @@ export default function BrowsePage() {
             inputValue={memberInput}
             onChange={setMemberInput}
             memberCount={memberRegistered}
-            lastUpdatedLabel={memberUpdatedLabel}
+            sinceLabel={memberSinceLabel}
             onApply={handleMemberApply}
             applying={memberApplying}
           />
@@ -431,7 +431,7 @@ export default function BrowsePage() {
             onChange={setBagInput}
             sessionCount={sessionCount}
             totalLabel={totalLabel}
-            lastUpdated={lastUpdated}
+            sinceLabel={sinceLabel}
             onApply={handleApply}
             applying={applying}
           />

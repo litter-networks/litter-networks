@@ -9,11 +9,11 @@ describe("MemberCounter", () => {
         inputValue={2}
         onChange={() => {}}
         memberCount={10}
-        lastUpdatedLabel="Sample Label"
+        sinceLabel="Sample Label"
         onApply={() => {}}
         applying={false}
       />
     );
-    expect(screen.getByText("Updated Sample Label")).toBeTruthy();
+    expect(screen.getByText("Since Sample Label")).toBeTruthy();
   });
 });

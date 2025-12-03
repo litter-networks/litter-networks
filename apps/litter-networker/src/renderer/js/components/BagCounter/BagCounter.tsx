@@ -5,23 +5,31 @@ type Props = {
   onChange: (next: number) => void;
   sessionCount: number;
   totalLabel: string;
-  lastUpdated?: string;
+  sinceLabel?: string;
   onApply: (advance: boolean) => void;
   applying: boolean;
 };
 
-const BagCounter = ({ inputValue, onChange, sessionCount, totalLabel, lastUpdated, onApply, applying }: Props) => {
+const BagCounter = ({ inputValue, onChange, sessionCount, totalLabel, sinceLabel, onApply, applying }: Props) => {
   const adjust = (delta: number) => {
     onChange(Math.max(0, +(inputValue + delta).toFixed(1)));
   };
   const disabled = applying;
+  const sinceText = sinceLabel ?? "--";
 
   return (
     <div className={styles.bagInline}>
       <div className={styles.stats}>
-        <span className={styles.eyebrow}>{totalLabel}</span>
-        <span className={styles.eyebrow}>This {sessionCount.toFixed(1)}</span>
-        <span className={styles.eyebrow}>Updated {lastUpdated ?? "--"}</span>
+        <div className={styles.titleRow}>
+          <span className={styles.title}>Bag Count</span>
+        </div>
+        <div className={styles.statRow}>
+          <span className={styles.eyebrow}>{totalLabel}</span>
+          <span className={styles.eyebrow}>This {sessionCount.toFixed(1)}</span>
+        </div>
+        <div className={styles.sinceRow}>
+          <span className={styles.eyebrow}>Since {sinceText}</span>
+        </div>
       </div>
       <div className={styles.controls}>
         <button className={styles.deltaButton} onClick={() => adjust(-5)}>
