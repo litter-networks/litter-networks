@@ -6,6 +6,7 @@ import DualPaneView from "../../components/DualPaneView/DualPaneView";
 import { useAppSnapshot } from "../../data-sources/useAppSnapshot";
 import styles from "./styles/BrowsePage.module.css";
 import NetworkNavigation from "../../components/NetworkNavigation/NetworkNavigation";
+import ErrorBoundary from "../../components/ErrorBoundary/ErrorBoundary";
 
 const HOME_NETWORK_ID = "litternetworks";
 
@@ -416,45 +417,53 @@ export default function BrowsePage() {
   return (
     <div className={styles.pageShell}>
       <div className={styles.controlsRow}>
-        <NetworkNavigation
-          options={snapshot?.networks.map((n) => ({ id: n.id, label: n.displayLabel })) ?? []}
-          value={selectedNetwork}
-          onChange={selectNetwork}
-          arrowLockEnabled={arrowLockEnabled}
-          onToggleArrowLock={() =>
-            setArrowLockEnabled((prev) => {
-              const next = !prev;
-              window.appApi.setArrowLock?.(next);
-              return next;
-            })
-          }
-          prefetchStatus={prefetchStatus}
-        />
+        <ErrorBoundary name="Network Navigation">
+          <NetworkNavigation
+            options={snapshot?.networks.map((n) => ({ id: n.id, label: n.displayLabel })) ?? []}
+            value={selectedNetwork}
+            onChange={selectNetwork}
+            arrowLockEnabled={arrowLockEnabled}
+            onToggleArrowLock={() =>
+              setArrowLockEnabled((prev) => {
+                const next = !prev;
+                window.appApi.setArrowLock?.(next);
+                return next;
+              })
+            }
+            prefetchStatus={prefetchStatus}
+          />
+        </ErrorBoundary>
 
       <div className={styles.counterGroup}>
         {selectedNetwork !== HOME_NETWORK_ID && selectedNetwork ? (
           <>
-            <MemberCounter
-              inputValue={memberInput}
-              onChange={setMemberInput}
-              memberCount={memberRegistered}
-              sinceLabel={memberSinceLabel}
-              onApply={handleMemberApply}
-              onAdvance={handleMemberAdvance}
-              applying={memberApplying}
-            />
-            <BagCounter
-              inputValue={bagInput}
-              onChange={setBagInput}
-              sessionCount={sessionCount}
-              totalLabel={totalLabel}
-              sinceLabel={sinceLabel}
-              onApply={handleApply}
-              applying={applying}
-            />
+            <ErrorBoundary name="Member Counter">
+              <MemberCounter
+                inputValue={memberInput}
+                onChange={setMemberInput}
+                memberCount={memberRegistered}
+                sinceLabel={memberSinceLabel}
+                onApply={handleMemberApply}
+                onAdvance={handleMemberAdvance}
+                applying={memberApplying}
+              />
+            </ErrorBoundary>
+            <ErrorBoundary name="Bag Counter">
+              <BagCounter
+                inputValue={bagInput}
+                onChange={setBagInput}
+                sessionCount={sessionCount}
+                totalLabel={totalLabel}
+                sinceLabel={sinceLabel}
+                onApply={handleApply}
+                applying={applying}
+              />
+            </ErrorBoundary>
           </>
         ) : null}
-        <CloudfrontInvalidation onInvalidate={handleInvalidateDistribution} />
+        <ErrorBoundary name="Cloudfront">
+          <CloudfrontInvalidation onInvalidate={handleInvalidateDistribution} />
+        </ErrorBoundary>
       </div>
       </div>
 
@@ -462,30 +471,32 @@ export default function BrowsePage() {
         <div className={styles.loadingState}>Loading workspace…</div>
       ) : (
         <div className={styles.paneWrapper}>
-          <DualPaneView
-            leftPane={snapshot.paneLayout.left}
-            rightPane={snapshot.paneLayout.right}
-            leftOverride={{
-              networkId: viewNetworkId ?? selectedNetwork ?? HOME_NETWORK_ID,
-              url: activeUrl || snapshot.paneLayout.left.url, // fallback to backend URL
-              prefetch: prefetchEntries,
-            onPrefetchStatusChange: (status) => {
-              const [prev, next, nextTwo] = prefetchEntries;
-              setPrefetchStatus({
-                prevReady: prev ? !!status[prev.networkId] : false,
-                nextReady: next ? !!status[next.networkId] : false,
-                nextTwoReady: nextTwo ? !!status[nextTwo.networkId] : false
-              });
-            },
-              onRegisterReload: (fn) => {
-                reloadRef.current = fn;
-              },
-              onReload: () => reloadRef.current?.()
-            }}
-            rightOverride={{ url: lnUrl }}
-            prefetchStatus={prefetchStatus}
-            leftExtras={mockToggle}
-          />
+          <ErrorBoundary name="Dual Pane View">
+            <DualPaneView
+              leftPane={snapshot.paneLayout.left}
+              rightPane={snapshot.paneLayout.right}
+              leftOverride={{
+                networkId: viewNetworkId ?? selectedNetwork ?? HOME_NETWORK_ID,
+                url: activeUrl || snapshot.paneLayout.left.url, // fallback to backend URL
+                prefetch: prefetchEntries,
+                onPrefetchStatusChange: (status) => {
+                  const [prev, next, nextTwo] = prefetchEntries;
+                  setPrefetchStatus({
+                    prevReady: prev ? !!status[prev.networkId] : false,
+                    nextReady: next ? !!status[next.networkId] : false,
+                    nextTwoReady: nextTwo ? !!status[nextTwo.networkId] : false
+                  });
+                },
+                onRegisterReload: (fn) => {
+                  reloadRef.current = fn;
+                },
+                onReload: () => reloadRef.current?.()
+              }}
+              rightOverride={{ url: lnUrl }}
+              prefetchStatus={prefetchStatus}
+              leftExtras={mockToggle}
+            />
+          </ErrorBoundary>
         </div>
       )}
     </div>

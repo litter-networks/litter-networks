@@ -7,6 +7,7 @@ import ContentPage from "../../pages/Content/ContentPage";
 import PlaceholderPage from "../../pages/Placeholder/PlaceholderPage";
 import styles from "./styles/App.module.css";
 import { useAppSnapshot } from "../../data-sources/useAppSnapshot";
+import ErrorBoundary from "../ErrorBoundary/ErrorBoundary";
 
 const App = () => {
   const { snapshot, loading, error } = useAppSnapshot();
@@ -59,7 +60,9 @@ const App = () => {
           </div>
         ) : (
           <>
-            <TabBar tabs={fullTabs} activeTab={activeTab} onSelect={setActiveTab} />
+            <ErrorBoundary name="TabBar">
+              <TabBar tabs={fullTabs} activeTab={activeTab} onSelect={setActiveTab} />
+            </ErrorBoundary>
             <div className={styles.pageContainer}>
               {fullTabs.map((tab) =>
                 mountedTabs.has(tab.id) ? (
@@ -68,17 +71,19 @@ const App = () => {
                     className={styles.tabPanel}
                     style={{ display: activeTab === tab.id ? "flex" : "none" }}
                   >
-                    {tab.id === "browse" ? (
-                      <BrowsePage />
-                    ) : tab.id === "costs" ? (
-                      <CostsPage />
-                    ) : tab.id === "networks" ? (
-                      <NetworksPage />
-                    ) : tab.id === "content" ? (
-                      <ContentPage />
-                    ) : (
-                      <PlaceholderPage name={tab.label} />
-                    )}
+                    <ErrorBoundary name={`${tab.label} Page`}>
+                      {tab.id === "browse" ? (
+                        <BrowsePage />
+                      ) : tab.id === "costs" ? (
+                        <CostsPage />
+                      ) : tab.id === "networks" ? (
+                        <NetworksPage />
+                      ) : tab.id === "content" ? (
+                        <ContentPage />
+                      ) : (
+                        <PlaceholderPage name={tab.label} />
+                      )}
+                    </ErrorBoundary>
                   </div>
                 ) : null
               )}
