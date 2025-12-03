@@ -1,0 +1,23 @@
+.errorBoundary {
+  border: 1px solid rgba(255, 86, 86, 0.5);
+  border-radius: 8px;
+  background: rgba(255, 237, 237, 0.9);
+  color: #7a1f1f;
+  padding: 12px 16px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.message {
+  font-size: 11px;
+  color: #5c1a1a;
+  word-break: break-word;
+}
