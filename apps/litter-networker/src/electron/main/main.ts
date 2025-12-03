@@ -8,7 +8,6 @@ import { CostService } from "../shared-services/costs";
 import { ContentJobParams, ContentService } from "../shared-services/content";
 import { NetworksService } from "../shared-services/networks";
 import { MemberCountService, type ApplyMemberCountPayload } from "../shared-services/memberCounts";
-import { MemberCountService, type ApplyMemberCountPayload } from "../shared-services/memberCounts";
 
 const DEFAULT_SPLIT_RATIO = 0.75;
 const ENABLE_BROWSER_CONTEXT_MENU = process.env.NODE_ENV !== "production";
@@ -20,7 +19,6 @@ let bagCountService: BagCountService | null = null;
 let costService: CostService | null = null;
 let networksService: NetworksService | null = null;
 let contentService: ContentService | null = null;
-let memberCountService: MemberCountService | null = null;
 let memberCountService: MemberCountService | null = null;
 
 const ensureMockServer = async () => {

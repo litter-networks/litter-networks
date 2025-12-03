@@ -1,8 +1,9 @@
 .widget {
   display: flex;
-  flex: 1;
+  flex: 0 0 auto;
   gap: 12px;
   align-items: center;
+  min-width: 0;
 }
 
 .buttonRow {
