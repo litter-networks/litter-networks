@@ -5,12 +5,6 @@
 
 set -euo pipefail
 
-export TERM="${TERM:-xterm}"
-
-if command -v tput >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != "dumb" ]; then
-  clear
-fi
-
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 echo "[info] Validating SPDX headers..."

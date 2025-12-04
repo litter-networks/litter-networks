@@ -13,7 +13,6 @@ if ! python3 "$REPO_ROOT/tools/license_check.py"; then
   exit 1
 fi
 
-clear
 
 export AWS_PROFILE="${AWS_PROFILE:-ln}"
 
