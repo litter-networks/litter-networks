@@ -57,17 +57,23 @@ export function NetworkSwitcher({ headerColorClass, searchColorClass }: Props) {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <Link className={styles.networkSwitcherLink} to={buildPath('')}>
+      <Link
+        className={styles.networkSwitcherLink}
+        to={buildPath('')}
+        onClick={(event) => {
+          event.preventDefault();
+          setOpen((state: boolean) => !state);
+        }}
+        role="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
         <img className={styles.networkSwitcherLogo} src="/brand/logo-only.svg" alt="Litter Networks logo" />
         <span className={styles.networkSwitcherTitle}>{displayName}</span>
         <img
           className={`${styles.networkSwitcherChevron} ${open ? styles.networkSwitcherChevronOpen : ''}`}
           src="/images/dropdown-icon.png"
           alt="Toggle network menu"
-          onClick={(event) => {
-            event.preventDefault();
-            setOpen((state: boolean) => !state);
-          }}
         />
       </Link>
       <NetworkSwitcherMenu
