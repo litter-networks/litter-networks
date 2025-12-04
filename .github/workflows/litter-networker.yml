@@ -17,6 +17,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: apps/litter-networker/package-lock.json
       - name: Install dependencies
         run: npm --prefix apps/litter-networker install
       - name: Run full test suite
