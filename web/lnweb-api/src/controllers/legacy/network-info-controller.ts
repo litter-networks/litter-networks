@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { Request, Response } from "express";
 const NetworksInfo = require("../../utils/networks-info.js");
 

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 
 set -euo pipefail
 
@@ -9,6 +12,13 @@ if command -v tput >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != "dumb
 fi
 
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+echo "[info] Validating SPDX headers..."
+if ! python3 "$REPO_ROOT/tools/license_check.py"; then
+  echo "[error] License header validation failed. Run: python3 tools/license_fix.py"
+  exit 1
+fi
+
 pushd "${SCRIPT_DIR}" >/dev/null
 
 export AWS_PROFILE="${AWS_PROFILE:-ln}"

@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 const { DynamoDBClient, GetItemCommand } = require("@aws-sdk/client-dynamodb");
 const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const NodeCache = require("node-cache");

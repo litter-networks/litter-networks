@@ -1,3 +1,6 @@
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 """Source directory scanning utilities."""
 
 from __future__ import annotations

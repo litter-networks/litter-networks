@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { describe, expect, it } from 'vitest';
 import styles from '../styles/header.module.css';
 import { getHeaderColorClass, getPathSuffix, getSearchColorClass } from '../header-helpers';

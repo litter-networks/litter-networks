@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { Link } from 'react-router-dom';
 import type { KnowledgeChildPage } from '@/data-sources/knowledge';
 import styles from '../styles/knowledge.module.css';

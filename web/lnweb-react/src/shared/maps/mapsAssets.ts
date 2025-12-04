@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 const scriptPromises = new Map<string, Promise<void>>();
 const loadedScripts = new Set<string>();
 let leafletAndMapScriptPromise: Promise<void> | null = null;

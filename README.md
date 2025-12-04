@@ -63,8 +63,12 @@ While we don’t have a formal contribution backlog, you can:
 
 - Open issues with observations, typos, or architectural questions.
 - Email dev@litternetworks.org with recommendations, especially if you spot security or scaling gaps.
-- Reference `CONTRIBUTING.txt` when touching new files for the preferred SPDX notice.
+- Reference `CONTRIBUTING.md` when touching new files for the preferred SPDX notice.
+
+## License header enforcement
+
+All source files in this repo must begin with the two-line Apache 2.0 SPDX header. The enforcement script lives in `tools/license_check.py`, and the desktop/web/service starter scripts invoke it before running. If you need to add the header to multiple files, run `python3 tools/license_fix.py` (or with `--dry-run` to preview) to auto-apply it.
 
 ## Licensing
 
-This repository is licensed under the Apache License 2.0—see `LICENSE` for the full text. All new files should use the short SPDX notice described in `CONTRIBUTING.txt`.
+This repository is licensed under the Apache License 2.0 - see `LICENSE` for the full text. All new files should use the short SPDX notice described in `CONTRIBUTING.md`.

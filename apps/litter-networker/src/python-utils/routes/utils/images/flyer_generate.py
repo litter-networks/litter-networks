@@ -1,3 +1,6 @@
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 import os
 from PIL import Image, ImageDraw, ImageFont
 from routes.utils.info.network_info import get_network_info, get_all_network_ids

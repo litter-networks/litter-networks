@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { useMemo } from "react";
 import { useCostsReport } from "../../data-sources/useCostsReport";
 import styles from "./styles/CostsPage.module.css";

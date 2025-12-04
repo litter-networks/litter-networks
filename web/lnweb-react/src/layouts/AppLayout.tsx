@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { Outlet, useParams } from 'react-router-dom';
 import { Header } from '@/components/header/Header';
 import { Footer } from '@/components/footer/Footer';

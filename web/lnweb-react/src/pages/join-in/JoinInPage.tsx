@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavData } from '@/features/nav/useNavData';
 import { fetchDistrictLocalInfo, type DistrictLocalInfo } from '@/data-sources/joinIn';

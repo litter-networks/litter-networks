@@ -1,10 +1,20 @@
 #!/bin/bash
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 set -euo pipefail
 
 # Electron refuses to spawn a window if these are set (e.g. from some IDE terminals).
 unset ELECTRON_RUN_AS_NODE ELECTRON_NO_ATTACH_CONSOLE
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+echo "[info] Validating SPDX headers..."
+if ! python3 "$REPO_ROOT/tools/license_check.py"; then
+  echo "[error] License header check failed. Run: python3 tools/license_fix.py"
+  exit 1
+fi
+
 cd "$SCRIPT_DIR"
 
 echo "[info] Running full test suite (build + tests)..."

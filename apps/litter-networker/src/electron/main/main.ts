@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { app, BrowserWindow, Menu, ipcMain, type MenuItemConstructorOptions, WebContents } from "electron";
 import path from "node:path";
 import { getAppSnapshot } from "../shared-services/appData";

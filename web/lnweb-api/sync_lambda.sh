@@ -1,6 +1,17 @@
 #!/bin/bash
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 
 set -e  # Exit immediately if a command exits with a non-zero status
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+echo "[info] Validating SPDX headers..."
+if ! python3 "$REPO_ROOT/tools/license_check.py"; then
+  echo "[error] License header validation failed. Run: python3 tools/license_fix.py"
+  exit 1
+fi
 
 clear
 

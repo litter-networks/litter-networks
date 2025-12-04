@@ -1,3 +1,6 @@
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 from PIL import Image, ImageDraw, ImageFont
 import os
 from enum import Enum, auto

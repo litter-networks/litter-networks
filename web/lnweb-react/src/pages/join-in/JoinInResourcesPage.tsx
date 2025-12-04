@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import type { MouseEvent, ReactNode } from 'react';
 import { useMemo } from 'react';
 import { appEnv } from '@/config/env';

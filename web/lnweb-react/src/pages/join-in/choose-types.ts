@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import type { Network } from '@/data-sources/networks';
 
 export interface DistrictGroup {

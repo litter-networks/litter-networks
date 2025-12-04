@@ -1,4 +1,7 @@
 #!/bin/bash
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 set -euo pipefail
 
 # Mount OneDrive using rclone

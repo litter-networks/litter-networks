@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { contextBridge, ipcRenderer } from "electron";
 import type { AppSnapshot } from "../../shared/app-state";
 import type { MonthlyCostsReport } from "../../shared/costs";

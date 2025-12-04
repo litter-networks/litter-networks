@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
 import { createHash } from "crypto";
 import NodeCache from "node-cache";

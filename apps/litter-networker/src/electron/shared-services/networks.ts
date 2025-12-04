@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
 import { DynamoDBDocumentClient, UpdateCommand, PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";

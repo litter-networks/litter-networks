@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { useCallback, useState } from "react";
 import widgetStyles from "../WidgetBase/styles/WidgetBase.module.css";
 import styles from "./styles/CloudfrontInvalidation.module.css";

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 """Synchronise the built SPA assets with S3 and ensure metadata is correct."""
 
 from __future__ import annotations
