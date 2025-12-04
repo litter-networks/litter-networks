@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import express, { Request, Response, Router } from "express";
-
-const networksInfo = require("../utils/networks-info.js");
+import networksInfo, { type NetworkRecord } from "../utils/networks-info";
 
 type BagsInfoRequest = Request<{ uniqueId: string }>;
 type SummaryRequest = Request<{ networkId?: string }>;
@@ -14,7 +13,7 @@ function createSummaryHandler(): RouterHandler {
   return async (req: SummaryRequest, res: Response) => {
     try {
       const { networkId } = req.params;
-      const allNetworks: Array<{ uniqueId: string; districtId?: string }> = await networksInfo.getAllNetworks();
+      const allNetworks = await networksInfo.getAllNetworks();
       const memberCountByNetwork = await networksInfo.getAllMemberCounts();
 
       const memberCountAll = Array.from(memberCountByNetwork.values()).reduce<number>((total, count) => {
@@ -27,10 +26,12 @@ function createSummaryHandler(): RouterHandler {
       let memberCountDistrict = 0;
 
       const normalizedNetworkId = networkId && networkId !== "all" ? networkId : null;
-      const selectedNetwork = normalizedNetworkId
-        ? (await networksInfo.findNetworkById(normalizedNetworkId)) ??
-          (await networksInfo.findNetworkByShortId(normalizedNetworkId))
-        : null;
+      const selectedNetwork: NetworkRecord | null =
+        normalizedNetworkId
+          ? ((await networksInfo.findNetworkById(normalizedNetworkId)) ??
+              (await networksInfo.findNetworkByShortId(normalizedNetworkId)) ??
+              null)
+          : null;
 
       if (selectedNetwork) {
         const districtId: string | undefined = selectedNetwork.districtId;

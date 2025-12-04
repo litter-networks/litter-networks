@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Request, Response } from "express";
-const NetworksInfo = require("../../utils/networks-info.js");
+import NetworksInfo from "../../utils/networks-info";
 
 function formatError(err: unknown): string {
     return err instanceof Error ? err.message : String(err);

@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import express, { NextFunction, Request, Response, Router } from "express";
-
-const networksInfo = require("../utils/networks-info.js");
+import networksInfo from "../utils/networks-info";
 const networkInfoControllerLegacy = require("../controllers/legacy/network-info-controller");
 
 type NearbyRequest = Request<{ networkId: string }>;

@@ -1,10 +1,7 @@
 // Copyright 2025 Litter Networks / Clean and Green Communities CIC
 // SPDX-License-Identifier: Apache-2.0
 
-export {};
-
-const mockDynamoSend = jest.fn();
-const mockDocSend = jest.fn();
+import networksInfo, { resetCachesForTests } from '../../../utils/networks-info';
 
 jest.mock('@aws-sdk/client-dynamodb', () => {
   class BaseCommand {
@@ -12,34 +9,38 @@ jest.mock('@aws-sdk/client-dynamodb', () => {
       this.input = input;
     }
   }
+  const mockSend = jest.fn();
   return {
-    DynamoDBClient: jest.fn(() => ({ send: mockDynamoSend })),
+    DynamoDBClient: jest.fn(() => ({ send: mockSend })),
     ScanCommand: BaseCommand,
     GetItemCommand: BaseCommand,
     QueryCommand: BaseCommand,
+    __mockSend: mockSend,
   };
 });
 
-jest.mock('@aws-sdk/lib-dynamodb', () => ({
-  DynamoDBDocumentClient: {
-    from: jest.fn(() => ({ send: mockDocSend })),
-  },
-  GetCommand: class {
-    constructor(public input: any) {
-      this.input = input;
-    }
-  },
-}));
+jest.mock('@aws-sdk/lib-dynamodb', () => {
+  const mockSend = jest.fn();
+  return {
+    DynamoDBDocumentClient: {
+      from: jest.fn(() => ({ send: mockSend })),
+    },
+    GetCommand: class {
+      constructor(public input: any) {
+        this.input = input;
+      }
+    },
+    __mockSend: mockSend,
+  };
+});
 
-const networksInfo = require('../../../utils/networks-info');
+const { __mockSend: mockDynamoSend } = require('@aws-sdk/client-dynamodb') as { __mockSend: jest.Mock };
+const { __mockSend: mockDocSend } = require('@aws-sdk/lib-dynamodb') as { __mockSend: jest.Mock };
+
+const networksInfoAny = networksInfo as any;
 
 const resetCaches = () => {
-  if (typeof networksInfo.__resetCachesForTests === 'function') {
-    networksInfo.__resetCachesForTests();
-  } else {
-    ['cacheNetworks', 'cacheNetworksByShortId', 'cacheDistricts', 'cacheDistrictLocalInfos', 'cacheNearbyNetworks', 'cacheBagsInfo', 'cacheCurrentMemberCounts']
-      .forEach((cacheKey) => networksInfo[cacheKey]?.flushAll?.());
-  }
+  resetCachesForTests();
 };
 
 describe('NetworksInfo utilities', () => {
@@ -80,16 +81,18 @@ describe('NetworksInfo utilities', () => {
     expect(mockDynamoSend).toHaveBeenCalledTimes(1);
 
     const byId = await networksInfo.findNetworkById('net-a');
-    expect(byId.fullName).toBe('Alpha');
+    expect(byId).toBeTruthy();
+    expect(byId!.fullName).toBe('Alpha');
 
     const byShortId = await networksInfo.findNetworkByShortId('b');
-    expect(byShortId.uniqueId).toBe('net-b');
+    expect(byShortId).toBeTruthy();
+    expect(byShortId!.uniqueId).toBe('net-b');
   });
 
   it('enriches nearby networks and caches results', async () => {
-    networksInfo.cacheNetworks.set('net-1', { uniqueId: 'net-1', fullName: 'Network One' });
-    networksInfo.cacheNetworks.set('net-2', { uniqueId: 'net-2', fullName: 'Network Two' });
-    networksInfo.cacheNetworks.set('allNetworks', [
+    networksInfoAny.cacheNetworks.set('net-1', { uniqueId: 'net-1', fullName: 'Network One' });
+    networksInfoAny.cacheNetworks.set('net-2', { uniqueId: 'net-2', fullName: 'Network Two' });
+    networksInfoAny.cacheNetworks.set('allNetworks', [
       { uniqueId: 'net-1', fullName: 'Network One' },
       { uniqueId: 'net-2', fullName: 'Network Two' },
     ]);
@@ -137,8 +140,9 @@ describe('NetworksInfo utilities', () => {
     });
 
     const info = await networksInfo.getBagsInfo('all');
-    expect(info.isAll).toBe(true);
-    expect(info.bagCounts).toMatchObject({
+    expect(info).not.toBeNull();
+    expect(info!.isAll).toBe(true);
+    expect(info!.bagCounts).toMatchObject({
       thisMonth: 10,
       lastMonth: 5,
       allTime: 400,
@@ -169,12 +173,13 @@ describe('NetworksInfo utilities', () => {
     });
     await networksInfo.getBagsInfo('all');
 
-    networksInfo.cacheNetworks.set('net-x', { uniqueId: 'net-x', fullName: 'Extra Network' });
+    networksInfoAny.cacheNetworks.set('net-x', { uniqueId: 'net-x', fullName: 'Extra Network' });
     mockDocSend.mockResolvedValueOnce({}); // No bag data for net-x
 
     const info = await networksInfo.getBagsInfo('net-x');
-    expect(info.networkName).toBe('Extra Network');
-    expect(info.bagCounts).toMatchObject({
+    expect(info).not.toBeNull();
+    expect(info!.networkName).toBe('Extra Network');
+    expect(info!.bagCounts).toMatchObject({
       thisMonth: '0',
       allTime: '0',
     });
@@ -222,7 +227,8 @@ describe('NetworksInfo utilities', () => {
     expect(mockDynamoSend).toHaveBeenCalledTimes(1);
 
     const found = await networksInfo.findDistrictById('district1');
-    expect(found.fullName).toBe('District One');
+    expect(found).toBeTruthy();
+    expect(found!.fullName).toBe('District One');
   });
 
   it('returns district local infos and caches them', async () => {

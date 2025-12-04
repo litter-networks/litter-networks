@@ -5,7 +5,7 @@ import request from 'supertest';
 import express from 'express';
 import type { Express } from 'express';
 
-jest.mock('../../../utils/networks-info.js', () => ({
+jest.mock('../../../utils/networks-info', () => ({
   getBagsInfo: jest.fn(async (uniqueId) => ({
     networkName: `Network ${uniqueId}`,
     bagCounts: { thisMonth: 5, lastMonth: 3 }

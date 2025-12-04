@@ -63,7 +63,7 @@ const mockNetworksInfo = {
   findDistrictById: jest.fn(async (id: string) => sampleDistricts.find((d) => d.uniqueId === id) || null),
 };
 
-jest.mock('../../../utils/networks-info.js', () => mockNetworksInfo);
+jest.mock('../../../utils/networks-info', () => mockNetworksInfo);
 
 const mockKnowledgePage = { bodyContent: '<p>Hello knowledge</p>', metadata: { title: 'Test', description: 'Desc' } };
 const mockKnowledgeChildren = [{ pageUrl: 'knowledge/foo', pageTitle: 'Foo' }];

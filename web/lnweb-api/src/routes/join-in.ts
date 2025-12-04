@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import express, { Request, Response, Router } from "express";
-
-const networksInfo = require("../utils/networks-info.js");
+import networksInfo from "../utils/networks-info";
 
 type DistrictParams = { districtId?: string };
 type DistrictLocalInfo = {

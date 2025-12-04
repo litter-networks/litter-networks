@@ -10,7 +10,7 @@ import {
 import { GetCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import NodeCache from "node-cache";
 
-type NetworkRecord = {
+export type NetworkRecord = {
   uniqueId: string;
   fullName: string;
   shortId?: string;
@@ -18,7 +18,7 @@ type NetworkRecord = {
   [key: string]: any;
 };
 
-type DistrictRecord = {
+export type DistrictRecord = {
   uniqueId: string;
   fullName: string;
   mapStyle?: string;
@@ -77,9 +77,9 @@ class NetworksInfo {
   }
 
     // (1) Method to find District by uniqueId
-  async findDistrictById(districtUniqueId: string) {
+  async findDistrictById(districtUniqueId: string): Promise<DistrictRecord | undefined> {
     await this.getAllDistricts();
-    return this.cacheDistricts.get(districtUniqueId);
+    return this.cacheDistricts.get<DistrictRecord>(districtUniqueId);
   }
 
     // (2) Method to get all districts (use cache if populated)
@@ -169,19 +169,19 @@ class NetworksInfo {
   }
 
     // Method to find Network by uniqueId
-  async findNetworkById(networkUniqueId: string) {
+  async findNetworkById(networkUniqueId: string): Promise<NetworkRecord | undefined> {
     await this.getAllNetworks();
-    return this.cacheNetworks.get(networkUniqueId);
+    return this.cacheNetworks.get<NetworkRecord>(networkUniqueId);
   }
 
-  async findNetworkByShortId(queryShortId: string) {
+  async findNetworkByShortId(queryShortId: string): Promise<NetworkRecord | undefined> {
     await this.getAllNetworks();
-    return this.cacheNetworksByShortId.get(queryShortId);
+    return this.cacheNetworksByShortId.get<NetworkRecord>(queryShortId);
   }
 
-  async getNearbyNetworks(networkId: string) {
+  async getNearbyNetworks(networkId: string): Promise<NearbyNetwork[]> {
         // Check if the full dataset is cached
-    const cachedNearbyNetworks = this.cacheNearbyNetworks.get(networkId);
+    const cachedNearbyNetworks = this.cacheNearbyNetworks.get<NearbyNetwork[]>(networkId);
     if (cachedNearbyNetworks) {
       return cachedNearbyNetworks;
     }
@@ -227,8 +227,8 @@ class NetworksInfo {
     }
   }
 
-  async getBagsInfo(statsUniqueId: string) {
-    const cachedBagsInfo = this.cacheBagsInfo.get(statsUniqueId);
+  async getBagsInfo(statsUniqueId: string): Promise<any> {
+    const cachedBagsInfo = this.cacheBagsInfo.get<any>(statsUniqueId);
     if (cachedBagsInfo) {
       return cachedBagsInfo;
     }
@@ -330,8 +330,8 @@ class NetworksInfo {
     return null;
   }
 
-  async getCurrentMemberCount(uniqueId: string) {
-    const cachedMemberCount = this.cacheCurrentMemberCounts.get(uniqueId);
+  async getCurrentMemberCount(uniqueId: string): Promise<number | null> {
+        const cachedMemberCount = this.cacheCurrentMemberCounts.get<number>(uniqueId);
     if (cachedMemberCount) {
       return cachedMemberCount;
     }
@@ -357,7 +357,7 @@ class NetworksInfo {
     return counts;
   }
 
-  async fetchCurrentMemberCount(uniqueId: string) {
+  async fetchCurrentMemberCount(uniqueId: string): Promise<number | null> {
     const params = {
       TableName: 'LN-MemberCounts',
       KeyConditionExpression: 'uniqueId = :uid',
@@ -429,6 +429,7 @@ function resetCachesForTests() {
   });
 }
 
-module.exports = instance;
-(module.exports as any).__resetCachesForTests = resetCachesForTests;
-export {};
+(instance as any).__resetCachesForTests = resetCachesForTests;
+
+export { resetCachesForTests };
+export default instance;
