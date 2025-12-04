@@ -1,8 +1,13 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavData } from '@/features/nav/useNavData';
 import { fetchDistrictLocalInfo, type DistrictLocalInfo } from '@/data-sources/joinIn';
-import { usePageTitle } from '@/shared/usePageTitle';
-import { getPrimaryDistrictId } from '@/shared/districtIds';
+import { fetchDistrictsCsv, type DistrictCsvRow } from '@/data-sources/districts';
+import type { Network } from '@/data-sources/networks';
+import { usePageTitle } from '@/shared/hooks/usePageTitle';
+import { getPrimaryDistrictId } from '@/shared/utils/districtIds';
 import styles from './styles/join-in.module.css';
 
 interface InfoBlock {
@@ -11,6 +16,18 @@ interface InfoBlock {
   href: string;
   type: 'email' | 'external' | 'internal';
 }
+
+type LocalInfoMeta = DistrictLocalInfo & {
+  councilName?: string;
+  councilUrl?: string;
+  districtFullName?: string;
+  districtName?: string;
+};
+
+type NetworkMeta = Network & {
+  councilName?: string;
+  councilUrl?: string;
+};
 
 /**
  * Render the Join In page with local participation resources and contact options.
@@ -25,6 +42,7 @@ export function JoinInPage() {
   const { network } = useNavData();
   const [localInfo, setLocalInfo] = useState<DistrictLocalInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  const [districtMeta, setDistrictMeta] = useState<Record<string, DistrictCsvRow>>({});
   usePageTitle('Join In');
 
   const districtId = useMemo(() => getPrimaryDistrictId(network?.districtId), [network?.districtId]);
@@ -77,8 +95,40 @@ export function JoinInPage() {
     };
   }, [districtId]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchDistrictsCsv(controller.signal)
+      .then((rows) => {
+        const meta: Record<string, DistrictCsvRow> = {};
+        rows.forEach((row) => {
+          if (!row.uniqueId) return;
+          meta[row.uniqueId] = row;
+        });
+        setDistrictMeta(meta);
+      })
+      .catch(() => {
+        setDistrictMeta({});
+      });
+    return () => controller.abort();
+  }, []);
+
+  const localInfoMeta = localInfo as LocalInfoMeta | null;
+  const networkMeta = network as NetworkMeta | undefined;
+  const districtInfo = districtId ? districtMeta[districtId] : undefined;
+  const areaName =
+    districtInfo?.fullName ??
+    network?.districtFullName ??
+    localInfoMeta?.districtFullName ??
+    localInfoMeta?.districtName ??
+    network?.districtId ??
+    'local';
+  const councilName =
+    districtInfo?.councilName ?? networkMeta?.councilName ?? localInfoMeta?.councilName ?? `${areaName} Council`;
+  const councilUrl = districtInfo?.councilUrl ?? networkMeta?.councilUrl ?? localInfoMeta?.councilUrl;
+  const networkDisplayName = network?.fullName ?? network?.uniqueId ?? 'This';
   const blocks = buildBlocks(localInfo);
   const titlePrefix = localInfo ? 'Local Info' : 'Reach Out';
+  const showCouncilNotice = Boolean(districtId && areaName && councilName);
 
   return (
     <div className={styles.page}>
@@ -89,6 +139,29 @@ export function JoinInPage() {
         </div>
       )}
       {loading && <div className={styles.defaultNotice}>Loading local information…</div>}
+      {showCouncilNotice && (
+        <div className={styles.councilNotice}>
+          <b>{networkDisplayName}</b> Litter Network is in the <b>{areaName}</b> area, which is covered by{' '}
+          {councilUrl ? (
+            <a
+              href={councilUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.councilLinkButton}
+            >
+              <img
+                src="https://cdn.litternetworks.org/images/icon-external-link.svg"
+                alt=""
+                aria-hidden="true"
+                className={styles.externalIcon}
+              />
+              {councilName}
+            </a>
+          ) : (
+            councilName
+          )}
+        </div>
+      )}
       <div className={styles.blocks}>
         {blocks.map((block) => (
           <a

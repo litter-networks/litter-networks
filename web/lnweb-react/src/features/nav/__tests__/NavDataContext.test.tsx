@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { renderHook, render, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';

@@ -1,0 +1,37 @@
+name: LNWeb API CI
+
+on:
+  push:
+    paths:
+      - "web/lnweb-api/**"
+      - "web/terraform/**"
+  pull_request:
+    paths:
+      - "web/lnweb-api/**"
+      - "web/terraform/**"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "web/lnweb-api/package-lock.json"
+      - name: Install dependencies
+        run: |
+          npm --prefix web/lnweb-api/lambda-layer/nodejs install
+          npm --prefix web/lnweb-api install
+      - name: Run API test suite
+        run: npm --prefix web/lnweb-api run test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install AWS SAM CLI
+        run: python -m pip install --upgrade pip && python -m pip install aws-sam-cli
+      - name: Run sync_lambda (read-only)
+        env:
+          SKIP_ENDPOINT_CONTRACT_CHECKS: "true"
+        run: bash web/lnweb-api/sync_lambda.sh --read-only --skip-golden-checks

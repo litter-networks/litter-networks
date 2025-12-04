@@ -5,12 +5,14 @@
   "main": "dist/electron/electron/main/main.js",
   "scripts": {
     "test": "npm run typecheck",
+    "test:unit": "vitest run",
+    "test:full": "npm run build:electron && npm run test:unit",
     "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\" \"npm:start:electron\"",
     "dev:background": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
-    "dev:renderer": "vite dev --host",
+    "dev:renderer": "vite dev --host --port ${VITE_DEV_SERVER_PORT:-5173}",
     "dev:electron": "tsc -p src/electron/tsconfig.json --watch",
-    "start:electron": "wait-on dist/electron/electron/main/main.js dist/electron/electron/preload/index.js http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 node ./scripts/start-electron.cjs",
-    "start:electron:debug": "wait-on dist/electron/electron/main/main.js dist/electron/electron/preload/index.js http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 node ./scripts/start-electron.cjs --inspect=9229",
+    "start:electron": "wait-on dist/electron/electron/main/main.js dist/electron/electron/preload/index.js http://localhost:${VITE_DEV_SERVER_PORT:-5173} && node ./scripts/start-electron.cjs",
+    "start:electron:debug": "wait-on dist/electron/electron/main/main.js dist/electron/electron/preload/index.js http://localhost:${VITE_DEV_SERVER_PORT:-5173} && node ./scripts/start-electron.cjs --inspect=9229",
     "build": "npm run build:renderer && npm run build:electron && npm run copy:python-utils",
     "dist": "npm run build && electron-builder --linux",
     "build:renderer": "vite build",
@@ -24,6 +26,7 @@
     "@aws-sdk/client-dynamodb": "^3.540.0",
     "@aws-sdk/client-s3": "^3.937.0",
     "@aws-sdk/credential-providers": "^3.936.0",
+    "@aws-sdk/client-cloudfront": "^3.936.0",
     "@aws-sdk/lib-dynamodb": "^3.540.0",
     "date-fns": "^2.30.0",
     "node-cache": "^5.1.2",
@@ -43,7 +46,10 @@
     "electron-builder": "^24.6.0",
     "typescript": "^5.4.5",
     "vite": "^5.2.0",
-    "wait-on": "^7.0.1"
+    "wait-on": "^7.0.1",
+    "vitest": "^4.0.15",
+    "@testing-library/react": "^14.0.0",
+    "jsdom": "^21.1.0"
   },
   "build": {
     "appId": "org.litternetworks.litter-networker",

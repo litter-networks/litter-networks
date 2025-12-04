@@ -1,8 +1,20 @@
 #!/bin/bash
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 
 set -e  # Exit immediately if a command exits with a non-zero status
 
-clear
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+echo "[info] Validating SPDX headers..."
+if ! python3 "$REPO_ROOT/tools/license_check.py"; then
+  echo "[error] License header validation failed. Run: python3 tools/license_fix.py"
+  exit 1
+fi
+
+cd "$SCRIPT_DIR"
+
 
 export AWS_PROFILE="${AWS_PROFILE:-ln}"
 
@@ -14,8 +26,29 @@ function on_error() {
 # Trap errors and call the on_error function
 trap 'on_error' ERR
 
-# Parse arguments
+# Command-line options
+SYNC_READ_ONLY=${SYNC_READ_ONLY:-false}
+SKIP_ENDPOINT_CONTRACT_CHECKS=${SKIP_ENDPOINT_CONTRACT_CHECKS:-false}
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -r|--read-only|-read-only)
+      SYNC_READ_ONLY=true
+      ;;
+    --skip-golden-checks)
+      SKIP_ENDPOINT_CONTRACT_CHECKS=true
+      ;;
+    *)
+      echo "[warn] Ignoring unknown argument: $1"
+      ;;
+  esac
+  shift
+done
+
 LAMBDA_DEPLOY=${LAMBDA_DEPLOY:-true}
+if [ "${SYNC_READ_ONLY}" = "true" ]; then
+    echo "[info] Running sync_lambda in read-only mode; skipping deploy/invalidation phases."
+    LAMBDA_DEPLOY=false
+fi
 
 # print_time_taken prints the elapsed time in seconds since the given start time and echoes "<label> took <seconds> seconds."
 function print_time_taken() {
@@ -60,13 +93,17 @@ stage_start=$(date +%s)
 npm test
 print_time_taken $stage_start "Jest tests"
 
-# Run local golden checks before any deployment
-current_stage="Local endpoint golden checks"
-echo ""
-echo "Running local endpoint golden checks... ========================="
-stage_start=$(date +%s)
-(cd deployment-tests && ./run-local-endpoint-checks.sh)
-print_time_taken $stage_start "Local endpoint golden checks"
+# Run local endpoint contract checks before any deployment
+if [ "$SKIP_ENDPOINT_CONTRACT_CHECKS" != "true" ]; then
+  current_stage="Local endpoint golden checks"
+  echo ""
+  echo "Running local endpoint golden checks... ========================="
+  stage_start=$(date +%s)
+  (cd deployment-tests && ./run-local-endpoint-checks.sh)
+  print_time_taken $stage_start "Local endpoint golden checks"
+else
+  echo "[info] Skipping local endpoint contract checks (SKIP_ENDPOINT_CONTRACT_CHECKS is true)."
+fi
 
 # Deploy to Elastic Beanstalk (optional)
 if [ "$LAMBDA_DEPLOY" = true ]; then
@@ -122,12 +159,16 @@ else
     echo "Skipping SAM Lambda deploy. ========================="
 fi
 
-current_stage="Remote endpoint golden checks"
-echo ""
-echo "Running remote endpoint golden checks... ========================="
-stage_start=$(date +%s)
-(cd deployment-tests && ./run-remote-endpoint-checks.sh)
-print_time_taken $stage_start "Remote endpoint golden checks"
+if [ "$SKIP_GOLDEN_CHECKS" != "true" ]; then
+  current_stage="Remote endpoint golden checks"
+  echo ""
+  echo "Running remote endpoint golden checks... ========================="
+  stage_start=$(date +%s)
+  (cd deployment-tests && ./run-remote-endpoint-checks.sh)
+  print_time_taken $stage_start "Remote endpoint golden checks"
+else
+  echo "[info] Skipping remote endpoint contract checks (SKIP_ENDPOINT_CONTRACT_CHECKS is true)."
+fi
 
 # Total time taken
 total_end_time=$(date +%s)

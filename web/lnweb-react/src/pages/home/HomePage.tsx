@@ -1,10 +1,13 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { useEffect, useMemo, useState } from 'react';
 import { appEnv } from '@/config/env';
 import { useNavData } from '@/features/nav/useNavData';
 import type { Network } from '@/data-sources/networks';
 import { StatsBoardImage } from '@/components/stats/StatsBoardImage';
-import { usePageTitle } from '@/shared/usePageTitle';
-import { useMediaQuery } from '@/shared/useMediaQuery';
+import { usePageTitle } from '@/shared/hooks/usePageTitle';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import styles from './styles/home.module.css';
 
 type BlockType = 'knowledge' | 'join-in' | 'news';
@@ -261,12 +264,12 @@ function createDefaultColumns(): WelcomeBlock[][] {
       description: 'Welcome! Learn how we use a Litter Network!',
     },
     {
-      link: 'join-in/choose',
-      blockType: 'join-in',
-      title: 'Join In',
-      description: 'Choose a network and get started!',
-      imageUrl: `${appEnv.staticAssetsBaseUrl}/images/mockup_map.jpg`,
-      classEx: 'block-image-cover-30vh',
+      link: 'news',
+      blockType: 'news',
+      title: 'News',
+      description: 'Read all about it!',
+      imageUrl: 'news-block-gallery',
+      classEx: 'block-image-cover-40vh',
     },
     {
       link: 'join-in',
@@ -277,12 +280,12 @@ function createDefaultColumns(): WelcomeBlock[][] {
   ];
   const right: WelcomeBlock[] = [
     {
-      link: 'news',
-      blockType: 'news',
-      title: 'News',
-      description: 'Read all about it!',
-      imageUrl: 'news-block-gallery',
-      classEx: 'block-image-cover-40vh',
+      link: 'join-in/choose',
+      blockType: 'join-in',
+      title: 'Join In',
+      description: 'Choose a network and get started!',
+      imageUrl: `${appEnv.staticAssetsBaseUrl}/images/mockup_map.jpg`,
+      classEx: 'block-image-cover-30vh',
     },
     {
       link: 'knowledge/our-organisation/about-us',

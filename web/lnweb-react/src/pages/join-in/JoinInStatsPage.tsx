@@ -1,11 +1,14 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { StatsBoardImage } from '@/components/stats/StatsBoardImage';
 import { fetchStatsSummary, type StatsSummary } from '@/data-sources/stats';
 import { useNavData } from '@/features/nav/useNavData';
 import { StatsSummaryImage } from '@/components/stats/StatsSummaryImage';
-import { usePageTitle } from '@/shared/usePageTitle';
-import { getPrimaryDistrictId } from '@/shared/districtIds';
+import { usePageTitle } from '@/shared/hooks/usePageTitle';
+import { getPrimaryDistrictId } from '@/shared/utils/districtIds';
 import styles from './styles/join-in-stats.module.css';
 
 interface BoardTarget {

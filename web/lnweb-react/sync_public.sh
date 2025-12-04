@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 
 set -euo pipefail
 
-export TERM="${TERM:-xterm}"
-
-if command -v tput >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != "dumb" ]; then
-  clear
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+echo "[info] Validating SPDX headers..."
+if ! python3 "$REPO_ROOT/tools/license_check.py"; then
+  echo "[error] License header validation failed. Run: python3 tools/license_fix.py"
+  exit 1
 fi
+
+pushd "${SCRIPT_DIR}" >/dev/null
 
 export AWS_PROFILE="${AWS_PROFILE:-ln}"
 export DEPLOY_BUCKET="lnweb-public"
@@ -44,6 +51,14 @@ function run_stage() {
   print_time_taken "${stage_start}" "${label}"
 }
 
+function sync_assets() {
+  if [ "${SYNC_READ_ONLY:-false}" = "true" ]; then
+    echo "[info] Read-only mode: skipping S3 sync and metadata updates."
+    return 0
+  fi
+  python3 scripts/sync_s3_with_metadata.py
+}
+
 start_time=$(date +%s)
 
 run_stage "ESLint" npm run lint
@@ -52,8 +67,9 @@ run_stage "Vitest suite" npm run test
 run_stage "npm audit" npm audit --audit-level=low
 run_stage "Vite build" npm run build
 
-run_stage "S3 sync + metadata" \
-  python3 scripts/sync_s3_with_metadata.py
+run_stage "S3 sync + metadata" sync_assets
+
+popd >/dev/null
 
 total_end_time=$(date +%s)
 total_elapsed=$(( total_end_time - start_time ))

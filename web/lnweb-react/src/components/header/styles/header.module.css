@@ -481,6 +481,26 @@
   }
 }
 
+/* Tighten submenu for small phones to keep items on one line. */
+@media (max-width: 520px) {
+  .joinInSubMenu {
+    width: 100%;
+    padding: 8px 6px 4px;
+  }
+
+  .joinInSubMenuList {
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+
+  .joinInSubMenuList .navItemLink {
+    font-size: 13px;
+    padding: 2px 4px;
+    margin-top: 8px;
+  }
+}
+
 /* Scale the brand lockup slightly down for phones around 480px wide. */
 @media (max-width: 480px) {
   .header {

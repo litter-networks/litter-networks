@@ -1,8 +1,12 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 const express = require("express");
 
 console.log(`LNWeb-API - Running Node.js version: ${process.version}`);
 
 const app = express();
+app.set('json spaces', 2);
 
 /**
  * Configure middleware, routing, and error handling on the shared Express `app` instance.

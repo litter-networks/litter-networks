@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 export {};
 
 declare global {
@@ -11,5 +14,7 @@ declare global {
       currentSelection: { districtId?: string; networkId?: string },
       modeIn?: string,
     ) => void;
+    updateMapSelection?: (selection: { districtId?: string; networkId?: string }) => void;
+    fetchGeoJSON?: (url: string) => Promise<unknown>;
   }
 }

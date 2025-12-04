@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright 2025 Litter Networks / Clean and Green Communities CIC
+# SPDX-License-Identifier: Apache-2.0
+
 """Helper script to run the lnwordtohtml sync inside python-utils."""
 
 from __future__ import annotations

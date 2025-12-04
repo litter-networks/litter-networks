@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 // CloudFront Function that turns top-level SPA routes (anything without a "."
 // extension and not ending in "/") into /index.html so the React app can
 // handle client-side routing. Static assets (/assets/*.js, /api/*, etc.)

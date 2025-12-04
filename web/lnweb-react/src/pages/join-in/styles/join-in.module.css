@@ -23,10 +23,13 @@
   color: #222;
   background-color: rgba(140, 181, 130, 0.12);
   transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
 .block:hover {
-  background-color: rgba(140, 181, 130, 0.2);
+  transform: scale(0.996);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .iconStrip {
@@ -70,6 +73,38 @@
   border: 1px solid rgba(140, 181, 130, 0.3);
   background-color: rgba(140, 181, 130, 0.08);
   margin-bottom: 1rem;
+}
+
+.councilNotice {
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  background-color: #fff;
+  margin-bottom: 1rem;
+  color: #2f3d2f;
+  text-align: center;
+}
+
+.councilLinkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background-color: rgba(127, 173, 116, 0.9);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+  text-decoration: none;
+}
+
+.councilLinkButton:hover {
+  background-color: rgba(127, 173, 116, 0.95);
+  color: #fff;
+}
+
+.externalIcon {
+  width: 16px;
+  height: 16px;
 }
 
 .placeholderPage {

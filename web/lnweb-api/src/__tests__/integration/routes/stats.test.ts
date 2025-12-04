@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import request from 'supertest';
 import express from 'express';
 import type { Express } from 'express';

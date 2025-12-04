@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import express, { Request, Response, Router } from "express";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 

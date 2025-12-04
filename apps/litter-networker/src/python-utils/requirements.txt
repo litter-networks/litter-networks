@@ -6,3 +6,4 @@ geopy
 tqdm
 shapely
 -e ./lnwordtohtml
+pytest

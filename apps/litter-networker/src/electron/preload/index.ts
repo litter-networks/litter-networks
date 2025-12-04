@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { contextBridge, ipcRenderer } from "electron";
 import type { AppSnapshot } from "../../shared/app-state";
 import type { MonthlyCostsReport } from "../../shared/costs";
@@ -28,6 +31,14 @@ const api = {
       all: { session: number; lastUpdated?: string };
       network: { session: number; lastUpdated?: string };
     }>,
+  invalidateDistribution: (distributionId: string) =>
+    ipcRenderer.invoke("bag:invalidateDistribution", distributionId) as Promise<void>,
+  applyMemberCount: (payload: { networkId: string; memberCount: number; dataSource?: string }) =>
+    ipcRenderer.invoke("member:apply", payload),
+  getMemberCount: (networkId: string) =>
+    ipcRenderer.invoke("member:getCurrent", networkId) as Promise<
+      { memberCount: number; sampleTime: number; dataSource?: string; reviewAdjustments?: unknown[] } | null
+    >,
   getMonthlyCosts: () => ipcRenderer.invoke("costs:getMonthly") as Promise<MonthlyCostsReport | null>,
   getNetworks: () => ipcRenderer.invoke("networks:get") as Promise<NetworksResponse>,
   updateNetworkRow: (payload: { uniqueId: string; changes: Record<string, string> }) =>

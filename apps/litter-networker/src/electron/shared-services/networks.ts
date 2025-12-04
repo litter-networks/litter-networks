@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
 import { DynamoDBDocumentClient, UpdateCommand, PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
@@ -74,19 +77,7 @@ const getHeadersFromDataFields = (rows: NetworkRow[]): string[] => {
   return [...fixed, ...remaining];
 };
 
-const attributeExistsInTable = async (attribute: string, tableName: string): Promise<boolean> => {
-  const command = new ScanCommand({
-    TableName: tableName,
-    Limit: 1,
-    ProjectionExpression: "#attr",
-    FilterExpression: "attribute_exists(#attr)",
-    ExpressionAttributeNames: {
-      "#attr": attribute
-    }
-  });
-  const response = await documentClient.send(command);
-  return Boolean(response.Items && response.Items.length > 0);
-};
+const MAP_TABLE_FIELDS = new Set(["mapFile", "mapSource"]);
 
 export class NetworksService {
   async getNetworks(): Promise<NetworksResponse> {
@@ -105,9 +96,7 @@ export class NetworksService {
 
     for (const [key, value] of Object.entries(changes)) {
       const trimmed = value.trim();
-      const targetTable = (await attributeExistsInTable(key, NETWORKS_INFO_TABLE))
-        ? NETWORKS_INFO_TABLE
-        : NETWORKS_MAP_TABLE;
+      const targetTable = MAP_TABLE_FIELDS.has(key) ? NETWORKS_MAP_TABLE : NETWORKS_INFO_TABLE;
       updates[targetTable][key] = trimmed;
     }
 

@@ -1,44 +1,55 @@
-import styles from "./styles/BagCounter.module.css";
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
+import widgetStyles from "../WidgetBase/styles/WidgetBase.module.css";
 
 type Props = {
   inputValue: number;
   onChange: (next: number) => void;
   sessionCount: number;
   totalLabel: string;
-  lastUpdated?: string;
+  sinceLabel?: string;
   onApply: (advance: boolean) => void;
   applying: boolean;
 };
 
-const BagCounter = ({ inputValue, onChange, sessionCount, totalLabel, lastUpdated, onApply, applying }: Props) => {
+const BagCounter = ({ inputValue, onChange, sessionCount, totalLabel, sinceLabel, onApply, applying }: Props) => {
   const adjust = (delta: number) => {
     onChange(Math.max(0, +(inputValue + delta).toFixed(1)));
   };
   const disabled = applying;
+  const sinceText = sinceLabel ?? "--";
 
   return (
-    <div className={styles.bagInline}>
-      <div className={styles.stats}>
-        <span className={styles.eyebrow}>{totalLabel}</span>
-        <span className={styles.eyebrow}>This {sessionCount.toFixed(1)}</span>
-        <span className={styles.eyebrow}>Updated {lastUpdated ?? "--"}</span>
+    <div className={widgetStyles.widgetInline}>
+      <div className={widgetStyles.stats}>
+        <div className={widgetStyles.titleRow}>
+          <span className={widgetStyles.title}>Bag Count</span>
+        </div>
+        <div className={widgetStyles.statRow}>
+          <span className={widgetStyles.eyebrow}>{totalLabel}</span>
+          <span className={widgetStyles.eyebrow}>This {sessionCount.toFixed(1)}</span>
+        </div>
+        <div className={widgetStyles.sinceRow}>
+          <span className={widgetStyles.eyebrow}>Since {sinceText}</span>
+        </div>
       </div>
-      <div className={styles.controls}>
-        <button className={styles.deltaButton} onClick={() => adjust(-5)}>
+      <div className={widgetStyles.controls}>
+        <button className={widgetStyles.deltaButton} onClick={() => adjust(-5)}>
           -5
         </button>
-        <button className={styles.deltaButton} onClick={() => adjust(-1)}>
+        <button className={widgetStyles.deltaButton} onClick={() => adjust(-1)}>
           -1
         </button>
         <input value={inputValue.toFixed(1)} readOnly aria-label="Bag count entry" />
-        <button className={styles.deltaButton} onClick={() => adjust(1)}>
+        <button className={widgetStyles.deltaButton} onClick={() => adjust(1)}>
           +1
         </button>
-        <button className={styles.deltaButton} onClick={() => adjust(5)}>
+        <button className={widgetStyles.deltaButton} onClick={() => adjust(5)}>
           +5
         </button>
         <button
-          className={`${styles.cta} ${styles.ctaGo}`}
+          className={`${widgetStyles.cta} ${widgetStyles.ctaGo}`}
           onClick={() => onApply(true)}
           disabled={disabled}
           aria-label="Apply and go to next network"
@@ -46,7 +57,7 @@ const BagCounter = ({ inputValue, onChange, sessionCount, totalLabel, lastUpdate
           ✓+►
         </button>
         <button
-          className={`${styles.cta} ${styles.ctaTick}`}
+          className={`${widgetStyles.cta} ${widgetStyles.ctaTick}`}
           aria-label="Apply bag count"
           onClick={() => onApply(false)}
           disabled={disabled}

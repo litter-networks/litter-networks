@@ -1,8 +1,12 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { Outlet, useParams } from 'react-router-dom';
 import { Header } from '@/components/header/Header';
 import { Footer } from '@/components/footer/Footer';
 import { NavDataProvider } from '@/features/nav/NavDataContext';
 import styles from './styles/app-layout.module.css';
+import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 
 /**
  * Renders the application layout and provides navigation data context from an optional `filterString` route parameter.
@@ -17,11 +21,17 @@ export function AppLayout() {
   return (
     <NavDataProvider filterStringParam={filterString}>
       <div className={styles.appShell}>
-        <Header />
+        <ErrorBoundary name="Header">
+          <Header />
+        </ErrorBoundary>
         <main className={styles.content}>
-          <Outlet />
+          <ErrorBoundary name="Page Content">
+            <Outlet />
+          </ErrorBoundary>
         </main>
-        <Footer />
+        <ErrorBoundary name="Footer">
+          <Footer />
+        </ErrorBoundary>
       </div>
     </NavDataProvider>
   );

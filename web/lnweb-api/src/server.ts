@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 // Server startup script for running the app directly (not through Lambda)
 
 const initializeApp = require('./app');

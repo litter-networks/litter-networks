@@ -86,6 +86,26 @@ th {
   z-index: 1;
 }
 
+.resizableHeader {
+  position: relative;
+  user-select: none;
+}
+
+.columnResizer {
+  position: absolute;
+  right: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 6px;
+  cursor: col-resize;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.columnResizer:hover {
+  background: rgba(24, 34, 54, 0.12);
+}
+
 .cellInput {
   width: 100%;
   border: 1px solid transparent;

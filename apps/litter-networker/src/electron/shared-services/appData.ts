@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { fromIni } from "@aws-sdk/credential-providers";
@@ -102,7 +105,7 @@ const buildNetworks = async (): Promise<{ networks: NetworkInfo[]; defaultNetwor
     const district = districts.get(districtKey);
     const districtName = district?.fullName ?? districtKey ?? "";
     const region = district?.region ?? network.region ?? "";
-    const displayLabel = `${index + 1}/${totalCount} - ${districtName} > ${network.fullName}`;
+    const displayLabel = `${index + 1}/${totalCount} - ${network.fullName} - ${districtName}`;
 
     return {
       id: network.uniqueId,

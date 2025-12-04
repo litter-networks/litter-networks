@@ -1,5 +1,9 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import type { NetworksResponse } from "@shared/networks";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { useNetworksData } from "../../data-sources/useNetworksData";
 import styles from "./styles/NetworksPage.module.css";
 
@@ -195,6 +199,9 @@ export default function NetworksPage() {
   const [addingStatus, setAddingStatus] = useState<RowStatus>("idle");
   const [newRow, setNewRow] = useState<Record<string, string>>({});
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const [isResizing, setIsResizing] = useState(false);
+  const resizingRef = useRef<{ header: string; startX: number; startWidth: number } | null>(null);
 
   const headers = data?.headers ?? [];
   const rows = data?.rows ?? [];
@@ -205,6 +212,18 @@ export default function NetworksPage() {
       Object.values(row).some((value) => value.toLowerCase().includes(needle))
     );
   }, [filter, rows]);
+
+  useEffect(() => {
+    setColumnWidths((prev) => {
+      const next = { ...prev };
+      headers.forEach((header) => {
+        if (!next[header]) {
+          next[header] = 180;
+        }
+      });
+      return next;
+    });
+  }, [headers]);
 
   const mapFileOptionsBySource = useMemo(() => {
     const lookup: Record<string, string[]> = {};
@@ -263,6 +282,43 @@ export default function NetworksPage() {
     const needle = search.trim().toLowerCase();
     return options.filter((opt) => opt.toLowerCase().includes(needle)).slice(0, 10);
   };
+
+  const handleColumnResizeStart = useCallback(
+    (header: string, event: ReactMouseEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const startWidth = columnWidths[header] ?? 180;
+      resizingRef.current = { header, startX: event.clientX, startWidth };
+      setIsResizing(true);
+    },
+    [columnWidths]
+  );
+
+  useEffect(() => {
+    const handleMove = (event: MouseEvent) => {
+      const current = resizingRef.current;
+      if (!current) return;
+      const delta = event.clientX - current.startX;
+      const nextWidth = Math.max(80, current.startWidth + delta);
+      setColumnWidths((prev) => ({ ...prev, [current.header]: nextWidth }));
+    };
+
+    const handleUp = () => {
+      if (!resizingRef.current) return;
+      resizingRef.current = null;
+      setIsResizing(false);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    document.body.style.cursor = isResizing ? "col-resize" : "";
+  }, [isResizing]);
 
   const baseRow = useMemo(() => {
     const base: Record<string, string> = {};
@@ -360,16 +416,34 @@ export default function NetworksPage() {
 
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
-          <thead>
-            <tr>
-              <th />
-              <th />
+            <colgroup>
+              <col style={{ width: "40px" }} />
+              <col style={{ width: "120px" }} />
               {headers.map((header) => (
-                <th key={header}>{header}</th>
+                <col
+                  key={`col_${header}`}
+                  style={{ width: columnWidths[header] ? `${columnWidths[header]}px` : undefined }}
+                />
               ))}
-              <th />
-            </tr>
-          </thead>
+              <col style={{ width: "48px" }} />
+            </colgroup>
+            <thead>
+              <tr>
+                <th />
+                <th />
+                {headers.map((header) => (
+                  <th key={header} className={styles.resizableHeader}>
+                    <span>{header}</span>
+                    <div
+                      className={styles.columnResizer}
+                      onMouseDown={(event) => handleColumnResizeStart(header, event)}
+                      role="presentation"
+                    />
+                  </th>
+                ))}
+                <th />
+              </tr>
+            </thead>
           <tbody>
             <tr>
               <td />

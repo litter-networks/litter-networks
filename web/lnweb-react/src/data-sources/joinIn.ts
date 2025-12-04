@@ -1,5 +1,8 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { apiRequest } from '@/lib/httpClient';
-import { getPrimaryDistrictId } from '@/shared/districtIds';
+import { getPrimaryDistrictId } from '@/shared/utils/districtIds';
 
 export interface DistrictLocalInfo {
   uniqueId: string;

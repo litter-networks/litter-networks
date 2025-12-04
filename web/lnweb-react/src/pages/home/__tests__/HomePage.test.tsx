@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
@@ -13,7 +16,7 @@ vi.mock('@/components/stats/StatsBoardImage', () => ({
   ),
 }));
 
-vi.mock('@/shared/usePageTitle', () => ({
+vi.mock('@/shared/hooks/usePageTitle', () => ({
   usePageTitle: vi.fn(),
 }));
 

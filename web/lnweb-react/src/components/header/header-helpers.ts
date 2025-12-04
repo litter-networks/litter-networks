@@ -1,4 +1,7 @@
-import { getSectionFromPath } from '@/shared/sections';
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
+import { getSectionFromPath } from '@/shared/utils/sections';
 import styles from './styles/header.module.css';
 
 type Section = ReturnType<typeof getSectionFromPath>;

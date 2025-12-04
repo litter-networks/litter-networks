@@ -1,8 +1,11 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
 import { NetworkSwitcher } from '@/components/network-switcher/NetworkSwitcher';
-import { getSectionFromPath } from '@/shared/sections';
+import { getSectionFromPath } from '@/shared/utils/sections';
 import { getHeaderColorClass, getSearchColorClass } from './header-helpers';
 import styles from './styles/header.module.css';
 
@@ -30,7 +33,7 @@ const themeColorVarMap: Record<string, string> = {
  * @returns The header JSX element containing the navbar, brand/filter trigger, navigation links, and conditional join-in submenu.
  */
 export function Header() {
-  const { buildPath, facebookLink } = useNavData();
+  const { buildPath, facebookLink, network } = useNavData();
   const location = useLocation();
   const sectionName = getSectionFromPath(location.pathname);
   const headerColorClass = getHeaderColorClass(sectionName);
@@ -96,7 +99,7 @@ export function Header() {
                   location.pathname.includes('/join-in/choose') ? styles.navItemCurrent : ''
                 }`}
               >
-                Map
+                Choose
               </Link>
             </li>
             <li>
@@ -116,7 +119,7 @@ export function Header() {
                   location.pathname.endsWith('/join-in') ? styles.navItemCurrent : ''
                 }`}
               >
-                Reach Out
+                {network ? 'Local Info' : 'Reach Out'}
               </Link>
             </li>
             <li>

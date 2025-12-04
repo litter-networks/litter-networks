@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useAppSnapshot } from "../../data-sources/useAppSnapshot";
 import { useContentJob } from "../../data-sources/useContentJob";

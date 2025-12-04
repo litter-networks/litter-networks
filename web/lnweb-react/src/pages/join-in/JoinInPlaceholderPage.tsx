@@ -1,4 +1,7 @@
-import { usePageTitle } from '@/shared/usePageTitle';
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
+import { usePageTitle } from '@/shared/hooks/usePageTitle';
 import styles from './styles/join-in.module.css';
 
 interface JoinInPlaceholderPageProps {

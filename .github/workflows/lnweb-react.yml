@@ -1,0 +1,26 @@
+name: LNWeb React CI
+
+on:
+  push:
+    paths:
+      - "web/lnweb-react/**"
+  pull_request:
+    paths:
+      - "web/lnweb-react/**"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "web/lnweb-react/package-lock.json"
+      - name: Install dependencies
+        run: npm --prefix web/lnweb-react install
+      - name: Run sync_public (read-only)
+        env:
+          SYNC_READ_ONLY: "true"
+        run: bash web/lnweb-react/sync_public.sh

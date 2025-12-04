@@ -38,6 +38,15 @@
   background-color: white;
   border-radius: 0.75em;
   border: 5px solid rgba(135, 129, 190, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.primary-column-entry-knowledge:hover,
+.primary-column-entry-join-in:hover,
+.primary-column-entry-news:hover {
+  transform: scale(0.996);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .primary-column-entry-join-in {

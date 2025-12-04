@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
@@ -78,7 +81,7 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
 
   const hasResults = trimmedTerm.length > 0 && filteredNetworks.length > 0;
 
-  const renderNetworkItem = (item: (typeof networks)[number], keyPrefix?: string, meta?: string) => (
+  const renderNetworkItem = (item: { uniqueId: string; fullName?: string }, keyPrefix?: string) => (
     <li key={`${keyPrefix ?? 'net'}-${item.uniqueId}`} className={styles.networkSwitcherItem}>
       <Link
         to={buildNetworkSwitchPath(item.uniqueId)}
@@ -87,7 +90,6 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
       >
         <img className={styles.networkSwitcherLogo} src="/brand/logo-only.svg" alt="Litter Networks logo" />
         <span className={styles.networkSwitcherItemText}>{item.fullName ?? item.uniqueId}</span>
-        {meta && <span className={styles.networkSwitcherItemMeta}>{meta}</span>}
       </Link>
       <button
         type="button"
@@ -151,11 +153,7 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
             <span className={styles.networkSwitcherSectionLabel}>nearby:</span>
           </li>
           {nearbyNetworks.map((nearby) =>
-            renderNetworkItem(
-              nearby,
-              'nearby',
-              nearby.roundedDistance != null ? `${nearby.roundedDistance} miles` : undefined,
-            ),
+            renderNetworkItem({ uniqueId: nearby.uniqueId, fullName: nearby.fullName }, 'nearby'),
           )}
         </>
       )}
@@ -163,7 +161,7 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
         <span className={styles.networkSwitcherSectionLabel}>general:</span>
       </li>
       {generalLinks.map((link) => (
-        <li key={link.label}>
+        <li key={link.label} className={styles.networkSwitcherItem}>
           <Link
             to={link.to}
             state={link.preserveReturnPath ? returnPathState : undefined}
@@ -171,7 +169,7 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
             onClick={onRequestClose}
           >
             <img className={styles.networkSwitcherLogo} src="/brand/logo-only.svg" alt="Litter Networks logo" />
-            {link.label}
+            <span className={styles.networkSwitcherItemText}>{link.label}</span>
           </Link>
         </li>
       ))}

@@ -1,9 +1,15 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import BagCounter from "../../components/BagCounter/BagCounter";
+import CloudfrontInvalidation from "../../components/CloudfrontInvalidation/CloudfrontInvalidation";
+import MemberCounter from "../../components/MemberCounter/MemberCounter";
 import DualPaneView from "../../components/DualPaneView/DualPaneView";
 import { useAppSnapshot } from "../../data-sources/useAppSnapshot";
 import styles from "./styles/BrowsePage.module.css";
 import NetworkNavigation from "../../components/NetworkNavigation/NetworkNavigation";
+import ErrorBoundary from "../../components/ErrorBoundary/ErrorBoundary";
 
 const HOME_NETWORK_ID = "litternetworks";
 
@@ -31,7 +37,11 @@ export default function BrowsePage() {
   const [bagInput, setBagInput] = useState(0);
   const [totalLabel, setTotalLabel] = useState("All 0");
   const [sessionCount, setSessionCount] = useState(0);
-  const [lastUpdated, setLastUpdated] = useState<string>();
+  const [sinceLabel, setSinceLabel] = useState<string>();
+  const [memberInput, setMemberInput] = useState(0);
+  const [memberRegistered, setMemberRegistered] = useState<number | null>(null);
+  const [memberApplying, setMemberApplying] = useState(false);
+  const [memberSinceLabel, setMemberSinceLabel] = useState("--");
   const [arrowLockEnabled, setArrowLockEnabled] = useState(true);
   const [prefetchStatus, setPrefetchStatus] = useState({
     prevReady: false,
@@ -44,6 +54,20 @@ export default function BrowsePage() {
   });
   const [mockSyncing, setMockSyncing] = useState(false);
   const [applying, setApplying] = useState(false);
+
+  const formatSampleTimeLabel = (value?: number | null) => {
+    if (!value || !Number.isFinite(value)) {
+      return "--";
+    }
+    return new Date(value * 1000).toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
+  };
 
   const previousNetwork = useRef<string | null>(null);
   const lastBaseUrl = useRef<string | null>(null);
@@ -67,6 +91,38 @@ export default function BrowsePage() {
     },
     [snapshot]
   );
+
+  const handleMemberApply = useCallback(async () => {
+    if (!selectedNetwork) return;
+    setMemberApplying(true);
+    try {
+      const nextValue = Math.max(0, Math.round(memberInput));
+      await window.appApi.applyMemberCount?.({
+        networkId: selectedNetwork,
+        memberCount: nextValue
+      });
+      const response = await window.appApi.getMemberCount?.(selectedNetwork);
+      if (response) {
+        const normalized = Math.max(0, Math.round(response.memberCount ?? 0));
+        setMemberRegistered(normalized);
+        setMemberInput(normalized);
+        setMemberSinceLabel(formatSampleTimeLabel(response.sampleTime));
+      }
+    } catch (error) {
+      console.error("Failed to apply member count", error);
+    } finally {
+      setMemberApplying(false);
+    }
+  }, [memberInput, selectedNetwork]);
+
+  const handleInvalidateDistribution = useCallback(async (distributionId: string) => {
+    try {
+      await window.appApi.invalidateDistribution?.(distributionId);
+    } catch (error) {
+      console.error("Failed to invalidate CloudFront distribution", error);
+    }
+  }, []);
+
 
   const selectNetwork = useCallback(
     (networkId: string, preserve = false) => {
@@ -120,7 +176,7 @@ export default function BrowsePage() {
           hour12: false
         });
         setSessionCount((prev) => prev + appliedAmount);
-        setLastUpdated(nowLabel);
+        setSinceLabel(nowLabel);
         setTotalLabel((prev) => {
           const match = prev.match(/All\s+([0-9.]+)/i);
           const current = match ? Number(match[1]) : 0;
@@ -134,13 +190,13 @@ export default function BrowsePage() {
       }
       applyPromise
         ?.then(() => window.appApi.getBagStats?.(refreshTargetId))
-        .then((stats) => {
-          if (!stats) return;
-          if (selectedNetworkRef.current !== refreshTargetId) return;
-          setSessionCount(stats.network.session);
-          setLastUpdated(stats.network.lastUpdated);
-          setTotalLabel(`All ${stats.all.session.toFixed(0)}`);
-        })
+          .then((stats) => {
+            if (!stats) return;
+            if (selectedNetworkRef.current !== refreshTargetId) return;
+            setSessionCount(stats.network.session);
+            setSinceLabel(stats.network.lastUpdated);
+            setTotalLabel(`All ${stats.all.session.toFixed(0)}`);
+          })
         .catch((error) => console.error("Failed to refresh bag stats", error));
     } catch (error) {
       console.error("Failed to apply bag count", error);
@@ -150,6 +206,11 @@ export default function BrowsePage() {
     },
     [snapshot, selectedNetwork, bagInput, refresh, moveToNextNetwork]
   );
+
+  const handleMemberAdvance = useCallback(async () => {
+    await handleMemberApply();
+    await handleApply(true);
+  }, [handleMemberApply, handleApply]);
 
   useEffect(() => {
     if (!snapshot) return;
@@ -177,7 +238,7 @@ export default function BrowsePage() {
     let cancelled = false;
     if (!selectedNetwork || selectedNetwork === HOME_NETWORK_ID) {
       setSessionCount(0);
-      setLastUpdated(undefined);
+      setSinceLabel(undefined);
       return;
     }
 
@@ -187,10 +248,41 @@ export default function BrowsePage() {
         if (!stats || cancelled) return;
         if (selectedNetworkRef.current !== selectedNetwork) return;
         setSessionCount(stats.network.session);
-        setLastUpdated(stats.network.lastUpdated);
+        setSinceLabel(stats.network.lastUpdated);
         setTotalLabel(`All ${stats.all.session.toFixed(0)}`);
       })
       .catch((error) => console.error("Failed to fetch bag stats", error));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedNetwork]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedNetwork || selectedNetwork === HOME_NETWORK_ID) {
+      setMemberRegistered(null);
+      setMemberInput(0);
+      setMemberSinceLabel("--");
+      return;
+    }
+
+    window.appApi
+      .getMemberCount?.(selectedNetwork)
+      ?.then((result) => {
+        if (cancelled) return;
+        const normalized = Math.max(0, Math.round(result?.memberCount ?? 0));
+        setMemberRegistered(normalized);
+        setMemberInput(normalized);
+        setMemberSinceLabel(formatSampleTimeLabel(result?.sampleTime));
+      })
+      .catch((error) => {
+        console.error("Failed to fetch member count", error);
+        if (!cancelled) {
+          setMemberRegistered(null);
+          setMemberSinceLabel("--");
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -328,62 +420,86 @@ export default function BrowsePage() {
   return (
     <div className={styles.pageShell}>
       <div className={styles.controlsRow}>
-        <NetworkNavigation
-          options={snapshot?.networks.map((n) => ({ id: n.id, label: n.displayLabel })) ?? []}
-          value={selectedNetwork}
-          onChange={selectNetwork}
-          arrowLockEnabled={arrowLockEnabled}
-          onToggleArrowLock={() =>
-            setArrowLockEnabled((prev) => {
-              const next = !prev;
-              window.appApi.setArrowLock?.(next);
-              return next;
-            })
-          }
-          prefetchStatus={prefetchStatus}
-        />
-
-        {selectedNetwork !== HOME_NETWORK_ID && selectedNetwork ? (
-          <BagCounter
-            inputValue={bagInput}
-            onChange={setBagInput}
-            sessionCount={sessionCount}
-            totalLabel={totalLabel}
-            lastUpdated={lastUpdated}
-            onApply={handleApply}
-            applying={applying}
+        <ErrorBoundary name="Network Navigation">
+          <NetworkNavigation
+            options={snapshot?.networks.map((n) => ({ id: n.id, label: n.displayLabel })) ?? []}
+            value={selectedNetwork}
+            onChange={selectNetwork}
+            arrowLockEnabled={arrowLockEnabled}
+            onToggleArrowLock={() =>
+              setArrowLockEnabled((prev) => {
+                const next = !prev;
+                window.appApi.setArrowLock?.(next);
+                return next;
+              })
+            }
+            prefetchStatus={prefetchStatus}
           />
+        </ErrorBoundary>
+
+      <div className={styles.counterGroup}>
+        {selectedNetwork !== HOME_NETWORK_ID && selectedNetwork ? (
+          <>
+            <ErrorBoundary name="Member Counter">
+              <MemberCounter
+                inputValue={memberInput}
+                onChange={setMemberInput}
+                memberCount={memberRegistered}
+                sinceLabel={memberSinceLabel}
+                onApply={handleMemberApply}
+                onAdvance={handleMemberAdvance}
+                applying={memberApplying}
+              />
+            </ErrorBoundary>
+            <ErrorBoundary name="Bag Counter">
+              <BagCounter
+                inputValue={bagInput}
+                onChange={setBagInput}
+                sessionCount={sessionCount}
+                totalLabel={totalLabel}
+                sinceLabel={sinceLabel}
+                onApply={handleApply}
+                applying={applying}
+              />
+            </ErrorBoundary>
+          </>
         ) : null}
+        <ErrorBoundary name="Cloudfront">
+          <CloudfrontInvalidation onInvalidate={handleInvalidateDistribution} />
+        </ErrorBoundary>
+      </div>
       </div>
 
       {loading || !snapshot ? (
         <div className={styles.loadingState}>Loading workspace…</div>
       ) : (
         <div className={styles.paneWrapper}>
-          <DualPaneView
-            leftPane={snapshot.paneLayout.left}
-            rightPane={snapshot.paneLayout.right}
-            leftOverride={{
-              networkId: viewNetworkId ?? selectedNetwork ?? HOME_NETWORK_ID,
-              url: activeUrl || snapshot.paneLayout.left.url, // fallback to backend URL
-              prefetch: prefetchEntries,
-            onPrefetchStatusChange: (status) => {
-              const [prev, next, nextTwo] = prefetchEntries;
-              setPrefetchStatus({
-                prevReady: prev ? !!status[prev.networkId] : false,
-                nextReady: next ? !!status[next.networkId] : false,
-                nextTwoReady: nextTwo ? !!status[nextTwo.networkId] : false
-              });
-            },
-              onRegisterReload: (fn) => {
-                reloadRef.current = fn;
-              },
-              onReload: () => reloadRef.current?.()
-            }}
-            rightOverride={{ url: lnUrl }}
-            prefetchStatus={prefetchStatus}
-            leftExtras={mockToggle}
-          />
+          <ErrorBoundary name="Dual Pane View">
+            <DualPaneView
+              leftPane={snapshot.paneLayout.left}
+              rightPane={snapshot.paneLayout.right}
+              leftOverride={{
+                networkId: viewNetworkId ?? selectedNetwork ?? HOME_NETWORK_ID,
+                url: activeUrl || snapshot.paneLayout.left.url, // fallback to backend URL
+                prefetch: prefetchEntries,
+                onPrefetchStatusChange: (status) => {
+                  const [prev, next, nextTwo] = prefetchEntries;
+                  setPrefetchStatus({
+                    prevReady: prev ? !!status[prev.networkId] : false,
+                    nextReady: next ? !!status[next.networkId] : false,
+                    nextTwoReady: nextTwo ? !!status[nextTwo.networkId] : false
+                  });
+                },
+                onRegisterReload: (fn) => {
+                  reloadRef.current = fn;
+                },
+                onReload: () => reloadRef.current?.()
+              }}
+              rightOverride={{ url: lnUrl }}
+              prefetchStatus={prefetchStatus}
+              leftExtras={mockToggle}
+            />
+          </ErrorBoundary>
         </div>
       )}
     </div>

@@ -1,3 +1,6 @@
+// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// SPDX-License-Identifier: Apache-2.0
+
 import type { AppSnapshot } from "@shared/app-state";
 import type { MonthlyCostsReport } from "@shared/costs";
 import type { NetworksResponse } from "@shared/networks";
@@ -21,6 +24,17 @@ declare global {
       getBagStats: (
         networkId: string
       ) => Promise<{ all: { session: number; lastUpdated?: string }; network: { session: number; lastUpdated?: string } }>;
+      applyMemberCount: (payload: { networkId: string; memberCount: number; dataSource?: string }) => Promise<{
+        uniqueId: string;
+        memberCount: number;
+        sampleTime: number;
+        dataSource: string;
+        reviewAdjustments: unknown[];
+      }>;
+      getMemberCount: (
+        networkId: string
+      ) => Promise<{ memberCount: number; sampleTime: number; dataSource?: string; reviewAdjustments?: unknown[] } | null>;
+      invalidateDistribution: (distributionId: string) => Promise<void>;
       getMonthlyCosts: () => Promise<MonthlyCostsReport | null>;
       getNetworks: () => Promise<NetworksResponse>;
       updateNetworkRow: (payload: { uniqueId: string; changes: Record<string, string> }) => Promise<void>;
