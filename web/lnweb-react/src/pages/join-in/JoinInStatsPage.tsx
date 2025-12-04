@@ -94,16 +94,23 @@ export function JoinInStatsPage() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [exitingIndex, setExitingIndex] = useState<number | null>(null);
   const previousActiveRef = useRef(0);
+
   useEffect(() => {
+    setExitingIndex(null);
     setActiveIndex(0);
   }, [network?.uniqueId, isFormal]);
+
   useEffect(() => {
+    setExitingIndex(null);
     setActiveIndex(0);
     if (boardTargets.length <= 1) {
       return;
     }
     const timer = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % boardTargets.length);
+      setActiveIndex((current) => {
+        setExitingIndex(current);
+        return (current + 1) % boardTargets.length;
+      });
     }, 5000);
     return () => window.clearInterval(timer);
   }, [boardTargets.length]);
@@ -140,26 +147,28 @@ export function JoinInStatsPage() {
       <div className={styles.content}>
         <div className={styles.displayPanel}>
           <div className={styles.displayFrame}>
-            {boardTargets.map((target, index) => (
-              <div
-                key={target.id}
-                className={`${styles.boardWrapper} ${
-                  index === activeIndex
-                    ? styles.boardWrapperActive
-                    : index === exitingIndex
-                    ? styles.boardWrapperExiting
-                    : ''
-                }`}
-              >
-                <StatsBoardImage
-                  uniqueId={target.uniqueId}
-                  variant={isFormal ? 'formal' : 'casual'}
-                  className={styles.statsImage}
-                  placeholderSrc={statsPlaceholderSrc}
-                  alt={target.caption}
-                />
-              </div>
-            ))}
+            {boardTargets.map((target, index) => {
+              const isActive = index === activeIndex;
+              const isExiting = index === exitingIndex;
+              const classNames = [
+                styles.boardWrapper,
+                isActive || isExiting ? styles.boardWrapperActive : '',
+                isExiting ? styles.boardWrapperExiting : '',
+              ]
+                .filter(Boolean)
+                .join(' ');
+              return (
+                <div key={target.id} className={classNames}>
+                  <StatsBoardImage
+                    uniqueId={target.uniqueId}
+                    variant={isFormal ? 'formal' : 'casual'}
+                    className={styles.statsImage}
+                    placeholderSrc={statsPlaceholderSrc}
+                    alt={target.caption}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
         <div className={styles.displayPanel}>
