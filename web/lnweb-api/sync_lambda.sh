@@ -26,9 +26,22 @@ function on_error() {
 # Trap errors and call the on_error function
 trap 'on_error' ERR
 
-# Parse arguments
+# Command-line options
+SYNC_READ_ONLY=${SYNC_READ_ONLY:-false}
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -r|--read-only|-read-only)
+      SYNC_READ_ONLY=true
+      ;;
+    *)
+      echo "[warn] Ignoring unknown argument: $1"
+      ;;
+  esac
+  shift
+done
+
 LAMBDA_DEPLOY=${LAMBDA_DEPLOY:-true}
-if [ "${SYNC_READ_ONLY:-false}" = "true" ]; then
+if [ "${SYNC_READ_ONLY}" = "true" ]; then
     echo "[info] Running sync_lambda in read-only mode; skipping deploy/invalidation phases."
     LAMBDA_DEPLOY=false
 fi

@@ -9,10 +9,8 @@ import { fileURLToPath } from 'url';
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(ROOT, '..');
 const CONFIG_PATH = path.join(ROOT, 'endpoint-config.json');
-const GOLDEN_DIR = path.join(ROOT, 'goldens');
 const OUTPUT_DIR = path.join(ROOT, 'latest-responses');
 const API_BASE = process.env.API_BASE_URL ?? 'https://aws.litternetworks.org/api';
-const UPDATE = process.argv.includes('--update');
 const SUPPORTS_COLOR = process.stdout.isTTY;
 const COLOR_GREEN = '\u001b[32m';
 const COLOR_RED = '\u001b[31m';
@@ -21,14 +19,6 @@ const COLOR_RESET = '\u001b[0m';
 async function loadConfig() {
   const payload = await fs.readFile(CONFIG_PATH, 'utf8');
   return JSON.parse(payload);
-}
-
-async function ensureGoldenDir() {
-  try {
-    await fs.mkdir(GOLDEN_DIR, { recursive: true });
-  } catch (err) {
-    // ignore
-  }
 }
 
 async function resetOutputDir() {
@@ -56,38 +46,38 @@ async function requestEndpoint(url, entry) {
 async function run() {
   await ensureTypeScriptBuild();
   const config = await loadConfig();
-  await ensureGoldenDir();
   await resetOutputDir();
   let failed = false;
 
   for (const entry of config) {
     const url = `${API_BASE}${entry.path}`;
     process.stdout.write(`Checking [${url}] ... `);
+    const outputFile = path.join(
+      OUTPUT_DIR,
+      `${entry.name}${entry.type === 'json' ? '.json' : entry.type === 'csv' ? '.csv' : '.txt'}`
+    );
     try {
       const body = await requestEndpoint(url, entry);
-      const extension =
-        entry.extension ??
-        (entry.type === 'json' ? '.json' : entry.type === 'text' ? '.txt' : '.golden');
-      const targetFile = path.join(GOLDEN_DIR, `${entry.name}${extension}`);
-      const outputFile = path.join(OUTPUT_DIR, `${entry.name}${extension}`);
       await fs.writeFile(outputFile, body, 'utf8');
 
-      if (UPDATE) {
-        await fs.writeFile(targetFile, body, 'utf8');
-        console.log('updated');
-        continue;
-      }
-
-      const existing = await fs.readFile(targetFile, 'utf8');
-      const normalizedBody = normalizeBody(body, entry);
-      const normalizedExisting = normalizeBody(existing, entry);
-      if (normalizedExisting !== normalizedBody) {
-        console.log(colorize('✗ mismatch', COLOR_RED));
-        console.error(`  ${entry.name} (${entry.path}) did not match golden file.`);
-        failed = true;
+      if (entry.type === 'csv') {
+        const parsed = parseCsv(body);
+        if (entry.schema) {
+          validateCsvSchema(parsed, entry.schema, entry.name);
+        }
+        if (entry.anchors) {
+          checkCsvAnchors(parsed, entry.anchors, entry.name);
+        }
       } else {
-        console.log(colorize('OK', COLOR_GREEN));
+        const parsed = JSON.parse(body);
+        if (entry.schema) {
+          validateSchema(parsed, entry.schema, entry.name);
+        }
+        if (entry.anchors) {
+          checkAnchors(parsed, entry.anchors, entry.name);
+        }
       }
+      console.log(colorize('OK', COLOR_GREEN));
     } catch (error) {
       console.log(colorize('✗ error', COLOR_RED));
       console.error(`  ${entry.name} (${entry.path}) failed: ${error.message}`);
@@ -95,7 +85,7 @@ async function run() {
     }
   }
 
-  if (failed && !UPDATE) {
+  if (failed) {
     throw new Error('One or more endpoint checks failed');
   }
 }
@@ -128,6 +118,170 @@ function colorize(text, color) {
   return `${color}${text}${COLOR_RESET}`;
 }
 
+function parseCsv(text) {
+  const lines = text.split(/\r?\n/).filter((line) => line.trim() !== '');
+  const rows = lines.map(splitCsvLine);
+  const headers = rows.shift() ?? [];
+  return { headers, rows };
+}
+
+function splitCsvLine(line) {
+  const values = [];
+  let buffer = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (char === '"' && !inQuotes) {
+      inQuotes = true;
+      continue;
+    }
+    if (char === '"' && inQuotes) {
+      if (line[i + 1] === '"') {
+        buffer += '"';
+        i += 1;
+        continue;
+      }
+      inQuotes = false;
+      continue;
+    }
+    if (char === ',' && !inQuotes) {
+      values.push(buffer);
+      buffer = '';
+      continue;
+    }
+    buffer += char;
+  }
+  values.push(buffer);
+  return values.map((value) => value.trim());
+}
+
+function validateCsvSchema(parsed, schema, name) {
+  const headers = parsed.headers;
+  if (Array.isArray(schema.headers)) {
+    for (const header of schema.headers) {
+      if (!headers.includes(header)) {
+        throw new Error(`CSV schema violation for ${name}: missing column "${header}"`);
+      }
+    }
+  }
+}
+
+function checkCsvAnchors(parsed, anchors, name) {
+  for (const anchor of anchors) {
+    const index = parsed.headers.indexOf(anchor.column);
+    if (index === -1) {
+      throw new Error(`CSV anchor column not found for ${name}: ${anchor.column}`);
+    }
+    const exists = parsed.rows.some((row) => matchesValue(row[index], anchor.value));
+    if (!exists) {
+      throw new Error(
+        `CSV anchor missing for ${name}: no row with ${anchor.column}=${anchor.value}`
+      );
+    }
+  }
+}
+
+function validateSchema(value, schema, name, pathTrace = 'root') {
+  if (!schema || schema.type === undefined) {
+    return;
+  }
+  if (schema.type === 'object') {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      throw new Error(`Schema violation for ${name} at ${pathTrace}: expected object`);
+    }
+    if (Array.isArray(schema.required)) {
+      for (const key of schema.required) {
+        if (!Object.prototype.hasOwnProperty.call(value, key)) {
+          throw new Error(`Schema violation for ${name} at ${pathTrace}: missing key ${key}`);
+        }
+      }
+    }
+    if (schema.properties) {
+      for (const [key, propertySchema] of Object.entries(schema.properties)) {
+        if (Object.prototype.hasOwnProperty.call(value, key)) {
+          validateSchema(value[key], propertySchema, name, `${pathTrace}.${key}`);
+        }
+      }
+    }
+  } else if (schema.type === 'array') {
+    if (!Array.isArray(value)) {
+      throw new Error(`Schema violation for ${name} at ${pathTrace}: expected array`);
+    }
+    if (schema.minItems && value.length < schema.minItems) {
+      throw new Error(
+        `Schema violation for ${name} at ${pathTrace}: expected at least ${schema.minItems} items`
+      );
+    }
+    if (schema.itemSchema) {
+      value.forEach((item, index) =>
+        validateSchema(item, schema.itemSchema, name, `${pathTrace}[${index}]`)
+      );
+    }
+  } else if (schema.type === 'string') {
+    if (typeof value !== 'string') {
+      throw new Error(`Schema violation for ${name} at ${pathTrace}: expected string`);
+    }
+  } else if (schema.type === 'number') {
+    if (typeof value !== 'number') {
+      throw new Error(`Schema violation for ${name} at ${pathTrace}: expected number`);
+    }
+  }
+}
+
+function checkAnchors(value, anchors, name) {
+  for (const anchor of anchors) {
+    const pathSegments = anchor.path.split('.');
+    const nodes = collectNodes(value, pathSegments);
+    const found = nodes.some(
+      (node) =>
+        typeof node === 'object' &&
+        node !== null &&
+        Object.entries(anchor.matches ?? {}).every(([key, expected]) =>
+          matchesValue(node[key], expected)
+        )
+    );
+    if (!found) {
+      throw new Error(`Anchor validation failed for ${name}: ${JSON.stringify(anchor)}`);
+    }
+  }
+}
+
+function collectNodes(current, parts) {
+  if (!parts.length) {
+    return [current];
+  }
+  const [segment, ...rest] = parts;
+  const arrayMatch = segment.match(/^(.+)\[\*\]$/);
+  if (arrayMatch) {
+    const key = arrayMatch[1];
+    const next = current?.[key];
+    if (!Array.isArray(next)) {
+      return [];
+    }
+    return next.flatMap((item) => collectNodes(item, rest));
+  }
+  if (segment === '[*]') {
+    if (!Array.isArray(current)) {
+      return [];
+    }
+    return current.flatMap((item) => collectNodes(item, rest));
+  }
+  if (typeof current === 'object' && current !== null && segment in current) {
+    return collectNodes(current[segment], rest);
+  }
+  return [];
+}
+
+function matchesValue(actual, expected) {
+  if (expected === '*') {
+    return true;
+  }
+  if (typeof expected === 'object' && expected !== null && expected.pattern) {
+    return new RegExp(expected.pattern).test(String(actual ?? ''));
+  }
+  return String(actual ?? '') === String(expected);
+}
+
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const CALLER_PATH = process.argv[1] ? path.resolve(process.cwd(), process.argv[1]) : null;
 if (CALLER_PATH === SCRIPT_PATH) {
@@ -135,149 +289,4 @@ if (CALLER_PATH === SCRIPT_PATH) {
     console.error(error);
     process.exit(1);
   });
-}
-
-function normalizeBody(payload, entry) {
-  const type = entry.type ?? 'text';
-  if (type === 'json') {
-    return normalizeJson(payload, entry.rules?.json ?? {});
-  }
-  return normalizeText(payload, entry.rules?.text ?? {});
-}
-
-function normalizeJson(payload, rules = {}) {
-  let parsed;
-  try {
-    parsed = JSON.parse(payload);
-  } catch (error) {
-    throw new Error(`JSON response was invalid: ${error.message}`);
-  }
-
-  const ignorePaths = Array.isArray(rules.ignorePaths) ? rules.ignorePaths : [];
-  for (const path of ignorePaths) {
-    removeJsonPath(parsed, path);
-  }
-
-  if (rules.onlyKeys) {
-    parsed = replaceValuesWithPlaceholders(parsed);
-  }
-
-  const canonical = canonicalizeJson(parsed);
-  return JSON.stringify(canonical);
-}
-
-function removeJsonPath(target, rawPath) {
-  if (!rawPath) {
-    return;
-  }
-  const parts = rawPath.split('.');
-  removePathParts(target, parts);
-}
-
-function removePathParts(current, parts) {
-  if (!parts.length || current == null) {
-    return;
-  }
-  const [rawKey, ...rest] = parts;
-  const isArray = rawKey.endsWith('[]');
-  const key = isArray ? rawKey.slice(0, -2) : rawKey;
-
-  if (!key) {
-    return;
-  }
-
-  if (rest.length === 0) {
-    if (isArray && Array.isArray(current[key])) {
-      delete current[key];
-    } else if (Object.prototype.hasOwnProperty.call(current, key)) {
-      delete current[key];
-    }
-    return;
-  }
-
-  const next = current[key];
-  if (next == null) {
-    return;
-  }
-
-  if (isArray && Array.isArray(next)) {
-    for (const item of next) {
-      removePathParts(item, rest);
-    }
-  } else if (!isArray) {
-    removePathParts(next, rest);
-  }
-}
-
-function canonicalizeJson(value) {
-  if (Array.isArray(value)) {
-    return value.map(canonicalizeJson);
-  }
-  if (isPlainObject(value)) {
-    const sorted = {};
-    const keys = Object.keys(value).sort();
-    for (const key of keys) {
-      sorted[key] = canonicalizeJson(value[key]);
-    }
-    return sorted;
-  }
-  return value;
-}
-
-function isPlainObject(value) {
-  return value !== null && typeof value === 'object' && value.constructor === Object;
-}
-
-function normalizeText(payload, rules = {}) {
-  const shouldNormalizeNewlines = rules.normalizeNewlines ?? true;
-  const lineNormalized = shouldNormalizeNewlines
-    ? payload.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
-    : payload;
-  const hasTrailingNewline = lineNormalized.endsWith('\n');
-  if (!rules || Object.keys(rules).length === 0) {
-    return lineNormalized;
-  }
-
-  let lines = lineNormalized.split('\n');
-  if (!rules.keepTrailingEmptyLine && hasTrailingNewline && lines[lines.length - 1] === '') {
-    lines.pop();
-  }
-
-  if (rules.trimLines) {
-    lines = lines.map((line) => line.trim());
-  }
-
-  if (rules.skipEmptyLines) {
-    lines = lines.filter((line) => line.length > 0);
-  }
-
-  let header;
-  if (rules.skipHeader && lines.length) {
-    header = lines.shift();
-  }
-
-  if (rules.sortRows) {
-    lines.sort();
-  }
-
-  const normalizedRows = header !== undefined ? [header, ...lines] : lines;
-  let result = normalizedRows.join('\n');
-  if (hasTrailingNewline) {
-    result += '\n';
-  }
-  return result;
-}
-
-function replaceValuesWithPlaceholders(value) {
-  if (Array.isArray(value)) {
-    return value.map(replaceValuesWithPlaceholders);
-  }
-  if (isPlainObject(value)) {
-    const result = {};
-    for (const key of Object.keys(value)) {
-      result[key] = replaceValuesWithPlaceholders(value[key]);
-    }
-    return result;
-  }
-  return null;
 }

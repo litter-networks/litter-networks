@@ -3,90 +3,142 @@
     "name": "root",
     "path": "/",
     "type": "json",
-    "extension": ".golden.json"
+    "schema": {
+      "type": "object",
+      "required": ["message"],
+      "properties": {
+        "message": { "type": "string" }
+      }
+    }
   },
   {
     "name": "districts-csv",
     "path": "/info/get-districts-csv",
-    "type": "text",
-    "extension": ".golden.csv",
-    "rules": {
-      "text": {
-        "normalizeNewlines": true,
-        "sortRows": true,
-        "skipHeader": true,
-        "skipEmptyLines": true
-      }
-    }
+    "type": "csv",
+    "schema": {
+      "headers": ["mapStyle", "councilName", "uniqueId", "fullName"]
+    },
+    "anchors": [
+      { "column": "uniqueId", "value": "liverpool" },
+      { "column": "uniqueId", "value": "manchester" }
+    ]
   },
   {
     "name": "districts-localinfo-csv",
     "path": "/info/get-districts-localinfo-csv",
-    "type": "text",
-    "extension": ".golden.csv",
-    "rules": {
-      "text": {
-        "normalizeNewlines": true,
-        "sortRows": true,
-        "skipHeader": true,
-        "skipEmptyLines": true
-      }
-    }
+    "type": "csv",
+    "schema": {
+      "headers": ["uniqueId", "flyTipReportUrl", "localRecyclingUrl"]
+    },
+    "anchors": [
+      { "column": "uniqueId", "value": "liverpool" },
+      { "column": "uniqueId", "value": "wigan" }
+    ]
   },
   {
     "name": "networks-csv",
     "path": "/info/get-networks-csv",
-    "type": "text",
-    "extension": ".golden.csv",
-    "rules": {
-      "text": {
-        "normalizeNewlines": true,
-        "sortRows": true,
-        "skipHeader": true,
-        "skipEmptyLines": true
-      }
-    }
+    "type": "csv",
+    "schema": {
+      "headers": ["shortId", "uniqueId", "fullName", "districtId"]
+    },
+    "anchors": [
+      { "column": "uniqueId", "value": "anfieldlitter" },
+      { "column": "uniqueId", "value": "lymmlitter" }
+    ]
   },
   {
     "name": "networks-info",
     "path": "/info/networks",
     "type": "json",
-    "extension": ".golden.json"
+    "schema": {
+      "type": "array",
+      "minItems": 1,
+      "itemSchema": {
+        "type": "object",
+        "required": ["uniqueId", "fullName", "districtId", "shortId"],
+        "properties": {
+          "uniqueId": { "type": "string" },
+          "fullName": { "type": "string" },
+          "districtId": { "type": "string" },
+          "shortId": { "type": "string" }
+        }
+      }
+    },
+    "anchors": [
+      { "path": "[*]", "matches": { "uniqueId": "anfieldlitter" } },
+      { "path": "[*]", "matches": { "uniqueId": "lymmlitter" } }
+    ]
   },
   {
     "name": "networks-nearby-anfield",
     "path": "/info/networks/anfieldlitter/nearby",
     "type": "json",
-    "extension": ".golden.json"
+    "schema": {
+      "type": "array",
+      "itemSchema": {
+        "type": "object",
+        "required": ["uniqueId", "roundedDistance"],
+        "properties": {
+          "uniqueId": { "type": "string" },
+          "roundedDistance": { "type": "string" }
+        }
+      }
+    },
+    "anchors": [
+      { "path": "[*]", "matches": { "uniqueId": "clubmoorwestlitter" } }
+    ]
   },
   {
     "name": "news-json",
     "path": "/news/get-press-cuttings-json",
     "type": "json",
-    "extension": ".golden.json"
+    "schema": {
+      "type": "array",
+      "minItems": 1,
+      "itemSchema": {
+        "type": "object",
+        "required": ["uniqueId", "title", "articleDate"],
+        "properties": {
+          "uniqueId": { "type": "string" },
+          "title": { "type": "string" },
+          "articleDate": { "type": "string" }
+        }
+      }
+    },
+    "anchors": [
+      { "path": "[*]", "matches": { "uniqueId": "2025-06-28-1" } }
+    ]
   },
   {
     "name": "news-csv",
     "path": "/news/get-press-cuttings-csv",
-    "type": "text",
-    "extension": ".golden.csv",
-    "rules": {
-      "text": {
-        "normalizeNewlines": true,
-        "sortRows": true,
-        "skipHeader": true,
-        "skipEmptyLines": true
-      }
-    }
+    "type": "csv",
+    "schema": {
+      "headers": ["scope", "scopeId", "title", "articleDate"]
+    },
+    "anchors": [
+      { "column": "scopeId", "value": "warrington" }
+    ]
   },
   {
     "name": "stats-bags-info-anfield",
     "path": "/stats/get-bags-info/anfieldlitter",
     "type": "json",
-    "extension": ".golden.json",
-    "rules": {
-      "json": {
-        "onlyKeys": true
+    "schema": {
+      "type": "object",
+      "required": ["networkName", "bagCounts"],
+      "properties": {
+        "networkName": { "type": "string" },
+        "bagCounts": {
+          "type": "object",
+          "required": ["thisMonth", "thisYear", "mostRecentPost"],
+          "properties": {
+            "thisMonth": { "type": "number" },
+            "thisYear": { "type": "number" },
+            "mostRecentPost": { "type": "string" }
+          }
+        }
       }
     }
   },
@@ -94,16 +146,26 @@
     "name": "stats-summary",
     "path": "/stats/summary",
     "type": "json",
-    "extension": ".golden.json"
+    "schema": {
+      "type": "object",
+      "required": ["memberCountAll", "numNetworksInAll"],
+      "properties": {
+        "memberCountAll": { "type": "number" },
+        "numNetworksInAll": { "type": "number" }
+      }
+    }
   },
   {
     "name": "stats-bag-stats-json",
     "path": "/stats/get-bag-stats-json/anfieldlitter",
     "type": "json",
-    "extension": ".golden.json",
-    "rules": {
-      "json": {
-        "onlyKeys": true
+    "schema": {
+      "type": "object",
+      "required": ["thisMonth", "thisYear", "mostRecentPost"],
+      "properties": {
+        "thisMonth": { "type": "number" },
+        "thisYear": { "type": "number" },
+        "mostRecentPost": { "type": "string" }
       }
     }
   },
@@ -111,24 +173,89 @@
     "name": "joinin-district-info-liverpool",
     "path": "/join-in/districts/liverpool/local-info",
     "type": "json",
-    "extension": ".golden.json"
+    "schema": {
+      "type": "object",
+      "required": ["uniqueId", "flyTipReportUrl", "localRecyclingUrl"],
+      "properties": {
+        "uniqueId": { "type": "string" }
+      }
+    }
   },
   {
     "name": "knowledge-page-how-it-works",
     "path": "/knowledge/page?path=knowledge/getting-started/how-it-works",
     "type": "json",
-    "extension": ".golden.json"
+    "schema": {
+      "type": "object",
+      "required": ["bodyContent", "metadata"],
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "required": ["title", "description"]
+        }
+      }
+    }
   },
   {
     "name": "knowledge-child-pages",
     "path": "/knowledge/child-pages?path=knowledge",
     "type": "json",
-    "extension": ".golden.json"
+    "schema": {
+      "type": "object",
+      "required": ["childPages"],
+      "properties": {
+        "childPages": {
+          "type": "array",
+          "minItems": 1,
+          "itemSchema": {
+            "type": "object",
+            "required": ["pageUrl", "pageTitle"],
+            "properties": {
+              "childPages": {
+                "type": "array"
+              }
+            }
+          }
+        }
+      }
+    }
   },
   {
     "name": "maps-area-info",
     "path": "/maps/area-info",
     "type": "json",
-    "extension": ".golden.json"
+    "schema": {
+      "type": "object",
+      "required": ["areaInfo"],
+      "properties": {
+        "areaInfo": {
+          "type": "array",
+          "minItems": 1,
+          "itemSchema": {
+            "type": "object",
+            "required": ["mapName", "networks"],
+            "properties": {
+              "networks": {
+                "type": "array",
+                "itemSchema": {
+                  "type": "object",
+                  "required": ["uniqueId", "mapSource"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "anchors": [
+      {
+        "path": "areaInfo[*].networks[*]",
+        "matches": { "uniqueId": "anfieldlitter" }
+      },
+      {
+        "path": "areaInfo[*].networks[*]",
+        "matches": { "uniqueId": "lymmlitter" }
+      }
+    ]
   }
 ]
