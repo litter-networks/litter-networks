@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { StatsBoardImage } from '@/components/stats/StatsBoardImage';
 import { fetchStatsSummary, type StatsSummary } from '@/data-sources/stats';
 import { useNavData } from '@/features/nav/useNavData';
@@ -29,6 +29,7 @@ interface BoardTarget {
  */
 export function JoinInStatsPage() {
   const { network, buildPath } = useNavData();
+  const navigate = useNavigate();
   const { formal } = useParams<{ formal?: string }>();
   const [storedStyle, setStoredStyle] = useState<StatsStylePreference>(() => getStoredStatsStyle());
   const isFormal = formal === 'formal' || (!formal && storedStyle === 'formal');
@@ -131,14 +132,12 @@ export function JoinInStatsPage() {
   }, [activeIndex]);
 
   useEffect(() => {
-    const nextStyle: StatsStylePreference = isFormal ? 'formal' : 'casual';
-    if (storedStyle !== nextStyle) {
-      setStoredStyle(nextStyle);
+    if (formal === 'formal') {
+      setStoredStyle('formal');
+      setStoredStatsStyle('formal');
     }
-    setStoredStatsStyle(nextStyle);
-  }, [isFormal, storedStyle]);
+  }, [formal]);
 
-  const togglePath = isFormal ? buildPath('join-in/stats') : buildPath('join-in/stats/formal');
   const statsPlaceholderSrc = isFormal
     ? `${appEnv.staticAssetsBaseUrl}/images/stats-board-formal.png`
     : `${appEnv.staticAssetsBaseUrl}/images/stats-board.png`;
@@ -150,9 +149,19 @@ export function JoinInStatsPage() {
         <h1 className={styles.title}>
           Join In | <b>Stats</b>
         </h1>
-        <Link to={togglePath} className={styles.toggleButton}>
+        <button
+          type="button"
+          className={styles.toggleButton}
+          onClick={() => {
+            const nextStyle: StatsStylePreference = isFormal ? 'casual' : 'formal';
+            setStoredStyle(nextStyle);
+            setStoredStatsStyle(nextStyle);
+            const target = nextStyle === 'formal' ? buildPath('join-in/stats/formal') : buildPath('join-in/stats');
+            navigate(target);
+          }}
+        >
           Style: {isFormal ? 'Formal' : 'Casual'}
-        </Link>
+        </button>
       </div>
       <div className={styles.content}>
         <div className={styles.displayPanel}>
