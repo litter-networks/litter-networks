@@ -54,6 +54,10 @@ const mockNetworksInfo = {
     bagCounts: { thisMonth: 5, lastMonth: 4, allTime: 20 },
   }),
   getCurrentMemberCount: jest.fn(async (id: string) => (id === 'net-1' ? 10 : 5)),
+  getAllMemberCounts: jest.fn(async () => new Map([
+    ['net-1', 10],
+    ['net-2', 5],
+  ])),
   findNetworkById: jest.fn(async (id: string) => sampleNetworks.find((n) => n.uniqueId === id) || null),
   findNetworkByShortId: jest.fn(async (id: string) => sampleNetworks.find((n) => n.shortId === id) || null),
   findDistrictById: jest.fn(async (id: string) => sampleDistricts.find((d) => d.uniqueId === id) || null),

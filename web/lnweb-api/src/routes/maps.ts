@@ -83,17 +83,20 @@ function parseSnapRouteBody(body: unknown): SnapRoutePayload {
     sanitized.push([entry[0], entry[1]]);
   }
 
+  const bodyRecord = body as Record<string, unknown>;
+  const geometryRecord = geometry as Record<string, unknown>;
+
   const payload: SnapRoutePayload = {
-    format: typeof (body as Record<string, unknown>).format === "string" ? (body as Record<string, unknown>).format : undefined,
-    id: typeof (body as Record<string, unknown>).id === "string" ? (body as Record<string, unknown>).id : undefined,
-    name: typeof (body as Record<string, unknown>).name === "string" ? (body as Record<string, unknown>).name : undefined,
+    format: typeof bodyRecord.format === "string" ? bodyRecord.format : undefined,
+    id: typeof bodyRecord.id === "string" ? bodyRecord.id : undefined,
+    name: typeof bodyRecord.name === "string" ? bodyRecord.name : undefined,
     geometry: {
       coordinates: sanitized,
-      type: typeof (geometry as Record<string, unknown>).type === "string" ? (geometry as Record<string, unknown>).type : undefined,
+      type: typeof geometryRecord.type === "string" ? geometryRecord.type : undefined,
     },
   };
 
-  const properties = (body as Record<string, unknown>).properties;
+  const properties = bodyRecord.properties;
   if (properties && typeof properties === "object") {
     payload.properties = properties as Record<string, unknown>;
   }

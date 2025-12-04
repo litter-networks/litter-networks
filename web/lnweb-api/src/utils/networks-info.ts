@@ -39,6 +39,7 @@ class NetworksInfo {
   private cacheNearbyNetworks = new NodeCache({ stdTTL: 5 * 60 });
   private cacheBagsInfo = new NodeCache({ stdTTL: 60 });
   private cacheCurrentMemberCounts = new NodeCache({ stdTTL: 60 });
+  private cacheAllMemberCounts = new NodeCache({ stdTTL: 60 });
   private tableName = 'LN-NetworksInfo';
   private districtsTableName = 'LN-DistrictsInfo';
   private districtsLocalInfoTableName = 'LN-DistrictsLocalInfo';
@@ -330,16 +331,31 @@ class NetworksInfo {
   }
 
   async getCurrentMemberCount(uniqueId: string) {
-        const cachedMemberCount = this.cacheCurrentMemberCounts.get(uniqueId);
-        if (cachedMemberCount) {
-            return cachedMemberCount;
-        }
-
-        const memberCount = await this.fetchCurrentMemberCount(uniqueId);
-        this.cacheCurrentMemberCounts.set(uniqueId, memberCount);
-
-        return memberCount;
+    const cachedMemberCount = this.cacheCurrentMemberCounts.get(uniqueId);
+    if (cachedMemberCount) {
+      return cachedMemberCount;
     }
+
+    const memberCount = await this.fetchCurrentMemberCount(uniqueId);
+    if (typeof memberCount === 'number') {
+      this.cacheCurrentMemberCounts.set(uniqueId, memberCount);
+    }
+
+    return memberCount;
+  }
+
+  async getAllMemberCounts(): Promise<Map<string, number>> {
+    const cached = this.cacheAllMemberCounts.get<Map<string, number>>('allMemberCounts');
+    if (cached) {
+      return cached;
+    }
+    const counts = await this.fetchAllMemberCounts();
+    this.cacheAllMemberCounts.set('allMemberCounts', counts);
+    counts.forEach((value, key) => {
+      this.cacheCurrentMemberCounts.set(key, value);
+    });
+    return counts;
+  }
 
   async fetchCurrentMemberCount(uniqueId: string) {
     const params = {
@@ -364,6 +380,33 @@ class NetworksInfo {
       return null;
     }
   }
+
+  private async fetchAllMemberCounts(): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    let exclusiveStartKey: Record<string, any> | undefined;
+
+    do {
+      const result = await this.dynamoDbClient.send(
+        new ScanCommand({
+          TableName: 'LN-MemberCounts',
+          ProjectionExpression: 'uniqueId, memberCount',
+          ExclusiveStartKey: exclusiveStartKey,
+        }),
+      );
+
+      (result.Items ?? []).forEach((item) => {
+        const flattened = this.flattenItem(item);
+        if (flattened?.uniqueId) {
+          const parsed = typeof flattened.memberCount === 'number' ? flattened.memberCount : Number(flattened.memberCount ?? 0);
+          counts.set(flattened.uniqueId, Number.isFinite(parsed) ? parsed : 0);
+        }
+      });
+
+      exclusiveStartKey = result.LastEvaluatedKey;
+    } while (exclusiveStartKey);
+
+    return counts;
+  }
 }
 
 const instance = new NetworksInfo();
@@ -377,6 +420,7 @@ function resetCachesForTests() {
     'cacheNearbyNetworks',
     'cacheBagsInfo',
     'cacheCurrentMemberCounts',
+    'cacheAllMemberCounts',
   ].forEach((cacheKey) => {
     const cacheRef = (instance as any)[cacheKey];
     if (cacheRef && typeof cacheRef.flushAll === 'function') {

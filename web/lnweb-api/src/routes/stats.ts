@@ -15,25 +15,11 @@ function createSummaryHandler(): RouterHandler {
     try {
       const { networkId } = req.params;
       const allNetworks: Array<{ uniqueId: string; districtId?: string }> = await networksInfo.getAllNetworks();
-      const memberCounts = await Promise.all(
-        allNetworks.map(async (network) =>
-          (await networksInfo.getCurrentMemberCount(network.uniqueId)) as number | null,
-        ),
-      );
+      const memberCountByNetwork = await networksInfo.getAllMemberCounts();
 
-      const memberCountByNetwork = new Map(
-        allNetworks.map((network: { uniqueId: string; districtId?: string }, index: number) => {
-          const value = memberCounts[index];
-          return [network.uniqueId, typeof value === "number" ? value : null];
-        }),
-      );
-
-      const memberCountAll = Array.from(memberCountByNetwork.values()).reduce<number>(
-        (total, count) => {
-          return total + (typeof count === "number" ? count : 0);
-        },
-        0,
-      );
+      const memberCountAll = Array.from(memberCountByNetwork.values()).reduce<number>((total, count) => {
+        return total + (typeof count === "number" ? count : 0);
+      }, 0);
 
       let memberCountNetwork = 0;
       let districtName = "";

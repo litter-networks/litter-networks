@@ -15,6 +15,10 @@ jest.mock('../../../utils/networks-info.js', () => ({
     { uniqueId: 'net-2', districtId: 'dist-1' }
   ]),
   getCurrentMemberCount: jest.fn(async () => 10),
+  getAllMemberCounts: jest.fn(async () => new Map([
+    ['net-1', 10],
+    ['net-2', 5],
+  ])),
   findNetworkById: jest.fn(async (uniqueId) => uniqueId === 'net-1' ? { uniqueId: 'net-1', districtId: 'dist-1' } : null),
   findNetworkByShortId: jest.fn(async () => null),
   findDistrictById: jest.fn(async () => ({ fullName: 'District 1' }))
