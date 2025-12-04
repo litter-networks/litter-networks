@@ -5,9 +5,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
   QueryCommand,
-  ScanCommand,
   QueryCommandInput,
-  ScanCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 import { format } from "@fast-csv/format";
 import type { Request, Response } from "express";
@@ -28,66 +26,49 @@ const dynamoDBClient = new DynamoDBClient({ region: 'eu-west-2' });
 const docClient = DynamoDBDocumentClient.from(dynamoDBClient);
 
 
-const getPressCuttingsCsvDeprecated = async (req: Request, res: Response) => {
-    const scope = (req.query.scope as string) || null;
-    const scopeId = (req.query.scopeId as string) || null;
+type PressCuttingsParams = {
+  scope?: string;
+  scopeId?: string;
+};
+
+const PRESS_CUTTINGS_TABLE = 'LN-PressCuttings';
+
+const getPressCuttingsCsvDeprecated = async (req: Request<PressCuttingsParams>, res: Response) => {
+    const { scope, scopeId } = req.params;
+    if (!scope || !scopeId) {
+        res.status(400).send('scope and scopeId are required');
+        return;
+    }
+
     let documents: PressCutting[] = [];
 
     try {
-        if (!scope && !scopeId) {
-            // Perform a table scan if no conditions are provided
-            const scanParams: ScanCommandInput = {
-                TableName: 'LN-PressCuttings'
-            };
+        const expressionValues: NonNullable<QueryCommandInput["ExpressionAttributeValues"]> = {
+            ':scope': scope,
+            ':scopeId': scopeId,
+        };
+        const expressionNames: NonNullable<QueryCommandInput["ExpressionAttributeNames"]> = {
+            '#scope': 'scope',
+            '#scopeId': 'scopeId',
+        };
 
-            const scanCommand = new ScanCommand(scanParams);
-            let data = await docClient.send(scanCommand);
-            documents = data.Items || [];
+        const queryParams: QueryCommandInput = {
+            TableName: PRESS_CUTTINGS_TABLE,
+            KeyConditionExpression: '#scope = :scope AND #scopeId = :scopeId',
+            ExpressionAttributeValues: expressionValues,
+            ExpressionAttributeNames: expressionNames,
+            ScanIndexForward: false, // newest first
+            ConsistentRead: false,
+        };
 
-            // Continue scanning if necessary (pagination)
-            while (data.LastEvaluatedKey) {
-                scanParams.ExclusiveStartKey = data.LastEvaluatedKey;
-                data = await docClient.send(new ScanCommand(scanParams));
-                documents = documents.concat(data.Items || []);
-            }
-        } else {
-            // Perform a query if scope and/or scopeId are provided
-            const expressionValues: NonNullable<QueryCommandInput["ExpressionAttributeValues"]> = {};
-            const expressionNames: NonNullable<QueryCommandInput["ExpressionAttributeNames"]> = {};
-            let keyConditionExpression = '';
+        const queryCommand = new QueryCommand(queryParams);
+        let data = await docClient.send(queryCommand);
+        documents = data.Items || [];
 
-            if (scopeId) {
-                keyConditionExpression += '#scopeId = :scopeId';
-                expressionValues[':scopeId'] = scopeId;
-                expressionNames['#scopeId'] = 'scopeId';
-            }
-
-            if (scope) {
-                if (keyConditionExpression.length > 0) keyConditionExpression += ' AND ';
-                keyConditionExpression += '#scope = :scope';
-                expressionValues[':scope'] = scope;
-                expressionNames['#scope'] = 'scope';
-            }
-
-            const queryParams: QueryCommandInput = {
-                TableName: 'LN-PressCuttings',
-                KeyConditionExpression: keyConditionExpression,
-                ExpressionAttributeValues: expressionValues,
-                ExpressionAttributeNames: expressionNames,
-                ScanIndexForward: false, // for descending order
-                ConsistentRead: true
-            };
-
-            const queryCommand = new QueryCommand(queryParams);
-            let data = await docClient.send(queryCommand);
-            documents = data.Items || [];
-
-            // Continue querying if necessary (pagination)
-            while (data.LastEvaluatedKey) {
-                queryParams.ExclusiveStartKey = data.LastEvaluatedKey;
-                data = await docClient.send(new QueryCommand(queryParams));
-                documents = documents.concat(data.Items || []);
-            }
+        while (data.LastEvaluatedKey) {
+            queryParams.ExclusiveStartKey = data.LastEvaluatedKey;
+            data = await docClient.send(new QueryCommand(queryParams));
+            documents = documents.concat(data.Items || []);
         }
 
         // Sort documents by articleDate in descending order

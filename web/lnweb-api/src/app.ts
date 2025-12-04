@@ -44,9 +44,9 @@ async function setupMiddleware() {
         next();
     });
 
-    // Load routes asynchronously
+    // Load routes
     console.log("Setting up middleware:routes...");
-    const routes: express.Router = await require("./routes/index");
+    const routes: express.Router = require("./routes/index");
     app.use("/", routes);
 
     // Fallback for unknown routes

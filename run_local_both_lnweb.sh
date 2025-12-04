@@ -4,6 +4,14 @@
 
 set -euo pipefail
 
+if [[ -z "${BASH_VERSINFO:-}" ]]; then
+  echo "[error] run_local_both_lnweb.sh must be run with Bash 4.3 or newer." >&2
+  exit 1
+elif (( BASH_VERSINFO[0] < 4 || ( BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 3 ) )); then
+  echo "[error] run_local_both_lnweb.sh requires Bash 4.3 or newer (detected ${BASH_VERSION:-unknown})." >&2
+  exit 1
+fi
+
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 API_SCRIPT="${SCRIPT_DIR}/web/lnweb-api/run_local_server.sh"
 REACT_SCRIPT="${SCRIPT_DIR}/web/lnweb-react/run_local_server.sh"
