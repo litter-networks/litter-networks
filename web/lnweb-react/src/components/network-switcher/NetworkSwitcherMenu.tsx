@@ -51,18 +51,31 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
       return [];
     }
 
-    const hasThree = trimmedTerm.length >= 3;
+    const hasTwo = trimmedTerm.length >= 2;
 
-    return networks.filter((item) => {
+    const matches = networks.filter((item) => {
       const fullName = (item.fullName ?? item.uniqueId ?? '').toLowerCase();
       if (!fullName) {
         return false;
       }
-      if (hasThree) {
+      if (hasTwo) {
         return fullName.includes(trimmedTerm);
       }
       return fullName.length <= 3 && fullName === trimmedTerm;
     });
+
+    return matches
+      .sort((a, b) => {
+        const nameA = (a.fullName ?? a.uniqueId ?? '').toLowerCase();
+        const nameB = (b.fullName ?? b.uniqueId ?? '').toLowerCase();
+        const indexA = nameA.indexOf(trimmedTerm);
+        const indexB = nameB.indexOf(trimmedTerm);
+        if (indexA === indexB) {
+          return nameA.localeCompare(nameB);
+        }
+        return indexA - indexB;
+      })
+      .slice(0, 5);
   }, [networks, trimmedTerm]);
 
   useEffect(() => {
@@ -79,7 +92,8 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
     { label: 'CHOOSE YOUR NETWORK', to: buildPath('join-in/choose'), preserveReturnPath: true },
   ];
 
-  const hasResults = trimmedTerm.length > 0 && filteredNetworks.length > 0;
+  const hasSearchTerm = trimmedTerm.length >= 2;
+  const hasResults = filteredNetworks.length > 0;
 
   const renderNetworkItem = (item: { uniqueId: string; fullName?: string }, keyPrefix?: string) => (
     <li key={`${keyPrefix ?? 'net'}-${item.uniqueId}`} className={styles.networkSwitcherItem}>
@@ -139,7 +153,7 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
           {favoriteNetworks.map((item) => renderNetworkItem(item, 'fav'))}
         </>
       )}
-      {recentNetworks.length > 0 && (
+      {recentNetworks.length > 0 && !hasSearchTerm && (
         <>
           <li>
             <span className={styles.networkSwitcherSectionLabel}>recent:</span>
@@ -147,7 +161,7 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
           {recentNetworks.map((item) => renderNetworkItem(item, 'recent'))}
         </>
       )}
-      {network && nearbyNetworks.length > 0 && (
+      {network && nearbyNetworks.length > 0 && !hasSearchTerm && (
         <>
           <li>
             <span className={styles.networkSwitcherSectionLabel}>nearby:</span>
