@@ -9,6 +9,7 @@ import { useNavData } from '@/features/nav/useNavData';
 import { StatsSummaryImage } from '@/components/stats/StatsSummaryImage';
 import { usePageTitle } from '@/shared/hooks/usePageTitle';
 import { getPrimaryDistrictId } from '@/shared/utils/districtIds';
+import { appEnv } from '@/config/env';
 import styles from './styles/join-in-stats.module.css';
 
 interface BoardTarget {
@@ -103,6 +104,9 @@ export function JoinInStatsPage() {
   }, [boardTargets.length]);
 
   const togglePath = isFormal ? buildPath('join-in/stats') : buildPath('join-in/stats/formal');
+  const statsPlaceholderSrc = isFormal
+    ? `${appEnv.staticAssetsBaseUrl}/images/stats-board-formal.png`
+    : `${appEnv.staticAssetsBaseUrl}/images/stats-board.png`;
 
   return (
     <div className={styles.page}>
@@ -128,6 +132,7 @@ export function JoinInStatsPage() {
                   uniqueId={target.uniqueId}
                   variant={isFormal ? 'formal' : 'casual'}
                   className={styles.statsImage}
+                  placeholderSrc={statsPlaceholderSrc}
                   alt={target.caption}
                 />
               </div>
@@ -136,7 +141,9 @@ export function JoinInStatsPage() {
         </div>
         <div className={styles.summaryColumn}>
           <div className={styles.summaryCard}>
-            {loadingSummary && <p>Loading stats summary…</p>}
+            {!summaryError && (!summary || loadingSummary) && (
+              <div className={styles.summaryPlaceholder} aria-busy={loadingSummary} />
+            )}
             {!loadingSummary && summary && (
               <div className={styles.summaryImageWrapper}>
                 <StatsSummaryImage

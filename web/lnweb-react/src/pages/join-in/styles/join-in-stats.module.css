@@ -45,6 +45,7 @@
   flex: 1;
   min-width: 300px;
   display: grid;
+  position: relative;
 }
 
 .rotator {
@@ -54,7 +55,7 @@
   background: #fff;
   padding: 20px;
   overflow: hidden;
-  min-height: 0;
+  min-height: 520px;
 }
 
 .boardWrapper {
@@ -67,6 +68,8 @@
   justify-content: center;
   padding: 10px;
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
 }
 
 .boardWrapperActive {
@@ -77,6 +80,7 @@
 .statsImage {
   width: 100%;
   height: auto;
+  max-height: min(100%, 500px);
   object-fit: contain;
   border-radius: 8px;
 }
@@ -101,6 +105,13 @@
   text-align: center;
 }
 
+.summaryPlaceholder {
+  width: 100%;
+  aspect-ratio: 1542 / 1060;
+  border-radius: 10px;
+  background: #fff;
+}
+
 .summaryImage {
   width: 100%;
   height: auto;
@@ -121,4 +132,11 @@
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+@media (max-width: 768px) {
+  .rotator {
+    min-height: 420px;
+    padding: 14px;
+  }
 }
