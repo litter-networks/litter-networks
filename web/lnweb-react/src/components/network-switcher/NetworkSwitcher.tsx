@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
 import { NetworkSwitcherMenu } from './NetworkSwitcherMenu';
 import styles from './styles/networkSwitcher.module.css';
@@ -15,7 +16,7 @@ type Props = {
  * Trigger + dropdown wrapper for selecting networks, searching, and managing favourites.
  */
 export function NetworkSwitcher({ headerColorClass, searchColorClass }: Props) {
-  const { displayName } = useNavData();
+  const { buildPath, displayName } = useNavData();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement | null>(null);
 
@@ -56,22 +57,19 @@ export function NetworkSwitcher({ headerColorClass, searchColorClass }: Props) {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <button
-        type="button"
-        className={styles.networkSwitcherLink}
-        onClick={() => setOpen((state: boolean) => !state)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-      >
+      <Link className={styles.networkSwitcherLink} to={buildPath('')}>
         <img className={styles.networkSwitcherLogo} src="/brand/logo-only.svg" alt="Litter Networks logo" />
         <span className={styles.networkSwitcherTitle}>{displayName}</span>
         <img
           className={`${styles.networkSwitcherChevron} ${open ? styles.networkSwitcherChevronOpen : ''}`}
           src="/images/dropdown-icon.png"
-          alt=""
-          aria-hidden="true"
+          alt="Toggle network menu"
+          onClick={(event) => {
+            event.preventDefault();
+            setOpen((state: boolean) => !state);
+          }}
         />
-      </button>
+      </Link>
       <NetworkSwitcherMenu
         open={open}
         onRequestClose={() => setOpen(false)}
