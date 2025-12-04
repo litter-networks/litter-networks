@@ -42,16 +42,17 @@
 .boardColumn {
   flex: 1;
   min-width: 300px;
+  display: grid;
 }
 
 .rotator {
   position: relative;
-  min-height: 520px;
   border-radius: 15px;
   border: 5px solid rgba(127, 173, 116, 0.2);
   background: #fff;
   padding: 20px;
   overflow: hidden;
+  min-height: 0;
 }
 
 .boardWrapper {
@@ -68,13 +69,12 @@
 
 .boardWrapperActive {
   opacity: 1;
-  z-index: 2;
   display: flex;
 }
 
 .statsImage {
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: contain;
   border-radius: 8px;
 }
@@ -119,11 +119,4 @@
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
-}
-/* Reduce rotary board padding/height on narrow tablets and phones for a tighter column stack. */
-@media (max-width: 768px) {
-  .rotator {
-    min-height: 420px;
-    padding: 14px;
-  }
 }
