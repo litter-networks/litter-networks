@@ -501,17 +501,17 @@
   }
 }
 
-/* Scale the brand lockup slightly down for phones around 480px wide. */
+/* Scale the brand phones around 480px wide. */
 @media (max-width: 480px) {
   .header {
-    --brand-scale: 0.82;
+    --brand-scale: 0.95;
   }
 }
 
 /* Further scale the brand/fonte for very small screens (~400px) so the text stays readable. */
 @media (max-width: 400px) {
   .header {
-    --brand-scale: 0.76;
+    --brand-scale: 0.9;
   }
 
   .menuItemLink {
