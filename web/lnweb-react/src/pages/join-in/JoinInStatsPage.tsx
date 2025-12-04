@@ -10,6 +10,7 @@ import { StatsSummaryImage } from '@/components/stats/StatsSummaryImage';
 import { usePageTitle } from '@/shared/hooks/usePageTitle';
 import { getPrimaryDistrictId } from '@/shared/utils/districtIds';
 import { appEnv } from '@/config/env';
+import { getStoredStatsStyle, setStoredStatsStyle, type StatsStylePreference } from '@/shared/statsStylePreference';
 import styles from './styles/join-in-stats.module.css';
 
 interface BoardTarget {
@@ -29,7 +30,8 @@ interface BoardTarget {
 export function JoinInStatsPage() {
   const { network, buildPath } = useNavData();
   const { formal } = useParams<{ formal?: string }>();
-  const isFormal = formal === 'formal';
+  const [storedStyle, setStoredStyle] = useState<StatsStylePreference>(() => getStoredStatsStyle());
+  const isFormal = formal === 'formal' || (!formal && storedStyle === 'formal');
   usePageTitle('Join In | Stats');
 
   const [summary, setSummary] = useState<StatsSummary | null>(null);
@@ -127,6 +129,14 @@ export function JoinInStatsPage() {
     }, 1200);
     return () => window.clearTimeout(timeout);
   }, [activeIndex]);
+
+  useEffect(() => {
+    const nextStyle: StatsStylePreference = isFormal ? 'formal' : 'casual';
+    if (storedStyle !== nextStyle) {
+      setStoredStyle(nextStyle);
+    }
+    setStoredStatsStyle(nextStyle);
+  }, [isFormal, storedStyle]);
 
   const togglePath = isFormal ? buildPath('join-in/stats') : buildPath('join-in/stats/formal');
   const statsPlaceholderSrc = isFormal
