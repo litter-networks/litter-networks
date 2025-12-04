@@ -18,6 +18,8 @@ jest.mock('@aws-sdk/lib-dynamodb', () => ({
   QueryCommand: jest.fn((input) => input),
 }));
 
+const libDynamoMock = require('@aws-sdk/lib-dynamodb');
+
 type CsvRow = Record<string, unknown>;
 const writeCalls: CsvRow[] = [];
 type CsvStream = {
@@ -41,16 +43,15 @@ jest.mock('@fast-csv/format', () => ({
 
 const csvController = require('../../../../controllers/legacy/news-controller-legacy');
 
-function buildReq(params?: { scope?: string; scopeId?: string }, useDefaults = true) {
-  const resolvedScope = useDefaults ? params?.scope ?? 'area' : params?.scope;
-  const resolvedScopeId = useDefaults ? params?.scopeId ?? 'net-1' : params?.scopeId;
+function buildReq(params?: { scope?: string; scopeId?: string }) {
+  const url =
+    params?.scope && params?.scopeId
+      ? `/news/get-press-cuttings-csv/${params.scope}/${params.scopeId}`
+      : '/news/get-press-cuttings-csv';
   return createRequest({
     method: 'GET',
-    url: `/news/get-press-cuttings-csv/${resolvedScope ?? ''}/${resolvedScopeId ?? ''}`,
-    params: {
-      scope: resolvedScope,
-      scopeId: resolvedScopeId,
-    },
+    url,
+    params,
   });
 }
 
@@ -61,15 +62,7 @@ describe('legacy news CSV controller', () => {
     lastCsvStream = null;
   });
 
-  it('returns 400 when scope params are missing', async () => {
-    const res = createResponse({ eventEmitter: require('events').EventEmitter });
-    await csvController.getPressCuttingsCsvDeprecated(buildReq({}, false), res);
-    expect(res.statusCode).toBe(400);
-    expect(res._getData()).toContain('scope and scopeId are required');
-    expect(mockSend).not.toHaveBeenCalled();
-  });
-
-  it('queries Dynamo with provided scope and paginates results', async () => {
+  it('queries all press cuttings when no scope provided', async () => {
     mockSend
       .mockResolvedValueOnce({
         Items: [{ scope: 'area', scopeId: 'net-1', title: 'One', articleDate: '2025-01-01' }],
@@ -95,5 +88,18 @@ describe('legacy news CSV controller', () => {
     await csvController.getPressCuttingsCsvDeprecated(buildReq(), res);
     expect(res.statusCode).toBe(500);
     expect(res._getData()).toContain('Error retrieving data');
+  });
+
+  it('adds filter expressions when scope params provided', async () => {
+    mockSend.mockResolvedValueOnce({
+      Items: [{ scope: 'area', scopeId: 'net-1', title: 'Scoped', articleDate: '2025-02-01' }],
+    });
+    const res = createResponse({ eventEmitter: require('events').EventEmitter });
+    await csvController.getPressCuttingsCsvDeprecated(buildReq({ scope: 'area', scopeId: 'net-1' }), res);
+    const lastCallInput = libDynamoMock.QueryCommand.mock.calls.at(-1)?.[0];
+    expect(lastCallInput?.FilterExpression).toContain('#scope = :scope');
+    expect(lastCallInput?.FilterExpression).toContain('#scopeId = :scopeId');
+    expect(lastCallInput?.ExpressionAttributeValues?.[':scope']).toBe('area');
+    expect(lastCallInput?.ExpressionAttributeValues?.[':scopeId']).toBe('net-1');
   });
 });

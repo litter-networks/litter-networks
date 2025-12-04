@@ -35,31 +35,40 @@ const PRESS_CUTTINGS_TABLE = 'LN-PressCuttings';
 
 const getPressCuttingsCsvDeprecated = async (req: Request<PressCuttingsParams>, res: Response) => {
     const { scope, scopeId } = req.params;
-    if (!scope || !scopeId) {
-        res.status(400).send('scope and scopeId are required');
-        return;
-    }
 
     let documents: PressCutting[] = [];
 
     try {
         const expressionValues: NonNullable<QueryCommandInput["ExpressionAttributeValues"]> = {
-            ':scope': scope,
-            ':scopeId': scopeId,
+            ':zero': '0',
         };
         const expressionNames: NonNullable<QueryCommandInput["ExpressionAttributeNames"]> = {
-            '#scope': 'scope',
-            '#scopeId': 'scopeId',
+            '#zero': 'zero',
         };
+        const filterExpressions: string[] = [];
+        if (scope) {
+            expressionNames['#scope'] = 'scope';
+            expressionValues[':scope'] = scope;
+            filterExpressions.push('#scope = :scope');
+        }
+        if (scopeId) {
+            expressionNames['#scopeId'] = 'scopeId';
+            expressionValues[':scopeId'] = scopeId;
+            filterExpressions.push('#scopeId = :scopeId');
+        }
 
         const queryParams: QueryCommandInput = {
             TableName: PRESS_CUTTINGS_TABLE,
-            KeyConditionExpression: '#scope = :scope AND #scopeId = :scopeId',
+            IndexName: 'GlobalIndex',
+            KeyConditionExpression: '#zero = :zero',
             ExpressionAttributeValues: expressionValues,
             ExpressionAttributeNames: expressionNames,
             ScanIndexForward: false, // newest first
             ConsistentRead: false,
         };
+        if (filterExpressions.length > 0) {
+            queryParams.FilterExpression = filterExpressions.join(' AND ');
+        }
 
         const queryCommand = new QueryCommand(queryParams);
         let data = await docClient.send(queryCommand);
