@@ -129,13 +129,23 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
       } ${headerColorClass}`}
     >
       <li className={styles.networkSwitcherSearch}>
-        <input
-          type="text"
-          className={`${styles.networkSwitcherSearchInput} ${searchColorClass}`}
-          placeholder="Search networks..."
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-        />
+        <div className={styles.networkSwitcherSearchControl}>
+          <input
+            type="text"
+            className={`${styles.networkSwitcherSearchInput} ${searchColorClass}`}
+            placeholder="Search networks..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+          <button
+            type="button"
+            className={styles.networkSwitcherSearchClear}
+            aria-label="Clear search"
+            onClick={() => setSearchTerm('')}
+          >
+            ×
+          </button>
+        </div>
       </li>
       <li>
         <span

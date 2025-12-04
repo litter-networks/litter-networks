@@ -504,14 +504,14 @@
 /* Scale the brand for phones around 480px wide. */
 @media (max-width: 480px) {
   .header {
-    --brand-scale: 0.95;
+    --brand-scale: 0.85;
   }
 }
 
 /* Further scale the brand/fonte for very small screens (~400px) so the text stays readable. */
 @media (max-width: 400px) {
   .header {
-    --brand-scale: 0.9;
+    --brand-scale: 0.8;
   }
 
   .menuItemLink {
