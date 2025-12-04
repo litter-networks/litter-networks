@@ -188,7 +188,9 @@
 
 .stats-image {
   display: block;
+  border-radius: 8px;
 }
+
 /* Collapse the two-column grid into the stacked mobile view once we drop below the desktop breakpoint. */
 @media (max-width: 920px) {
   .page {

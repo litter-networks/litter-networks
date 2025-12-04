@@ -10,6 +10,13 @@ import {
   mockFetch,
 } from './helpers/appFixture';
 
+const validSnapPayload = {
+  geometry: {
+    coordinates: [[0, 0]],
+    type: 'LineString',
+  },
+};
+
 describe('Maps routes', () => {
   beforeEach(resetMocks);
 
@@ -32,7 +39,7 @@ describe('Maps routes', () => {
       ok: true,
       json: async () => ({ snapped: true }),
     });
-    const res = await sendRequest('POST', '/maps/snap-route', { body: { coordinates: [[0, 0]] } });
+    const res = await sendRequest('POST', '/maps/snap-route', { body: validSnapPayload });
     expect(res.statusCode).toBe(200);
     expect(getJson(res)).toEqual({ snapped: true });
   });
@@ -47,7 +54,7 @@ describe('Maps routes', () => {
   it('fails when OpenRoute returns error', async () => {
     mockSsmSend.mockResolvedValueOnce({ Parameter: { Value: 'key' } });
     mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
-    const res = await sendRequest('POST', '/maps/snap-route', { body: {} });
+    const res = await sendRequest('POST', '/maps/snap-route', { body: validSnapPayload });
     expect(res.statusCode).toBe(500);
     expect(getJson(res)).toEqual({ error: 'Failed to process request' });
   });

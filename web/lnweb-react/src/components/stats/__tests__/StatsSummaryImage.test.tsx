@@ -49,7 +49,7 @@ describe('StatsSummaryImage', () => {
       />,
     );
 
-    expect(screen.getByText('Preparing summary…')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole('img')).toBeInTheDocument());
     expect(screen.getByRole('img')).toHaveAttribute('src', 'data:image/png;base64,summary');
     expect(window.html2canvas).toHaveBeenCalled();

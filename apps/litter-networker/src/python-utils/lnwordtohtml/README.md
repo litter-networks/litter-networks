@@ -19,19 +19,16 @@ styles, and slot neatly into this repo.
   (e.g. `python -m lnwordtohtml.cli sync`).
 
 ## Getting Started
-```bash
-# From repo root
-./convert-docs.sh --dry-run --dump-dir tmp/lnwordtohtml-new
-./convert-docs.sh --no-dry-run       # push changes live (includes CF invalidation)
+The workflow now lives inside the Electron “Content” panel, so authors can trigger dry runs or real syncs directly from the desktop app. To execute the converter manually:
 
-# Or run manually from python-utils
+```bash
 cd apps/litter-networker/src/python-utils
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m lnwordtohtml.cli sync --dry-run --dump-dir tmp/lnwordtohtml-new
 ```
 
-Key CLI flags (usable via `convert-docs.sh` or the module directly):
+Key CLI flags:
 - `--config PATH` overrides bucket/table/profile defaults via YAML.
 - `--source PATH` can point to any DOCX tree (absolute or relative).
 - `--dry-run/--no-dry-run` toggles upload mode (defaults to real sync).
@@ -39,11 +36,11 @@ Key CLI flags (usable via `convert-docs.sh` or the module directly):
   against S3 before uploading.
 
 ## Typical Workflow
-1. Run `./convert-docs.sh --dry-run --dump-dir tmp/lnwordtohtml-new`.
+1. Run the converter with `--dry-run --dump-dir tmp/lnwordtohtml-new` (either through the Electron UI’s dry-run toggle or via the CLI command shown above).
 2. Compare `tmp/lnwordtohtml-new` with a golden snapshot from S3 (for example
    by syncing `s3://lnweb-docs/docs` into `tmp/lnwordtohtml-golden`) and review
    the diffs.
-3. Once satisfied, run `./convert-docs.sh --no-dry-run`. This uploads HTML,
+3. Once satisfied, re-run without `--dry-run`. This uploads HTML,
    CSS, assets, updates Dynamo, and automatically requests a CloudFront
    invalidation for `/knowledge*` and `/docs/styles/*`.
 4. Spot-check `aws.litternetworks.org` (or the Content panel) after the
@@ -142,8 +139,7 @@ full output before promoting.
 - Decide if we store per-file state locally (e.g. `.lnwordtohtml-cache.json`) to
   avoid re-converting unchanged DOCX even if S3 listing timestamps differ.
 - Add linting/formatting rules for this tool (ruff/black?).
-- Hook the CLI into CI or a helper shell script for authors (e.g.
-  `convert-docs.sh`).
+- Hook the CLI into CI or document the Electron workflow further as it evolves.
 
 Once this design is approved we can start scaffolding the package and porting the
 converter logic.

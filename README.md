@@ -1,50 +1,22 @@
 # litter-networks
 
-A single repository containing the web, API, and desktop tools that power Litter Networks. The code you see here drives the React public site, the express-based API, and the Electron-based `litter-networker` companion for admins who coordinate the clean-up community from their desktops. The goal is transparency, critique, and shared improvement; the project is still run by volunteers, so extra hands aren’t strictly required right now, but the code is open so you can review, suggest, or help us polish things.
+A single repository containing the web, API, and desktop tools that power Litter Networks. The code you see here drives the React public site, the express-based API, and the Electron-based `litter-networker` companion for admins who coordinate the clean-up community from their desktops. The goal is transparency, critique, and shared improvement; the project is still run by volunteers, so extra hands aren’t strictly required right now, but the code is open so you can review, suggest, or help us polish things. For a deeper breakdown of each surface (entry points, commands, and responsibilities), see `docs/architecture.md`.
 
 ## Repository structure
 
-- `web/lnweb-react` – the public-facing React app served by CloudFront and built with Vite. It renders maps, stats, and join-in flows and is optimized for browsers and the static CDN.
-- `web/lnweb-api` – the Express/TypeScript backend that proxies OpenRouteService, reads from DynamoDB, and exposes the JSON data used by both the React app and the desktop admin tool. Deployments rely on SAM/CloudFront (see `web/terraform`).
-- `web/terraform` – Terraform definitions for CloudFront, cache policies, and the routes your CDN uses to reach Lambda and S3 origins.
-- `apps/litter-networker` – the Electron + React admin client that talks to AWS DynamoDB/S3, builds Python helpers, and surfaces operational data for trusted moderators.
-- `apps/litter-networker/src/python-utils` – supporting Python scripts that generate docs, logos, and other artifacts before they are pushed to S3 and DynamoDB.
+- `web/lnweb-react` – the public-facing React/Vite app served via CloudFront. It renders maps, stats, and onboarding flows, and fronts the CDN for users.
+- `web/lnweb-api` – the Express/TypeScript backend that proxies OpenRouteService, reads from DynamoDB, and provides the JSON used by both the React site and the desktop admin tool. Deployments rely on SAM + CloudFront (Terraform lives in `web/terraform`).
+- `apps/litter-networker` – the Electron + React admin client that trusted moderators run locally to sync content, review stats, and manage bag counts. Supporting Python utilities ship under `apps/litter-networker/src/python-utils`.
+- `tools/`, `run_local_*.sh`, `sync_*` – shared scripts for linting, license enforcement, and launching the various surfaces.
 
-## Key components
+See `docs/architecture.md` for per-surface entry files, dev commands, and deployment notes.
 
-### `web/lnweb-react` (Public website)
+## Notable behaviors & conventions
 
-- Uses Vite + React Router to surface the public site, map overlays, and general info about Litter Networks.
-- Hit `npm run dev` to run a local Vite server, `npm run build` to prepare a CI deploy, and `npm run deploy` (calls `sync_public.sh`) to publish static assets.
-- Includes shared assets in `public/` (icons, CSS, Leaflet, etc.) and can run Vitest for unit tests (`npm run test`).
-
-### `web/lnweb-api` (Express backend)
-
-- TypeScript/Node API that loads secrets from Parameter Store (e.g., `/LNWeb-API/OPENROUTE_API_KEY`) and handles routes such as `/api/maps/*`, `/area-info`, and other REST endpoints.
-- Built with `tsc -p .` and tested via Jest; deployments happen via SAM/Lambda (see `web/lnweb-api/template.yaml` for IAM permissions and layers).
-- The `sync_lambda.sh` script will build, test, run audits, and optionally `sam deploy`; it also invalidates CloudFront when changes reach the origin.
-
-### Terraform & supporting services
-
-- `web/terraform/cloudfront.tf` defines the CloudFront distributions, cache policies, OAC, and response headers for both the dynamic API and the static CDN buckets.
-- `spa-rewrite.js` implements the CloudFront Function for SPA routing.
-
-### `apps/litter-networker` (Electron desktop)
-
-- Builds a React renderer, an Electron main process, and bundles the Python utilities (`copy-python-utils.mjs`, `run_dev.sh`) so administrators can run the app locally or as a packaged release (`npm run dist`).
-- Talks directly to DynamoDB/S3/CloudWatch via the AWS SDK using the caller’s profile (`AWS_PROFILE=ln` by default). Environment variables (`AWS_REGION`, `CDN_BUCKET`, etc.) keep prod/test behavior configurable.
-- Ships utilities for looking up networks, costs, bags, and content-sync jobs, and it boots a Python virtualenv when legacy scripts are required.
-
-Scripts worth noting:
-
-```
-# install/build the renderer + Electron bits
-npm run build
-# run all dev servers (renderer + ts watchers + Electron shell)
-npm run dev
-# package an AppImage / tarball
-npm run dist
-```
+- **Navigation memory (React site):** `web/lnweb-react/src/shared/navigation/sectionHistory.ts` stores at most one path per top-level section (Welcome, Join In, News, Knowledge) in `localStorage`. The header reuses that path the next time the visitor clicks the section link, so please update the section history whenever you add new section landing routes.
+- **Secrets & infrastructure (API):** `web/lnweb-api` loads API keys from SSM and deploys through SAM; Terraform in `web/terraform` wires CloudFront, cache policies, and SPA rewrites.
+- **Desktop automation:** `apps/litter-networker` packages Python helpers during `npm run build` and talks directly to DynamoDB/S3 using the caller’s AWS profile. The root shortcuts (`run_local_networker.sh`, etc.) mirror the per-package `run_dev.sh` scripts.
+- **License enforcement:** Every source file starts with the Apache 2.0 SPDX header. Run `python3 tools/license_fix.py` if you need to repair headers en masse.
 
 ## Getting started
 

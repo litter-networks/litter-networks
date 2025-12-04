@@ -2,8 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Request, Response } from "express";
-const NetworksInfo = require("../../utils/networks-info.js");
+import NetworksInfo from "../../utils/networks-info";
 
+function formatError(err: unknown): string {
+    return err instanceof Error ? err.message : String(err);
+}
 
 /**
  * Builds a CSV string from an array of headers and rows.
@@ -102,7 +105,8 @@ async function getDistrictsLocalInfoCsv(_req: Request, res: Response) {
         res.setHeader('Content-Disposition', 'attachment; filename="districts-local-info.csv"');
         res.send(csvContent);
     } catch (err) {
-        res.status(500).send('Error generating CSV: ' + err.message);
+        console.error('Error generating districts local info CSV:', formatError(err));
+        res.status(500).send('Error generating CSV');
     }
 }
 
@@ -177,7 +181,8 @@ async function getNetworksCsv(_req: Request, res: Response) {
         res.setHeader('Content-Disposition', 'attachment; filename="networks.csv"');
         res.send(csvContent);
     } catch (err) {
-        res.status(500).send('Error generating CSV: ' + err.message);
+        console.error('Error generating networks CSV:', formatError(err));
+        res.status(500).send('Error generating CSV');
     }
 }
 

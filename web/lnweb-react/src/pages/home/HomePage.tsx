@@ -8,6 +8,7 @@ import type { Network } from '@/data-sources/networks';
 import { StatsBoardImage } from '@/components/stats/StatsBoardImage';
 import { usePageTitle } from '@/shared/hooks/usePageTitle';
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
+import { getStoredStatsStyle, STATS_STYLE_CHANGE_EVENT, STATS_STYLE_STORAGE_KEY, type StatsStylePreference } from '@/shared/statsStylePreference';
 import styles from './styles/home.module.css';
 
 type BlockType = 'knowledge' | 'join-in' | 'news';
@@ -70,6 +71,31 @@ export function HomePage() {
   const { network, buildPath } = useNavData();
   usePageTitle('Welcome');
 
+  const [statsStyle, setStatsStyle] = useState<StatsStylePreference>(() => getStoredStatsStyle());
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    const handleCustom = (event: Event) => {
+      const detail = (event as CustomEvent<StatsStylePreference>).detail;
+      if (detail === 'formal' || detail === 'casual') {
+        setStatsStyle(detail);
+      }
+    };
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === STATS_STYLE_STORAGE_KEY) {
+        setStatsStyle(event.newValue === 'formal' ? 'formal' : 'casual');
+      }
+    };
+    window.addEventListener(STATS_STYLE_CHANGE_EVENT, handleCustom as EventListener);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener(STATS_STYLE_CHANGE_EVENT, handleCustom as EventListener);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
+
   const columns = useMemo(() => {
     if (network) {
       return createNetworkColumns(network);
@@ -87,7 +113,7 @@ export function HomePage() {
           {columns.map((columnBlocks, columnIndex) => (
             <div className={css('column')} key={`column-${columnIndex}`}>
               {columnBlocks.map((block) => (
-                <BlockCard key={`${block.title}-${block.link}`} block={block} buildPath={buildPath} />
+                <BlockCard key={`${block.title}-${block.link}`} block={block} buildPath={buildPath} statsStyle={statsStyle} />
               ))}
             </div>
           ))}
@@ -95,7 +121,12 @@ export function HomePage() {
       ) : (
         <div className={css('mobileStack')}>
           {stackedBlocks.map((block, blockIndex) => (
-            <BlockCard key={`${block.title}-${block.link}-${blockIndex}`} block={block} buildPath={buildPath} />
+            <BlockCard
+              key={`${block.title}-${block.link}-${blockIndex}`}
+              block={block}
+              buildPath={buildPath}
+              statsStyle={statsStyle}
+            />
           ))}
         </div>
       )}
@@ -106,6 +137,7 @@ export function HomePage() {
 interface BlockCardProps {
   block: WelcomeBlock;
   buildPath: (path?: string) => string;
+  statsStyle: StatsStylePreference;
 }
 
 /**
@@ -117,7 +149,7 @@ interface BlockCardProps {
  * @param buildPath - Function that converts an internal route path into a full href for navigation.
  * @returns The JSX element for the block card.
  */
-function BlockCard({ block, buildPath }: BlockCardProps) {
+function BlockCard({ block, buildPath, statsStyle }: BlockCardProps) {
   const isExternal = /^https?:\/\//i.test(block.link);
   const href = isExternal ? block.link : buildPath(block.link);
 
@@ -147,9 +179,7 @@ function BlockCard({ block, buildPath }: BlockCardProps) {
         {hasBody && (
           <div className={css('block-text')}>
             {block.description && <p>{block.description}</p>}
-            {block.imageUrl && (
-              <BlockMedia block={block} />
-            )}
+            {block.imageUrl && <BlockMedia block={block} statsStyle={statsStyle} />}
           </div>
         )}
       </div>
@@ -163,19 +193,24 @@ function BlockCard({ block, buildPath }: BlockCardProps) {
  * @param block - The WelcomeBlock whose media should be rendered. If `block.imageUrl` is `'news-block-gallery'` a rotating gallery is rendered; if `block.imageClass` is `'stats-image'` a `StatsBoardImage` is rendered using `block.statsUniqueId` (or `'all'`); if `block.imageUrl` is falsy nothing is rendered.
  * @returns A React element representing the selected media, or `null` when the block has no image configured.
  */
-function BlockMedia({ block }: { block: WelcomeBlock }) {
+function BlockMedia({ block, statsStyle }: { block: WelcomeBlock; statsStyle: StatsStylePreference }) {
   if (block.imageUrl === 'news-block-gallery') {
     return <NewsGallery items={galleryItems} />;
   }
 
   if (block.imageClass === 'stats-image') {
     const statsUniqueId = block.statsUniqueId ?? 'all';
+    const placeholder =
+      statsStyle === 'formal'
+        ? `${appEnv.staticAssetsBaseUrl}/images/stats-board-formal.png`
+        : `${appEnv.staticAssetsBaseUrl}/images/stats-board.png`;
     return (
       <StatsBoardImage
         uniqueId={statsUniqueId}
         className={cx(block.imageClass, block.classEx ?? 'block-image-cover')}
         alt=""
-        placeholderSrc={block.imageUrl}
+        placeholderSrc={placeholder}
+        variant={statsStyle === 'formal' ? 'formal' : 'casual'}
       />
     );
   }

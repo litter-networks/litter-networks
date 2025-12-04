@@ -1,5 +1,10 @@
 .page {
   padding: 1.5rem 0 4rem;
+  min-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
 }
 
 .title {

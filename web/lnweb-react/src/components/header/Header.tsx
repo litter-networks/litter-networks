@@ -5,15 +5,22 @@ import { useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
 import { NetworkSwitcher } from '@/components/network-switcher/NetworkSwitcher';
-import { getSectionFromPath } from '@/shared/utils/sections';
+import { getSectionFromPath, type SiteSection } from '@/shared/utils/sections';
+import { loadSectionHistory, writeLastSectionPath } from '@/shared/navigation/sectionHistory';
 import { getHeaderColorClass, getSearchColorClass } from './header-helpers';
 import styles from './styles/header.module.css';
 
-const navLinks = [
-  { label: 'Welcome', path: '' },
-  { label: 'Join In', path: 'join-in' },
-  { label: 'News', path: 'news' },
-  { label: 'Knowledge', path: 'knowledge' },
+type NavLinkConfig = {
+  label: string;
+  section: SiteSection;
+  defaultPath: string;
+};
+
+const navLinks: NavLinkConfig[] = [
+  { label: 'Welcome', section: 'welcome', defaultPath: '' },
+  { label: 'Join In', section: 'join-in', defaultPath: 'join-in' },
+  { label: 'News', section: 'news', defaultPath: 'news' },
+  { label: 'Knowledge', section: 'knowledge', defaultPath: 'knowledge' },
 ];
 
 const DEFAULT_THEME_COLOR = '#FFFFFF';
@@ -33,7 +40,7 @@ const themeColorVarMap: Record<string, string> = {
  * @returns The header JSX element containing the navbar, brand/filter trigger, navigation links, and conditional join-in submenu.
  */
 export function Header() {
-  const { buildPath, facebookLink, network } = useNavData();
+  const { buildPath, facebookLink, network, filterString } = useNavData();
   const location = useLocation();
   const sectionName = getSectionFromPath(location.pathname);
   const headerColorClass = getHeaderColorClass(sectionName);
@@ -42,6 +49,27 @@ export function Header() {
     () => ({ returnPath: `${location.pathname}${location.search}${location.hash}` }),
     [location.pathname, location.search, location.hash],
   );
+  const storedHistory = loadSectionHistory();
+  const normalizedSectionPath = useMemo(
+    () => stripFilterFromPath(location.pathname, filterString).replace(/^\/+/, ''),
+    [filterString, location.pathname],
+  );
+  const previousPathForSection = storedHistory[sectionName];
+  const sectionHistory: Partial<Record<SiteSection, string>> = {
+    ...storedHistory,
+    [sectionName]: normalizedSectionPath,
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !filterString) {
+      return;
+    }
+    if (previousPathForSection === normalizedSectionPath) {
+      return;
+    }
+    writeLastSectionPath(sectionName, normalizedSectionPath);
+  }, [filterString, normalizedSectionPath, previousPathForSection, sectionName]);
+
   useEffect(() => {
     if (typeof document === 'undefined') {
       return;
@@ -57,8 +85,10 @@ export function Header() {
   }, [headerColorClass]);
 
   const navItemsMarkup = navLinks.map((item) => {
-    const href = buildPath(item.path);
-    const isActive = sectionName === getSectionFromPath(href);
+    const storedTarget = sectionHistory[item.section];
+    const targetSegment = storedTarget ?? item.defaultPath;
+    const href = buildPath(targetSegment);
+    const isActive = sectionName === item.section;
     return (
       <li key={item.label} className={styles.navListItem}>
         <Link to={href} className={`${styles.navItemLink} ${isActive ? styles.navItemCurrent : ''}`}>
@@ -162,4 +192,24 @@ export function Header() {
       )}
     </header>
   );
+}
+
+function stripFilterFromPath(pathname: string, filterString?: string) {
+  const trimmed = pathname.replace(/^\/+/, '');
+  if (!filterString) {
+    return trimmed;
+  }
+  const normalizedFilter = filterString.replace(/^\/+|\/+$/g, '');
+  if (!normalizedFilter) {
+    return trimmed;
+  }
+  const trimmedLower = trimmed.toLowerCase();
+  const filterLower = normalizedFilter.toLowerCase();
+  if (trimmedLower === filterLower) {
+    return '';
+  }
+  if (trimmedLower.startsWith(`${filterLower}/`)) {
+    return trimmed.substring(normalizedFilter.length + 1);
+  }
+  return trimmed;
 }

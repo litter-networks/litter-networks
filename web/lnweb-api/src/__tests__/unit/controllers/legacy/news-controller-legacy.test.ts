@@ -16,11 +16,18 @@ jest.mock('@aws-sdk/lib-dynamodb', () => ({
     from: jest.fn(() => ({ send: mockSend })),
   },
   QueryCommand: jest.fn((input) => input),
-  ScanCommand: jest.fn((input) => input),
 }));
 
-const writeCalls = [];
-let lastCsvStream = null;
+const libDynamoMock = require('@aws-sdk/lib-dynamodb');
+
+type CsvRow = Record<string, unknown>;
+const writeCalls: CsvRow[] = [];
+type CsvStream = {
+  pipe: jest.Mock;
+  write: jest.Mock;
+  end: jest.Mock;
+};
+let lastCsvStream: CsvStream | null = null;
 
 jest.mock('@fast-csv/format', () => ({
   format: jest.fn(() => {
@@ -36,11 +43,15 @@ jest.mock('@fast-csv/format', () => ({
 
 const csvController = require('../../../../controllers/legacy/news-controller-legacy');
 
-function buildReq(query = {}) {
+function buildReq(params?: { scope?: string; scopeId?: string }) {
+  const url =
+    params?.scope && params?.scopeId
+      ? `/news/get-press-cuttings-csv/${params.scope}/${params.scopeId}`
+      : '/news/get-press-cuttings-csv';
   return createRequest({
     method: 'GET',
-    url: '/news/get-press-cuttings-csv',
-    query,
+    url,
+    params,
   });
 }
 
@@ -51,35 +62,24 @@ describe('legacy news CSV controller', () => {
     lastCsvStream = null;
   });
 
-  it('streams CSV rows via scans when no scope provided', async () => {
+  it('queries all press cuttings when no scope provided', async () => {
     mockSend
       .mockResolvedValueOnce({
-        Items: [{ scope: 'global', title: 'One', articleDate: '2025-01-01' }],
+        Items: [{ scope: 'area', scopeId: 'net-1', title: 'One', articleDate: '2025-01-01' }],
         LastEvaluatedKey: { next: true },
       })
       .mockResolvedValueOnce({
-        Items: [{ scope: 'global', title: 'Two', articleDate: '2025-01-02' }],
+        Items: [{ scope: 'area', scopeId: 'net-1', title: 'Two', articleDate: '2025-01-02' }],
       });
 
     const res = createResponse({ eventEmitter: require('events').EventEmitter });
     await csvController.getPressCuttingsCsvDeprecated(buildReq(), res);
+    if (!lastCsvStream) {
+      throw new Error('CSV stream was not initialized');
+    }
     expect(lastCsvStream.pipe).toHaveBeenCalledWith(res);
     expect(writeCalls.length).toBe(2);
-    const titles = writeCalls.map((row) => row.title);
-    expect(titles).toContain('One');
-    expect(titles).toContain('Two');
     expect(mockSend).toHaveBeenCalledTimes(2);
-  });
-
-  it('queries when scope parameters are provided', async () => {
-    mockSend.mockImplementationOnce(async () => ({
-      Items: [{ scope: 'area', scopeId: 'net-1', title: 'Area', articleDate: '2025-02-01' }],
-    }));
-
-    const res = createResponse({ eventEmitter: require('events').EventEmitter });
-    await csvController.getPressCuttingsCsvDeprecated(buildReq({ scope: 'scope', scopeId: 'scopeId' }), res);
-    expect(writeCalls[0]).toMatchObject({ scopeId: 'net-1' });
-    expect(mockSend).toHaveBeenCalled();
   });
 
   it('returns 500 when Dynamo errors', async () => {
@@ -88,5 +88,18 @@ describe('legacy news CSV controller', () => {
     await csvController.getPressCuttingsCsvDeprecated(buildReq(), res);
     expect(res.statusCode).toBe(500);
     expect(res._getData()).toContain('Error retrieving data');
+  });
+
+  it('adds filter expressions when scope params provided', async () => {
+    mockSend.mockResolvedValueOnce({
+      Items: [{ scope: 'area', scopeId: 'net-1', title: 'Scoped', articleDate: '2025-02-01' }],
+    });
+    const res = createResponse({ eventEmitter: require('events').EventEmitter });
+    await csvController.getPressCuttingsCsvDeprecated(buildReq({ scope: 'area', scopeId: 'net-1' }), res);
+    const lastCallInput = libDynamoMock.QueryCommand.mock.calls.at(-1)?.[0];
+    expect(lastCallInput?.FilterExpression).toContain('#scope = :scope');
+    expect(lastCallInput?.FilterExpression).toContain('#scopeId = :scopeId');
+    expect(lastCallInput?.ExpressionAttributeValues?.[':scope']).toBe('area');
+    expect(lastCallInput?.ExpressionAttributeValues?.[':scopeId']).toBe('net-1');
   });
 });

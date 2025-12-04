@@ -66,7 +66,7 @@ export function StatsSummaryImage({ summary, networkName, districtName, classNam
       {imageSrc ? (
         <img src={imageSrc} alt="Network membership summary" className={className} />
       ) : (
-        <div className={`${boardStyles.placeholder} ${className ?? ''}`.trim()}>Preparing summary…</div>
+        <div className={`${boardStyles.placeholder} ${className ?? ''}`.trim()} role="status" aria-live="polite" />
       )}
     </>
   );

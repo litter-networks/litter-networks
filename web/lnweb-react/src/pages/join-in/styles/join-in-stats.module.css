@@ -1,7 +1,9 @@
 .page {
   padding: 20px 0 40px;
+  min-height: calc(100vh - 200px);
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 20px;
 }
 
@@ -37,21 +39,28 @@
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
+  justify-content: center;
 }
 
-.boardColumn {
-  flex: 1;
+.displayPanel {
+  flex: 0 1 640px;
   min-width: 300px;
+  width: min(640px, 100%);
+  display: flex;
 }
 
-.rotator {
+.displayFrame {
   position: relative;
-  min-height: 520px;
+  width: 100%;
+  background: #fff;
   border-radius: 15px;
   border: 5px solid rgba(127, 173, 116, 0.2);
-  background: #fff;
   padding: 20px;
+  aspect-ratio: 1542 / 1060;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .boardWrapper {
@@ -68,7 +77,15 @@
 
 .boardWrapperActive {
   opacity: 1;
+  display: flex;
   z-index: 2;
+}
+
+.boardWrapperExiting {
+  opacity: 1;
+  z-index: 1;
+  transition: opacity 0.6s ease;
+  transition-delay: 0.6s;
   display: flex;
 }
 
@@ -79,24 +96,19 @@
   border-radius: 8px;
 }
 
-.summaryColumn {
-  flex: 1;
-  min-width: 260px;
-  display: flex;
-}
-
-.summaryCard {
-  background: #fff;
-  border-radius: 15px;
-  border: 5px solid rgba(127, 173, 116, 0.2);
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.summaryCardPending {
+  border-color: transparent;
 }
 
 .summaryImageWrapper {
   text-align: center;
+}
+
+.summaryPlaceholder {
+  width: 100%;
+  aspect-ratio: 1542 / 1060;
+  border-radius: 10px;
+  background: #fff;
 }
 
 .summaryImage {
@@ -119,11 +131,4 @@
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
-}
-/* Reduce rotary board padding/height on narrow tablets and phones for a tighter column stack. */
-@media (max-width: 768px) {
-  .rotator {
-    min-height: 420px;
-    padding: 14px;
-  }
 }

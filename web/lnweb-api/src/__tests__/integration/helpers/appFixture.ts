@@ -54,12 +54,16 @@ const mockNetworksInfo = {
     bagCounts: { thisMonth: 5, lastMonth: 4, allTime: 20 },
   }),
   getCurrentMemberCount: jest.fn(async (id: string) => (id === 'net-1' ? 10 : 5)),
+  getAllMemberCounts: jest.fn(async () => new Map([
+    ['net-1', 10],
+    ['net-2', 5],
+  ])),
   findNetworkById: jest.fn(async (id: string) => sampleNetworks.find((n) => n.uniqueId === id) || null),
   findNetworkByShortId: jest.fn(async (id: string) => sampleNetworks.find((n) => n.shortId === id) || null),
   findDistrictById: jest.fn(async (id: string) => sampleDistricts.find((d) => d.uniqueId === id) || null),
 };
 
-jest.mock('../../../utils/networks-info.js', () => mockNetworksInfo);
+jest.mock('../../../utils/networks-info', () => mockNetworksInfo);
 
 const mockKnowledgePage = { bodyContent: '<p>Hello knowledge</p>', metadata: { title: 'Test', description: 'Desc' } };
 const mockKnowledgeChildren = [{ pageUrl: 'knowledge/foo', pageTitle: 'Foo' }];
@@ -146,7 +150,7 @@ function createReqRes(method: HttpMethod, path: string, { body, headers, query }
     method,
     url: path,
     headers,
-    body,
+    body: body as Record<string, unknown> | undefined,
     query,
   });
   const res = createResponse({ eventEmitter: EventEmitter });

@@ -1,14 +1,21 @@
 // Copyright 2025 Litter Networks / Clean and Green Communities CIC
 // SPDX-License-Identifier: Apache-2.0
 
-export {};
+import NetworksInfo from '../../../utils/networks-info';
 
 const networkInfoController = require('../../../controllers/legacy/network-info-controller');
 const mockResponse = require('node-mocks-http').createResponse;
 const mockRequest = require('node-mocks-http').createRequest;
 
+type MockResponse = ReturnType<typeof mockResponse> & {
+  setHeader: jest.Mock;
+  send: jest.Mock;
+  status: jest.Mock;
+  json: jest.Mock;
+};
+
 // Mock the NetworksInfo module
-jest.mock('../../../utils/networks-info.js', () => ({
+jest.mock('../../../utils/networks-info', () => ({
   getAllNetworks: jest.fn().mockResolvedValue([
     { uniqueId: 'network1', fullName: 'Test Network 1', district: 'District 1' },
     { uniqueId: 'network2', fullName: 'Test Network 2', district: 'District 2' }
@@ -23,11 +30,11 @@ jest.mock('../../../utils/networks-info.js', () => ({
   ])
 }));
 
-const NetworksInfo = require('../../../utils/networks-info.js');
+const mockedNetworksInfo = NetworksInfo as jest.Mocked<typeof NetworksInfo>;
 
 describe('Network Info Controller', () => {
-  let req;
-  let res;
+  let req: ReturnType<typeof mockRequest>;
+  let res: MockResponse;
 
   beforeEach(() => {
     req = mockRequest();
@@ -51,7 +58,7 @@ describe('Network Info Controller', () => {
     });
 
     it('injects overrides for known networks and escapes fields', async () => {
-      NetworksInfo.getAllNetworks.mockResolvedValueOnce([
+      mockedNetworksInfo.getAllNetworks.mockResolvedValueOnce([
         { uniqueId: 'croftlitter', fullName: 'Croft "Litter"', extra: 'Value' },
         { uniqueId: 'plain', fullName: 'Plain' }
       ]);
@@ -65,7 +72,7 @@ describe('Network Info Controller', () => {
     });
 
     it('handles errors from NetworksInfo', async () => {
-      NetworksInfo.getAllNetworks.mockRejectedValueOnce(new Error('boom'));
+      mockedNetworksInfo.getAllNetworks.mockRejectedValueOnce(new Error('boom'));
       await networkInfoController.getNetworksCsv(req, res);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith(expect.stringContaining('Error generating CSV'));
@@ -85,7 +92,7 @@ describe('Network Info Controller', () => {
     });
 
     it('returns 500 when getAllDistricts fails', async () => {
-      NetworksInfo.getAllDistricts.mockRejectedValueOnce(new Error('fail'));
+      mockedNetworksInfo.getAllDistricts.mockRejectedValueOnce(new Error('fail'));
       await networkInfoController.getDistrictsCsv(req, res);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith('Internal server error generating CSV');
@@ -105,7 +112,7 @@ describe('Network Info Controller', () => {
     });
 
     it('returns 500 when getAllDistrictLocalInfos fails', async () => {
-      NetworksInfo.getAllDistrictLocalInfos.mockRejectedValueOnce(new Error('bad'));
+      mockedNetworksInfo.getAllDistrictLocalInfos.mockRejectedValueOnce(new Error('bad'));
       await networkInfoController.getDistrictsLocalInfoCsv(req, res);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith(expect.stringContaining('Error generating CSV'));

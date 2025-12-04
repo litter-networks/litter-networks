@@ -12,8 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "strict": false,
-    "noEmitOnError": false
+    "strict": true,
+    "noEmitOnError": true
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "coverage", "node_modules"]
