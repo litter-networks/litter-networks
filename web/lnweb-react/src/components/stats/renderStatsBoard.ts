@@ -44,23 +44,6 @@ function parseCount(value?: number | string) {
   return 0;
 }
 
-function computeBagCountScale(text: string, allowScale: boolean) {
-  if (!allowScale) {
-    return 1;
-  }
-
-  const digitsOnly = text.replace(/\D/g, '');
-  const digitLength = digitsOnly.length || text.length;
-  // Treat five-digit values like four-digit ones so the large jump only occurs once counts exceed 99,999.
-  const effectiveLength = digitLength <= 4 ? digitLength : digitLength === 5 ? 4 : digitLength;
-
-  if (effectiveLength <= 0) {
-    return 1;
-  }
-
-  return Math.min(1, 3.2 / effectiveLength);
-}
-
 /**
  * Render a centered statistic line consisting of a leading label, a numeric count, and trailing text onto the provided canvas context.
  *
@@ -89,8 +72,8 @@ function drawStatsLine(
 ) {
   const bagCount = parseCount(bagCountValue);
   const lineYScaled = lineY * options.scaleFactor;
-  const bagCountText = bagCount >= 100000 ? bagCount.toLocaleString() : bagCount.toString();
-  const scale = computeBagCountScale(bagCountText, allowScale);
+  const bagCountText = bagCount >= 10000 ? bagCount.toLocaleString() : bagCount.toString();
+  const scale = allowScale ? Math.min(1, 3 / bagCountText.length) : 1;
   const bagCountFontSize = bagCountSize * scale;
 
   ctx.textBaseline = 'bottom';
@@ -155,10 +138,10 @@ function drawStatsDoubleLine(
   const bagCount = parseCount(bagCountValue);
   const bagCount2 = parseCount(bagCount2Value);
   const lineYScaled = lineY * options.scaleFactor;
-  const bagCountText = bagCount >= 100000 ? bagCount.toLocaleString() : bagCount.toString();
-  const bagCount2Text = bagCount2 >= 100000 ? bagCount2.toLocaleString() : bagCount2.toString();
+  const bagCountText = bagCount >= 10000 ? bagCount.toLocaleString() : bagCount.toString();
+  const bagCount2Text = bagCount2 >= 10000 ? bagCount2.toLocaleString() : bagCount2.toString();
 
-  const scale = computeBagCountScale(bagCountText, allowScale);
+  const scale = allowScale ? Math.min(1, 3 / bagCountText.length) : 1;
   const bagCountFontSize = bagCountSize * scale;
   const secondStatScale = 0.8;
   const bagCount2FontSize = bagCountFontSize * secondStatScale;
