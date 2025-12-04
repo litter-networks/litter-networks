@@ -5,6 +5,6 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-TARGET_SCRIPT="${SCRIPT_DIR}/web/lnweb-api/run_local_server.sh"
+TARGET_SCRIPT="${SCRIPT_DIR}/web/lnweb-api/sync_lambda.sh"
 
 exec "${TARGET_SCRIPT}" "$@"

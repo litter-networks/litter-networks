@@ -12,6 +12,8 @@ if ! python3 "$REPO_ROOT/tools/license_check.py"; then
   exit 1
 fi
 
+cd "$SCRIPT_DIR"
+
 echo "Running lint..."
 npm run lint
 
