@@ -69,6 +69,10 @@ While we don’t have a formal contribution backlog, you can:
 
 All source files in this repo must begin with the two-line Apache 2.0 SPDX header. The enforcement script lives in `tools/license_check.py`, and the desktop/web/service starter scripts invoke it before running. If you need to add the header to multiple files, run `python3 tools/license_fix.py` (or with `--dry-run` to preview) to auto-apply it.
 
+## Automation scripts
+
+The `sync_lambda.sh` and `sync_public.sh` helpers accept `SYNC_READ_ONLY=true` so CI can exercise their lint, audit, test, and build stages without triggering AWS deployments or invalidations. The GitHub Actions defined under `.github/workflows/` rely on that read-only mode.
+
 ## Licensing
 
-This repository is licensed under the Apache License 2.0 - see `LICENSE` for the full text. All new files should use the short SPDX notice described in `CONTRIBUTING.md`.
+This repository is licensed under the Apache License 2.0—see `LICENSE` for the full text. All new files should use the short SPDX notice described in `CONTRIBUTING.md`.

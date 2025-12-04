@@ -27,6 +27,10 @@ trap 'on_error' ERR
 
 # Parse arguments
 LAMBDA_DEPLOY=${LAMBDA_DEPLOY:-true}
+if [ "${SYNC_READ_ONLY:-false}" = "true" ]; then
+    echo "[info] Running sync_lambda in read-only mode; skipping deploy/invalidation phases."
+    LAMBDA_DEPLOY=false
+fi
 
 # print_time_taken prints the elapsed time in seconds since the given start time and echoes "<label> took <seconds> seconds."
 function print_time_taken() {
