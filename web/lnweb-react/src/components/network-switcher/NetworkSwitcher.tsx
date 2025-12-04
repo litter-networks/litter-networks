@@ -1,7 +1,7 @@
 // Copyright 2025 Litter Networks / Clean and Green Communities CIC
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
 import { NetworkSwitcherMenu } from './NetworkSwitcherMenu';
@@ -19,6 +19,18 @@ export function NetworkSwitcher({ headerColorClass, searchColorClass }: Props) {
   const { buildPath, displayName } = useNavData();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement | null>(null);
+
+  const handlePointerEnter = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'mouse') {
+      setOpen(true);
+    }
+  };
+
+  const handlePointerLeave = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'mouse') {
+      setOpen(false);
+    }
+  };
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -54,8 +66,8 @@ export function NetworkSwitcher({ headerColorClass, searchColorClass }: Props) {
       className={triggerClassName}
       tabIndex={0}
       ref={triggerRef}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
     >
       <Link
         className={styles.networkSwitcherLink}
