@@ -18,7 +18,7 @@ export default function ContentPage() {
   const { networks = [] } = snapshot ?? { networks: [] };
   const { logs, running, summary, run, stop } = useContentJob();
   const [selectedNetwork, setSelectedNetwork] = useState<string>(networks[0]?.id ?? "");
-  const [docsDryRun, setDocsDryRun] = useState(true);
+  const [docsDryRun, setDocsDryRun] = useState(false);
 
   const friendlyNetworks = useMemo(
     () =>
