@@ -4,6 +4,9 @@
 import { Request, Response } from "express";
 const NetworksInfo = require("../../utils/networks-info.js");
 
+function formatError(err: unknown): string {
+    return err instanceof Error ? err.message : String(err);
+}
 
 /**
  * Builds a CSV string from an array of headers and rows.
@@ -102,7 +105,7 @@ async function getDistrictsLocalInfoCsv(_req: Request, res: Response) {
         res.setHeader('Content-Disposition', 'attachment; filename="districts-local-info.csv"');
         res.send(csvContent);
     } catch (err) {
-        res.status(500).send('Error generating CSV: ' + err.message);
+        res.status(500).send('Error generating CSV: ' + formatError(err));
     }
 }
 
@@ -177,7 +180,7 @@ async function getNetworksCsv(_req: Request, res: Response) {
         res.setHeader('Content-Disposition', 'attachment; filename="networks.csv"');
         res.send(csvContent);
     } catch (err) {
-        res.status(500).send('Error generating CSV: ' + err.message);
+        res.status(500).send('Error generating CSV: ' + formatError(err));
     }
 }
 

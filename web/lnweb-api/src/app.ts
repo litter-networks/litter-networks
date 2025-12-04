@@ -1,7 +1,8 @@
 // Copyright 2025 Litter Networks / Clean and Green Communities CIC
 // SPDX-License-Identifier: Apache-2.0
 
-const express = require("express");
+import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
 
 console.log(`LNWeb-API - Running Node.js version: ${process.version}`);
 
@@ -19,12 +20,10 @@ async function setupMiddleware() {
 
     console.log("Setting up middleware...");
 
-    const cors = require('cors');
-
     const allowedHostPattern = /^https?:\/\/([a-z0-9-]+\.)*litternetworks\.org(?::\d+)?$/i;
 
     app.use(cors({
-        origin: (origin, callback) => {
+        origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
             if (!origin || allowedHostPattern.test(origin)) {
                 callback(null, true);
             } else {
@@ -40,24 +39,25 @@ async function setupMiddleware() {
     console.log("Setting up middleware:misc...");
     app.use(express.json({ limit: '100kb' }));
 
-    app.use((req, res, next) => {
+    app.use((req: Request, res: Response, next: NextFunction) => {
         console.log(`[${new Date().toISOString()}] Request: ${JSON.stringify(req.method)} ${JSON.stringify(req.url)}`);
         next();
     });
 
     // Load routes asynchronously
     console.log("Setting up middleware:routes...");
-    const routes = await require("./routes/index");
+    const routes: express.Router = await require("./routes/index");
     app.use("/", routes);
 
     // Fallback for unknown routes
-    app.use((req, res) => res.status(404).json({ error: "Not found", path: req.path }));
+    app.use((req: Request, res: Response) => res.status(404).json({ error: "Not found", path: req.path }));
 
     // keep this "catch all" at end of stack:
-    app.use((err, req, res, _next) => {
+    app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
         void _next;
-        console.error('Error:', err.message || err);
-        res.status(500).json({ error: err.message || 'Internal Server Error' });
+        const message = err instanceof Error ? err.message : String(err);
+        console.error('Error:', message);
+        res.status(500).json({ error: message || 'Internal Server Error' });
     });
 }
 
@@ -66,7 +66,8 @@ module.exports = async function initializeApp() {
     try {
         await setupMiddleware();
     } catch (err) {
-        console.error('Error:', err.message || err);
+        const message = err instanceof Error ? err.message : String(err);
+        console.error('Error:', message);
     }
     return app;
 };

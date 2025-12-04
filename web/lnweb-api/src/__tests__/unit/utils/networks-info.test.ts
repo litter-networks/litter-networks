@@ -72,7 +72,7 @@ describe('NetworksInfo utilities', () => {
     });
 
     const networks = await networksInfo.getAllNetworks();
-    expect(networks.map((n) => n.fullName)).toEqual(['Alpha', 'Beta']);
+    expect(networks.map((n: { fullName: string }) => n.fullName)).toEqual(['Alpha', 'Beta']);
     expect(mockDynamoSend).toHaveBeenCalledTimes(1);
 
     // Cached responses should not trigger additional scans

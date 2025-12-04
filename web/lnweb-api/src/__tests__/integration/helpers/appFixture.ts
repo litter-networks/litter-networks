@@ -150,7 +150,7 @@ function createReqRes(method: HttpMethod, path: string, { body, headers, query }
     method,
     url: path,
     headers,
-    body,
+    body: body as Record<string, unknown> | undefined,
     query,
   });
   const res = createResponse({ eventEmitter: EventEmitter });

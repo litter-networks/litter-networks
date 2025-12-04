@@ -3,18 +3,8 @@
 
 import { lambdaHandler } from './lambda';
 
-type TestEvent = {
-  requestContext: {
-    http: {
-      method: string;
-      path?: string;
-    };
-  };
-  rawPath?: string;
-  headers: Record<string, string> | null;
-  queryStringParameters: Record<string, string> | null;
-  body: string | null;
-};
+type TestEvent = Parameters<typeof lambdaHandler>[0];
+type TestContext = Parameters<typeof lambdaHandler>[1];
 
 async function testLambda() {
   const event: TestEvent = {
@@ -25,14 +15,14 @@ async function testLambda() {
       },
     },
     rawPath: '/info/networks',
+    rawQueryString: '',
     headers: {
       'Content-Type': 'application/json',
     },
-    queryStringParameters: null,
     body: null,
   };
 
-  const context = { callbackWaitsForEmptyEventLoop: false };
+  const context: TestContext = { callbackWaitsForEmptyEventLoop: false };
 
   try {
     console.log("Invoking Lambda...");

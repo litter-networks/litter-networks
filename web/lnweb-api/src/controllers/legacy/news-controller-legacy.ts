@@ -52,27 +52,31 @@ const getPressCuttingsCsvDeprecated = async (req: Request, res: Response) => {
             }
         } else {
             // Perform a query if scope and/or scopeId are provided
-            const queryParams: QueryCommandInput = {
-                TableName: 'LN-PressCuttings',
-                KeyConditionExpression: '',
-                ExpressionAttributeValues: {},
-                ExpressionAttributeNames: {},
-                ScanIndexForward: false, // for descending order
-                ConsistentRead: true
-            };
+            const expressionValues: NonNullable<QueryCommandInput["ExpressionAttributeValues"]> = {};
+            const expressionNames: NonNullable<QueryCommandInput["ExpressionAttributeNames"]> = {};
+            let keyConditionExpression = '';
 
             if (scopeId) {
-                queryParams.KeyConditionExpression += '#scopeId = :scopeId';
-                queryParams.ExpressionAttributeValues[':scopeId'] = scopeId;
-                queryParams.ExpressionAttributeNames['#scopeId'] = 'scopeId';
+                keyConditionExpression += '#scopeId = :scopeId';
+                expressionValues[':scopeId'] = scopeId;
+                expressionNames['#scopeId'] = 'scopeId';
             }
 
             if (scope) {
-                if (queryParams.KeyConditionExpression.length > 0) queryParams.KeyConditionExpression += ' AND ';
-                queryParams.KeyConditionExpression += '#scope = :scope';
-                queryParams.ExpressionAttributeValues[':scope'] = scope;
-                queryParams.ExpressionAttributeNames['#scope'] = 'scope';
+                if (keyConditionExpression.length > 0) keyConditionExpression += ' AND ';
+                keyConditionExpression += '#scope = :scope';
+                expressionValues[':scope'] = scope;
+                expressionNames['#scope'] = 'scope';
             }
+
+            const queryParams: QueryCommandInput = {
+                TableName: 'LN-PressCuttings',
+                KeyConditionExpression: keyConditionExpression,
+                ExpressionAttributeValues: expressionValues,
+                ExpressionAttributeNames: expressionNames,
+                ScanIndexForward: false, // for descending order
+                ConsistentRead: true
+            };
 
             const queryCommand = new QueryCommand(queryParams);
             let data = await docClient.send(queryCommand);

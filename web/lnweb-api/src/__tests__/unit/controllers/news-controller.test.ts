@@ -3,6 +3,10 @@
 
 export {};
 
+type NewsControllerModule = {
+  fetchNextNewsItems: (maxNumItems: number, prevUniqueId: string | null, cdnHost: string) => Promise<Array<Record<string, unknown>> | null>;
+};
+
 jest.mock('@aws-sdk/client-dynamodb', () => {
   const sendMock = jest.fn();
   return {
@@ -26,8 +30,8 @@ jest.mock('node-cache', () => {
 });
 
 describe('News Controller', () => {
-  let newsController;
-  let mockSend;
+  let newsController: NewsControllerModule;
+  let mockSend: jest.Mock;
 
   beforeEach(() => {
     jest.resetModules();
@@ -51,6 +55,9 @@ describe('News Controller', () => {
     const result = await newsController.fetchNextNewsItems(5, null, 'https://cdn.test');
 
     expect(mockSend).toHaveBeenCalled();
+    if (!result) {
+      throw new Error('Expected Dynamo response');
+    }
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
       uniqueId: 'abc',
@@ -61,8 +68,10 @@ describe('News Controller', () => {
 
   it('should return cached results on subsequent calls with same arguments', async () => {
     mockSend.mockResolvedValueOnce({ Items: [] });
-    await newsController.fetchNextNewsItems(2, null, 'https://cdn.test');
-    await newsController.fetchNextNewsItems(2, null, 'https://cdn.test');
+    const first = await newsController.fetchNextNewsItems(2, null, 'https://cdn.test');
+    const second = await newsController.fetchNextNewsItems(2, null, 'https://cdn.test');
+    expect(first).not.toBeNull();
+    expect(second).not.toBeNull();
     expect(mockSend).toHaveBeenCalledTimes(1);
   });
 

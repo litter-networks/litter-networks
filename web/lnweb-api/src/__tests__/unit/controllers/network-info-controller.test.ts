@@ -3,6 +3,13 @@
 
 export {};
 
+type MockResponse = ReturnType<typeof mockResponse> & {
+  setHeader: jest.Mock;
+  send: jest.Mock;
+  status: jest.Mock;
+  json: jest.Mock;
+};
+
 const networkInfoController = require('../../../controllers/legacy/network-info-controller');
 const mockResponse = require('node-mocks-http').createResponse;
 const mockRequest = require('node-mocks-http').createRequest;
@@ -26,8 +33,8 @@ jest.mock('../../../utils/networks-info.js', () => ({
 const NetworksInfo = require('../../../utils/networks-info.js');
 
 describe('Network Info Controller', () => {
-  let req;
-  let res;
+  let req: ReturnType<typeof mockRequest>;
+  let res: MockResponse;
 
   beforeEach(() => {
     req = mockRequest();

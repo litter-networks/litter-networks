@@ -121,8 +121,8 @@ async function getAreaInfo(): Promise<DistrictAreaInfo[]> {
                 return {
                     uniqueId: network.uniqueId,
                     fullName: network.fullName,
-                    mapSource: mapInfo.mapSource || 'custom',
-                    mapFile: mapInfo.mapFile || null,
+                    mapSource: mapInfo?.mapSource || 'custom',
+                    mapFile: mapInfo?.mapFile || null,
                 };
             });
 
@@ -139,9 +139,11 @@ async function getAreaInfo(): Promise<DistrictAreaInfo[]> {
         cache.set("areaInfo", areaInfo);
         return areaInfo;
     } catch (error) {
+        const errMessage = error instanceof Error ? error.message : String(error);
+        const errStack = error instanceof Error ? error.stack : undefined;
         console.error("Failed to fetch area info from DynamoDB tables:", {
-            message: error.message,
-            stack: error.stack,
+            message: errMessage,
+            stack: errStack,
         });
         throw new Error("Failed to retrieve area information");
     }

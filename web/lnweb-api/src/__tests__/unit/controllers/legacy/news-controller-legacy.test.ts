@@ -19,8 +19,14 @@ jest.mock('@aws-sdk/lib-dynamodb', () => ({
   ScanCommand: jest.fn((input) => input),
 }));
 
-const writeCalls = [];
-let lastCsvStream = null;
+type CsvRow = Record<string, unknown>;
+const writeCalls: CsvRow[] = [];
+type CsvStream = {
+  pipe: jest.Mock;
+  write: jest.Mock;
+  end: jest.Mock;
+};
+let lastCsvStream: CsvStream | null = null;
 
 jest.mock('@fast-csv/format', () => ({
   format: jest.fn(() => {
@@ -63,6 +69,9 @@ describe('legacy news CSV controller', () => {
 
     const res = createResponse({ eventEmitter: require('events').EventEmitter });
     await csvController.getPressCuttingsCsvDeprecated(buildReq(), res);
+    if (!lastCsvStream) {
+      throw new Error('CSV stream was not initialized');
+    }
     expect(lastCsvStream.pipe).toHaveBeenCalledWith(res);
     expect(writeCalls.length).toBe(2);
     const titles = writeCalls.map((row) => row.title);
