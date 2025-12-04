@@ -8,6 +8,7 @@
   padding: 6px 8px;
   min-width: max-content;
   position: relative;
+  z-index: 10;
   transform: scale(var(--brand-scale, 1));
   transform-origin: center;
   transition: transform 0.2s ease;
@@ -177,4 +178,3 @@
     height: calc(24px * var(--brand-scale, 1));
   }
 }
-

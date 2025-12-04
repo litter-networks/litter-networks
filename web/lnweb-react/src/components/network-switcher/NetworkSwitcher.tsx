@@ -49,18 +49,6 @@ export function NetworkSwitcher({ headerColorClass, searchColorClass }: Props) {
     [open],
   );
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (open) {
-      root.classList.add('filter-menu-open');
-    } else {
-      root.classList.remove('filter-menu-open');
-    }
-    return () => {
-      root.classList.remove('filter-menu-open');
-    };
-  }, [open]);
-
   return (
     <div
       className={triggerClassName}
