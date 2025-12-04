@@ -34,6 +34,7 @@ const MODE_LOCATION_MARKERS = 'location-markers';
 const MODE_LOCATION_DRAW = 'location-draw';
 
 let mode = MODE_DEFAULT;
+let geoJsonRenderer = null;
 
 function validateMode(mode) {
     if (mode?.toLowerCase() === MODE_LOCATION_MARKERS) {
@@ -370,6 +371,7 @@ function geometryHasFilledSurface(geometry) {
 function createLayer(geoJSONData, colorClass, uniqueId) {
 
     const layer = L.geoJSON(geoJSONData, {
+        renderer: geoJsonRenderer ?? undefined,
         style: function (feature) {
             const shouldFill = geometryHasFilledSurface(feature.geometry);
             let style = { className: shouldFill ? colorClass : colorClass + "-nofill" };
@@ -585,7 +587,8 @@ function applyInverseOverlay(map, layerGroup) {
         fillColor: 'rgba(0, 0, 0, 0.8)',
         fillOpacity: 0.8,
         stroke: false,
-        interactive: false // Make it non-interactive, so doesn't block selection of other areas/networks
+        interactive: false, // Make it non-interactive, so doesn't block selection of other areas/networks
+        renderer: geoJsonRenderer ?? undefined,
     });
 
     inversePolygon.addTo(map);
@@ -1669,6 +1672,9 @@ async function createMap(_mode, mapsSourceDomain, _routesGeoJSONUrl, areaInfo, s
     }).setView([0, 0], 18);
 
     mapInstance = map;
+    // Use an SVG renderer with padding so offscreen polygons remain drawn while the map pans/zooms.
+    geoJsonRenderer = L.svg({ padding: 1.0 });
+    geoJsonRenderer.addTo(map);
 
     addGeolocationControl(map);
 
