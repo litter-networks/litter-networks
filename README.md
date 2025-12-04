@@ -48,7 +48,13 @@ npm run dist
 
 ## Getting started
 
-1. `npm install`/`npm ci` at the root for workspace scripts, then install per-package dependencies inside each subfolder (`apps/litter-networker`, `web/lnweb-react`, `web/lnweb-api`).
+1. `npm install`/`npm ci` at the root for workspace scripts, then install per-package dependencies inside each subfolder (`apps/litter-networker`, `web/lnweb-react`, `web/lnweb-api`). For the API we also install the SAM lambda layer modules so `express` and the AWS SDK are available to tests:
+
+   ```
+   cd web/lnweb-api
+   npm install
+   npm --prefix lambda-layer/nodejs install
+   ```
 2. Node 18+ is required for the backend; the Electron app relies on Vite (Port 5173 by default) and TypeScript for the renderer+main build.
 3. AWS access comes from your local credentials (`~/.aws/credentials`) plus env vars. No AWS credentials are stored in the repo.
 4. If Python scripts are involved, `npm run build` in `apps/litter-networker` also runs `copy-python-utils.mjs` and installs the `.venv` before executing the helper scripts.

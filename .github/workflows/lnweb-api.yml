@@ -21,7 +21,9 @@ jobs:
           cache: "npm"
           cache-dependency-path: "web/lnweb-api/package-lock.json"
       - name: Install dependencies
-        run: npm --prefix web/lnweb-api install
+        run: |
+          npm --prefix web/lnweb-api/lambda-layer/nodejs install
+          npm --prefix web/lnweb-api install
       - name: Run API test suite
         run: npm --prefix web/lnweb-api run test
       - uses: actions/setup-python@v5
