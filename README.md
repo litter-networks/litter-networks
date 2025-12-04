@@ -77,11 +77,11 @@ All source files in this repo must begin with the two-line Apache 2.0 SPDX heade
 
 ## Automation scripts
 
-The `sync_lambda.sh` and `sync_public.sh` helpers support a read-only mode so CI can exercise their lint, audit, test, and build stages without triggering AWS deployments or invalidations. You can either set `SYNC_READ_ONLY=true` or call `sync_lambda.sh --read-only` (the flag sets the same mode). The GitHub Actions defined under `.github/workflows/` rely on that read-only mode.
+The `sync_lambda.sh` and `sync_public.sh` helpers support a read-only mode so CI can exercise their lint, audit, test, and build stages without triggering AWS deployments or invalidations. You can either set `SYNC_READ_ONLY=true` or call `sync_lambda.sh --read-only` (the flag sets the same mode). When running in CI you can also set `SKIP_ENDPOINT_CONTRACT_CHECKS=true` (or pass `--skip-golden-checks`) to skip the local/remote endpoint contract checks that require production data; the lnweb-api workflow already does this.
 
 ## Endpoint contracts
 
-The API deployment test (`deployment-tests/check-deployed-endpoints.mjs`) now validates responses against the declarative `deployment-tests/endpoint-config.json` schema/anchor rules instead of comparing static golden files. Each endpoint definition includes the expected shape (JSON or CSV headers) plus anchor rows such as `anfieldlitter` or `lymmlitter` to keep the smoke checks meaningful while allowing routine data drift. If the contract fails, the latest response files remain under `deployment-tests/latest-responses/` and the error output reports which path/anchor triggered the regression.
+The API deployment test (`deployment-tests/check-endpoint-contracts.mjs`) now validates responses against the declarative `deployment-tests/endpoint-config.json` schema/anchor rules instead of comparing static golden files. Each endpoint definition includes the expected shape (JSON or CSV headers) plus anchor rows such as `anfieldlitter` or `lymmlitter` to keep the smoke checks meaningful while allowing routine data drift. If the contract fails, the latest response files remain under `deployment-tests/latest-responses/` and the error output reports which path/anchor triggered the regression.
 
 ## Licensing
 

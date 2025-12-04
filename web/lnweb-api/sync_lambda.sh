@@ -28,10 +28,14 @@ trap 'on_error' ERR
 
 # Command-line options
 SYNC_READ_ONLY=${SYNC_READ_ONLY:-false}
+SKIP_ENDPOINT_CONTRACT_CHECKS=${SKIP_ENDPOINT_CONTRACT_CHECKS:-false}
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--read-only|-read-only)
       SYNC_READ_ONLY=true
+      ;;
+    --skip-golden-checks)
+      SKIP_ENDPOINT_CONTRACT_CHECKS=true
       ;;
     *)
       echo "[warn] Ignoring unknown argument: $1"
@@ -89,13 +93,17 @@ stage_start=$(date +%s)
 npm test
 print_time_taken $stage_start "Jest tests"
 
-# Run local golden checks before any deployment
-current_stage="Local endpoint golden checks"
-echo ""
-echo "Running local endpoint golden checks... ========================="
-stage_start=$(date +%s)
-(cd deployment-tests && ./run-local-endpoint-checks.sh)
-print_time_taken $stage_start "Local endpoint golden checks"
+# Run local endpoint contract checks before any deployment
+if [ "$SKIP_ENDPOINT_CONTRACT_CHECKS" != "true" ]; then
+  current_stage="Local endpoint golden checks"
+  echo ""
+  echo "Running local endpoint golden checks... ========================="
+  stage_start=$(date +%s)
+  (cd deployment-tests && ./run-local-endpoint-checks.sh)
+  print_time_taken $stage_start "Local endpoint golden checks"
+else
+  echo "[info] Skipping local endpoint contract checks (SKIP_ENDPOINT_CONTRACT_CHECKS is true)."
+fi
 
 # Deploy to Elastic Beanstalk (optional)
 if [ "$LAMBDA_DEPLOY" = true ]; then
@@ -151,12 +159,16 @@ else
     echo "Skipping SAM Lambda deploy. ========================="
 fi
 
-current_stage="Remote endpoint golden checks"
-echo ""
-echo "Running remote endpoint golden checks... ========================="
-stage_start=$(date +%s)
-(cd deployment-tests && ./run-remote-endpoint-checks.sh)
-print_time_taken $stage_start "Remote endpoint golden checks"
+if [ "$SKIP_GOLDEN_CHECKS" != "true" ]; then
+  current_stage="Remote endpoint golden checks"
+  echo ""
+  echo "Running remote endpoint golden checks... ========================="
+  stage_start=$(date +%s)
+  (cd deployment-tests && ./run-remote-endpoint-checks.sh)
+  print_time_taken $stage_start "Remote endpoint golden checks"
+else
+  echo "[info] Skipping remote endpoint contract checks (SKIP_ENDPOINT_CONTRACT_CHECKS is true)."
+fi
 
 # Total time taken
 total_end_time=$(date +%s)
