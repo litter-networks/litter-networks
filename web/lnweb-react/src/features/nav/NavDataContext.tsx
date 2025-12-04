@@ -240,7 +240,7 @@ function buildDisplayName(network: Network) {
     return 'Litter Networks';
   }
   const fullWithSuffix = `${baseName} Litter Network`;
-  return baseName.length < 18 ? fullWithSuffix : baseName;
+  return baseName.length < 14 ? fullWithSuffix : baseName;
 }
 
 function deriveUsageLists(
@@ -260,7 +260,7 @@ function deriveUsageLists(
   const recentNetworks = entries
     .filter((entry) => !favoriteIds.has(entry.id))
     .sort((a, b) => b.lastVisited - a.lastVisited)
-    .slice(0, 5)
+    .slice(0, 3)
     .map((item) => byId.get(item.id))
     .filter((net): net is Network => Boolean(net));
 
