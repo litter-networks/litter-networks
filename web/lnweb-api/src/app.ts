@@ -38,7 +38,7 @@ async function setupMiddleware() {
 
     // Middleware to parse JSON requests (useful for POST requests)
     console.log("Setting up middleware:misc...");
-    app.use(express.json());
+    app.use(express.json({ limit: '100kb' }));
 
     app.use((req, res, next) => {
         console.log(`[${new Date().toISOString()}] Request: ${JSON.stringify(req.method)} ${JSON.stringify(req.url)}`);
