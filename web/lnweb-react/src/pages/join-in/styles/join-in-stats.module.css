@@ -1,7 +1,9 @@
 .page {
   padding: 20px 0 40px;
+  min-height: calc(100vh - 200px);
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 20px;
 }
 

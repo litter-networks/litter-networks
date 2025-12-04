@@ -1,5 +1,10 @@
 .page {
   padding: 1.5rem clamp(16px, 4vw, 48px) 4rem;
+  min-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
 }
 
 .knowledgeMain {
