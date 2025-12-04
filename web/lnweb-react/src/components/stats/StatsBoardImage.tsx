@@ -40,6 +40,10 @@ export function StatsBoardImage({
       : `${appEnv.staticAssetsBaseUrl}/images/stats-board.png`;
 
   useEffect(() => {
+    setImageSrc(placeholderSrc ?? baseImageSrc);
+  }, [placeholderSrc, uniqueId, variant, baseImageSrc]);
+
+  useEffect(() => {
     let cancelled = false;
     const controller = new AbortController();
 

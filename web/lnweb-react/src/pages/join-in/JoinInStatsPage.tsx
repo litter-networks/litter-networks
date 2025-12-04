@@ -1,7 +1,7 @@
 // Copyright 2025 Litter Networks / Clean and Green Communities CIC
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { StatsBoardImage } from '@/components/stats/StatsBoardImage';
 import { fetchStatsSummary, type StatsSummary } from '@/data-sources/stats';
@@ -92,6 +92,11 @@ export function JoinInStatsPage() {
   }, [network?.uniqueId, network?.fullName, network?.districtId, network?.districtFullName]);
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [exitingIndex, setExitingIndex] = useState<number | null>(null);
+  const previousActiveRef = useRef(0);
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [network?.uniqueId, isFormal]);
   useEffect(() => {
     setActiveIndex(0);
     if (boardTargets.length <= 1) {
@@ -103,10 +108,24 @@ export function JoinInStatsPage() {
     return () => window.clearInterval(timer);
   }, [boardTargets.length]);
 
+  useEffect(() => {
+    const lastActive = previousActiveRef.current;
+    if (activeIndex === lastActive) {
+      return;
+    }
+    setExitingIndex(lastActive);
+    previousActiveRef.current = activeIndex;
+    const timeout = window.setTimeout(() => {
+      setExitingIndex((prev) => (prev === lastActive ? null : prev));
+    }, 1200);
+    return () => window.clearTimeout(timeout);
+  }, [activeIndex]);
+
   const togglePath = isFormal ? buildPath('join-in/stats') : buildPath('join-in/stats/formal');
   const statsPlaceholderSrc = isFormal
     ? `${appEnv.staticAssetsBaseUrl}/images/stats-board-formal.png`
     : `${appEnv.staticAssetsBaseUrl}/images/stats-board.png`;
+  const summaryPending = !summaryError && (!summary || loadingSummary);
 
   return (
     <div className={styles.page}>
@@ -119,13 +138,17 @@ export function JoinInStatsPage() {
         </Link>
       </div>
       <div className={styles.content}>
-        <div className={styles.boardColumn}>
-          <div className={styles.rotator}>
+        <div className={styles.displayPanel}>
+          <div className={styles.displayFrame}>
             {boardTargets.map((target, index) => (
               <div
                 key={target.id}
                 className={`${styles.boardWrapper} ${
-                  index === activeIndex ? styles.boardWrapperActive : ''
+                  index === activeIndex
+                    ? styles.boardWrapperActive
+                    : index === exitingIndex
+                    ? styles.boardWrapperExiting
+                    : ''
                 }`}
               >
                 <StatsBoardImage
@@ -139,11 +162,9 @@ export function JoinInStatsPage() {
             ))}
           </div>
         </div>
-        <div className={styles.summaryColumn}>
-          <div className={styles.summaryCard}>
-            {!summaryError && (!summary || loadingSummary) && (
-              <div className={styles.summaryPlaceholder} aria-busy={loadingSummary} />
-            )}
+        <div className={styles.displayPanel}>
+          <div className={`${styles.displayFrame} ${summaryPending ? styles.summaryCardPending : ''}`}>
+            {summaryPending && <div className={styles.summaryPlaceholder} aria-busy={loadingSummary} />}
             {!loadingSummary && summary && (
               <div className={styles.summaryImageWrapper}>
                 <StatsSummaryImage
