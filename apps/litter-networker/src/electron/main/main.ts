@@ -248,7 +248,6 @@ app.whenReady().then(async () => {
   tablesService = new TablesService();
   contentService = new ContentService();
   memberCountService = new MemberCountService();
-  memberCountService = new MemberCountService();
 
   ipcMain.handle("appData:getSnapshot", () => getAppSnapshot());
   ipcMain.handle("appData:getSplitRatio", () => settingsStore?.getSplitRatio(DEFAULT_SPLIT_RATIO) ?? DEFAULT_SPLIT_RATIO);
