@@ -4,6 +4,7 @@
 import type { AppSnapshot } from "@shared/app-state";
 import type { MonthlyCostsReport } from "@shared/costs";
 import type { NetworksResponse } from "@shared/networks";
+import type { TablePreferences, TableScanRequest, TableScanResult } from "@shared/tables";
 
 declare global {
   interface Window {
@@ -41,6 +42,18 @@ declare global {
       addNetworkRow: (payload: { uniqueId: string; newRow: Record<string, string> }) => Promise<void>;
       deleteNetworkRow: (uniqueId: string) => Promise<void>;
       listMapFiles: (mapSource: string) => Promise<string[]>;
+      listTables: () => Promise<string[]>;
+      scanTable: (payload: TableScanRequest) => Promise<TableScanResult>;
+      putTableItem: (payload: { tableName: string; item: Record<string, unknown> }) => Promise<void>;
+      deleteTableItem: (payload: { tableName: string; key: Record<string, unknown> }) => Promise<void>;
+      getTablesPreferences: () => Promise<TablePreferences | null>;
+      setTablesPreferences: (prefs: TablePreferences) => Promise<void>;
+      getLastTabId: () => Promise<string | null>;
+      setLastTabId: (tabId: string) => Promise<void>;
+      getSelectedNetworkId: () => Promise<string | null>;
+      setSelectedNetworkId: (networkId: string | null) => Promise<void>;
+      getMockPreference: () => Promise<boolean | null>;
+      setMockPreference: (value: boolean) => Promise<void>;
       runContentJob: (payload: { job?: "legacy" | "docs"; networkId?: string; force?: boolean; dryRun?: boolean }) => Promise<{ ok: true }>;
       stopContentJob: () => Promise<{ stopped: boolean }>;
       subscribeContentProgress: () => void;

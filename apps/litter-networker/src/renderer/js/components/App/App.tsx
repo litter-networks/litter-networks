@@ -8,6 +8,7 @@ import CostsPage from "../../pages/Costs/CostsPage";
 import NetworksPage from "../../pages/Networks/NetworksPage";
 import ContentPage from "../../pages/Content/ContentPage";
 import PlaceholderPage from "../../pages/Placeholder/PlaceholderPage";
+import TablesPage from "../../pages/Tables/TablesPage";
 import styles from "./styles/App.module.css";
 import { useAppSnapshot } from "../../data-sources/useAppSnapshot";
 import ErrorBoundary from "../ErrorBoundary/ErrorBoundary";
@@ -22,12 +23,43 @@ const App = () => {
     return [{ id: "browse", label: "Browse" }, ...tabs];
   }, [tabs]);
   const [activeTab, setActiveTab] = useState<string>(fullTabs[0]?.id ?? "browse");
+  const [storedTabId, setStoredTabId] = useState<string | null>(null);
+  const [tabPrefsReady, setTabPrefsReady] = useState(false);
 
   useEffect(() => {
-    if (fullTabs.length > 0 && !fullTabs.find((tab) => tab.id === activeTab)) {
-      setActiveTab(fullTabs[0].id);
-    }
-  }, [fullTabs, activeTab]);
+    let cancelled = false;
+    const loadLastTab = async () => {
+      try {
+        const saved = await window.appApi.getLastTabId?.();
+        if (!cancelled) {
+          setStoredTabId(saved ?? null);
+        }
+      } catch (err) {
+        console.error("Failed to load last tab", err);
+      } finally {
+        if (!cancelled) {
+          setTabPrefsReady(true);
+        }
+      }
+    };
+    loadLastTab();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (fullTabs.length === 0) return;
+    setActiveTab((prev) => {
+      if (storedTabId && fullTabs.some((tab) => tab.id === storedTabId)) {
+        return storedTabId;
+      }
+      if (fullTabs.some((tab) => tab.id === prev)) {
+        return prev;
+      }
+      return fullTabs[0].id;
+    });
+  }, [fullTabs, storedTabId]);
 
   const [mountedTabs, setMountedTabs] = useState<Set<string>>(new Set(["browse"]));
 
@@ -41,6 +73,13 @@ const App = () => {
       return next;
     });
   }, [activeTab]);
+
+  useEffect(() => {
+    if (!tabPrefsReady) return;
+    if (!fullTabs.some((tab) => tab.id === activeTab)) return;
+    const persist = window.appApi.setLastTabId?.(activeTab);
+    persist?.catch((err) => console.error("Failed to persist last tab", err));
+  }, [activeTab, tabPrefsReady, fullTabs]);
 
   return (
     <div className={styles.appShell}>
@@ -81,6 +120,8 @@ const App = () => {
                         <CostsPage />
                       ) : tab.id === "networks" ? (
                         <NetworksPage />
+                      ) : tab.id === "tables" ? (
+                        <TablesPage />
                       ) : tab.id === "content" ? (
                         <ContentPage />
                       ) : (

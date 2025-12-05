@@ -48,10 +48,8 @@ export default function BrowsePage() {
     nextReady: false,
     nextTwoReady: false
   });
-  const [mockEnabled, setMockEnabled] = useState<boolean>(() => {
-    const stored = typeof localStorage !== "undefined" ? localStorage.getItem("ln.mockEnabled") : null;
-    return stored === "true";
-  });
+  const [mockEnabled, setMockEnabled] = useState(false);
+  const [mockPrefsReady, setMockPrefsReady] = useState(false);
   const [mockSyncing, setMockSyncing] = useState(false);
   const [applying, setApplying] = useState(false);
 
@@ -72,6 +70,7 @@ export default function BrowsePage() {
   const previousNetwork = useRef<string | null>(null);
   const lastBaseUrl = useRef<string | null>(null);
   const selectedNetworkRef = useRef<string | undefined>(selectedNetwork);
+  const selectionPrefsReadyRef = useRef(false);
 
   const updateActiveUrl = useCallback(
     (networkId: string, preserveSubgroup: boolean) => {
@@ -124,18 +123,53 @@ export default function BrowsePage() {
   }, []);
 
 
+  const persistSelectedNetwork = useCallback((networkId: string | undefined) => {
+    if (!selectionPrefsReadyRef.current) return;
+    const promise = window.appApi.setSelectedNetworkId?.(networkId ?? null);
+    promise?.catch((err) => console.error("Failed to persist selected network", err));
+  }, []);
+
   const selectNetwork = useCallback(
     (networkId: string, preserve = false) => {
       setSelectedNetwork(networkId);
       selectedNetworkRef.current = networkId;
       updateActiveUrl(networkId, preserve);
+      persistSelectedNetwork(networkId);
     },
-    [updateActiveUrl]
+    [updateActiveUrl, persistSelectedNetwork]
   );
 
   useEffect(() => {
     selectedNetworkRef.current = selectedNetwork;
   }, [selectedNetwork]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadSelection = async () => {
+      let stored: string | null = null;
+      try {
+        stored = await window.appApi.getSelectedNetworkId?.();
+        if (cancelled) return;
+        if (stored) {
+          setSelectedNetwork(stored);
+          selectedNetworkRef.current = stored;
+        }
+      } catch (err) {
+        console.error("Failed to load selected network", err);
+      } finally {
+        if (!cancelled) {
+          selectionPrefsReadyRef.current = true;
+          if (selectedNetworkRef.current) {
+            persistSelectedNetwork(selectedNetworkRef.current);
+          }
+        }
+      }
+    };
+    loadSelection();
+    return () => {
+      cancelled = true;
+    };
+  }, [persistSelectedNetwork]);
 
   const moveToNextNetwork = useCallback((): string | null => {
     if (!snapshot || !selectedNetwork) return null;
@@ -289,54 +323,64 @@ export default function BrowsePage() {
     };
   }, [selectedNetwork]);
 
-  // Initial mock status from main; reconcile with local preference
-  useEffect(() => {
-    let mounted = true;
-    window.appApi.getMockStatus?.().then((status) => {
-      if (!mounted || !status) return;
-      const next = status.enabled;
-      const stored = typeof localStorage !== "undefined" ? localStorage.getItem("ln.mockEnabled") : null;
-      const storedBool = stored === "true";
-      const desired = stored ? storedBool : next;
-      if (desired !== mockEnabled) {
-        setMockEnabled(desired);
-      }
-      if (desired !== status.enabled) {
-        // push desired to main, then refresh
-        window.appApi.setMockEnabled?.(desired).then(() => refresh());
-      } else {
-        // state matches main; still refresh once to pick up current URLs
-        refresh();
-      }
-    });
-    return () => {
-      mounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Sync mock state to main + refresh snapshot when toggled by user
+  // Load mock preference and align with the host process before syncing changes.
   useEffect(() => {
     let cancelled = false;
-    const run = async () => {
-      setMockSyncing(true);
+    const loadMockPreference = async () => {
       try {
-        await window.appApi.setMockEnabled?.(mockEnabled);
-        if (typeof localStorage !== "undefined") {
-          localStorage.setItem("ln.mockEnabled", String(mockEnabled));
+        const status = await window.appApi.getMockStatus?.();
+        const stored = await window.appApi.getMockPreference?.();
+        if (cancelled) return;
+        if (typeof stored === "boolean") {
+          setMockEnabled(stored);
+        } else if (status) {
+          setMockEnabled(status.enabled);
+        } else {
+          setMockEnabled(false);
         }
-        if (!cancelled) {
-          await refresh();
-        }
+      } catch (err) {
+        console.error("Failed to load mock preference", err);
       } finally {
-        if (!cancelled) setMockSyncing(false);
+        if (!cancelled) {
+          setMockPrefsReady(true);
+        }
       }
     };
-    run();
+    loadMockPreference();
     return () => {
       cancelled = true;
     };
-  }, [mockEnabled, refresh]);
+  }, []);
+
+  // Sync mock state + preference to disk and refresh snapshot when toggled by user
+  useEffect(() => {
+    if (!mockPrefsReady) return;
+    let cancelled = false;
+    const syncPreference = async () => {
+      setMockSyncing(true);
+      try {
+        const tasks: Promise<unknown>[] = [];
+        const mockPromise = window.appApi.setMockEnabled?.(mockEnabled);
+        if (mockPromise) tasks.push(mockPromise);
+        const prefPromise = window.appApi.setMockPreference?.(mockEnabled);
+        if (prefPromise) tasks.push(prefPromise);
+        await Promise.all(tasks);
+        if (!cancelled) {
+          await refresh();
+        }
+      } catch (err) {
+        console.error("Failed to sync mock preference", err);
+      } finally {
+        if (!cancelled) {
+          setMockSyncing(false);
+        }
+      }
+    };
+    syncPreference();
+    return () => {
+      cancelled = true;
+    };
+  }, [mockEnabled, mockPrefsReady, refresh]);
 
   // refs used by updateActiveUrl to preserve subgroup URLs
 
@@ -410,7 +454,7 @@ export default function BrowsePage() {
       type="button"
       className={`featureToggleButton ${mockEnabled ? "featureToggleButtonActive" : ""}`}
       onClick={() => setMockEnabled((prev) => !prev)}
-      disabled={mockSyncing}
+      disabled={mockSyncing || !mockPrefsReady}
       title={mockEnabled ? "Using local mock pages" : "Switch to local mock pages"}
     >
       Mock

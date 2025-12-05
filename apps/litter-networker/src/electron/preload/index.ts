@@ -5,6 +5,7 @@ import { contextBridge, ipcRenderer } from "electron";
 import type { AppSnapshot } from "../../shared/app-state";
 import type { MonthlyCostsReport } from "../../shared/costs";
 import type { NetworksResponse } from "../../shared/networks";
+import type { TablePreferences, TableScanRequest, TableScanResult } from "../../shared/tables";
 
 const api = {
   platform: process.platform,
@@ -47,6 +48,22 @@ const api = {
     ipcRenderer.invoke("networks:add", payload) as Promise<void>,
   deleteNetworkRow: (uniqueId: string) => ipcRenderer.invoke("networks:delete", uniqueId) as Promise<void>,
   listMapFiles: (mapSource: string) => ipcRenderer.invoke("maps:listFiles", mapSource) as Promise<string[]>,
+  listTables: () => ipcRenderer.invoke("tables:list") as Promise<string[]>,
+  scanTable: (payload: TableScanRequest) => ipcRenderer.invoke("tables:scan", payload) as Promise<TableScanResult>,
+  putTableItem: (payload: { tableName: string; item: Record<string, unknown> }) =>
+    ipcRenderer.invoke("tables:put", payload) as Promise<void>,
+  deleteTableItem: (payload: { tableName: string; key: Record<string, unknown> }) =>
+    ipcRenderer.invoke("tables:delete", payload) as Promise<void>,
+  getTablesPreferences: () => ipcRenderer.invoke("settings:getTablesPrefs") as Promise<TablePreferences | null>,
+  setTablesPreferences: (prefs: TablePreferences) =>
+    ipcRenderer.invoke("settings:setTablesPrefs", prefs) as Promise<void>,
+  getLastTabId: () => ipcRenderer.invoke("settings:getLastTab") as Promise<string | null>,
+  setLastTabId: (tabId: string) => ipcRenderer.invoke("settings:setLastTab", tabId) as Promise<void>,
+  getSelectedNetworkId: () => ipcRenderer.invoke("settings:getSelectedNetwork") as Promise<string | null>,
+  setSelectedNetworkId: (networkId: string | null) =>
+    ipcRenderer.invoke("settings:setSelectedNetwork", networkId) as Promise<void>,
+  getMockPreference: () => ipcRenderer.invoke("settings:getMockPreference") as Promise<boolean | null>,
+  setMockPreference: (value: boolean) => ipcRenderer.invoke("settings:setMockPreference", value) as Promise<void>,
   runContentJob: (payload: { job?: "legacy" | "docs"; networkId?: string; force?: boolean; dryRun?: boolean }) =>
     ipcRenderer.invoke("content:run", payload) as Promise<{ ok: true }>,
   stopContentJob: () => ipcRenderer.invoke("content:stop") as Promise<{ stopped: boolean }>,
