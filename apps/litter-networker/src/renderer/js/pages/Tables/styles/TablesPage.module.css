@@ -1,0 +1,229 @@
+.pageShell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  width: 100%;
+  height: 100%;
+}
+
+.pageSurface {
+  width: 100%;
+  height: 100%;
+  background: var(--color-surface);
+  border-radius: 22px;
+  border: 1px solid var(--color-border);
+  padding: 24px;
+  box-shadow: var(--color-card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.pageSubtitle {
+  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.selectGroup {
+  min-width: 220px;
+}
+
+.tableSelect {
+  border-radius: 12px;
+  border: 1px solid rgba(24, 34, 54, 0.2);
+  background: #fff;
+  padding: 8px 12px;
+  font-size: 14px;
+  min-width: 220px;
+}
+
+.selectPlaceholder,
+.selectError {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.selectError {
+  color: #b52323;
+}
+
+.filter {
+  border-radius: 12px;
+  border: 1px solid rgba(24, 34, 54, 0.2);
+  background: #fff;
+  padding: 8px 12px;
+  min-width: 180px;
+}
+
+.button {
+  border-radius: 12px;
+  border: 1px solid rgba(24, 34, 54, 0.2);
+  background: #fff;
+  padding: 6px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.commitButton {
+  border-color: rgba(38, 128, 235, 0.6);
+}
+
+.buttonProcessing {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.buttonError {
+  border-color: rgba(181, 35, 35, 0.7);
+  color: #b52323;
+}
+
+.tableToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.tableWrapper {
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  border: 1px solid var(--color-border);
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+th,
+td {
+  border-bottom: 1px solid rgba(24, 34, 54, 0.08);
+  padding: 12px;
+  font-size: 13px;
+  text-align: left;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 1;
+  vertical-align: middle;
+}
+
+.sortHeader {
+  border: none;
+  background: none;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  font-weight: 600;
+  color: inherit;
+}
+
+.sortIndicator {
+  font-size: 16px;
+  opacity: 0.4;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.sortIndicator[data-active="true"] {
+  opacity: 1;
+}
+
+.sortIndicator[data-direction="desc"] {
+  transform: none;
+}
+
+.cellInput {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.cellInput:focus {
+  outline: none;
+  border-color: rgba(58, 141, 255, 0.6);
+  background: rgba(58, 141, 255, 0.08);
+}
+
+.modifiedCell {
+  background: rgba(58, 141, 255, 0.08);
+}
+
+.actionCell {
+  min-width: 120px;
+  display: flex;
+  justify-content: center;
+}
+
+.deleteButton {
+  border-radius: 10px;
+  border: 1px solid rgba(181, 35, 35, 0.6);
+  background: #fff;
+  color: #b52323;
+  padding: 6px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emptyState {
+  padding: 24px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.tableStatus {
+  font-weight: 500;
+}

@@ -37,6 +37,7 @@ const buildHomeFacebookUrl = () => {
 const tabs: AppSnapshot["tabs"] = [
   { id: "browse", label: "Browse" },
   { id: "networks", label: "Networks" },
+  { id: "tables", label: "Tables" },
   { id: "content", label: "Content" },
   { id: "costs", label: "Costs" }
 ];

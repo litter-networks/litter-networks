@@ -1,7 +1,7 @@
 // Copyright 2025 Litter Networks / Clean and Green Communities CIC
 // SPDX-License-Identifier: Apache-2.0
 
-import { app, BrowserWindow, Menu, ipcMain, type MenuItemConstructorOptions, WebContents } from "electron";
+import { app, BrowserWindow, Menu, ipcMain, type BrowserWindowConstructorOptions, type MenuItemConstructorOptions, WebContents } from "electron";
 import path from "node:path";
 import { getAppSnapshot } from "../shared-services/appData";
 import { SettingsStore } from "../shared-services/settingsStore";
@@ -10,7 +10,9 @@ import { BagCountService } from "../shared-services/bagCounts";
 import { CostService } from "../shared-services/costs";
 import { ContentJobParams, ContentService } from "../shared-services/content";
 import { NetworksService } from "../shared-services/networks";
+import { TablesService } from "../shared-services/tables";
 import { MemberCountService, type ApplyMemberCountPayload } from "../shared-services/memberCounts";
+import type { TablePreferences } from "../../shared/tables";
 
 const DEFAULT_SPLIT_RATIO = 0.75;
 const ENABLE_BROWSER_CONTEXT_MENU = process.env.NODE_ENV !== "production";
@@ -23,6 +25,7 @@ let costService: CostService | null = null;
 let networksService: NetworksService | null = null;
 let contentService: ContentService | null = null;
 let memberCountService: MemberCountService | null = null;
+let tablesService: TablesService | null = null;
 
 const ensureMockServer = async () => {
   if (mockServer) return mockServer.urlBase;
@@ -147,7 +150,8 @@ const registerNavigationHotkeys = (contents: WebContents, targetWindow: BrowserW
 };
 
 const createWindow = async () => {
-  const mainWindow = new BrowserWindow({
+  const startMaximized = settingsStore?.isWindowMaximized(false) ?? false;
+  const windowOptions: BrowserWindowConstructorOptions = {
     width: 1600,
     height: 900,
     minWidth: 1200,
@@ -161,11 +165,40 @@ const createWindow = async () => {
       nodeIntegration: false,
       webviewTag: true
     }
-  });
+  };
+
+  const mainWindow = new BrowserWindow(windowOptions);
+  if (startMaximized) {
+    mainWindow.maximize();
+    mainWindow.webContents.invalidate();
+  }
+
+  const persistMaximized = (value: boolean) => {
+    settingsStore
+      ?.setWindowMaximized(value)
+      .catch((err) => console.error("Failed to persist window maximized state", err));
+  };
 
   mainWindow.once("ready-to-show", () => {
-    mainWindow.show();
+    if (!mainWindow.isVisible()) {
+      mainWindow.show();
+    }
+    if (startMaximized && !mainWindow.isMaximized()) {
+      mainWindow.maximize();
+      mainWindow.webContents.invalidate();
+    }
   });
+
+  mainWindow.once("show", () => {
+    if (startMaximized && !mainWindow.isMaximized()) {
+      mainWindow.maximize();
+      mainWindow.webContents.invalidate();
+    }
+  });
+
+  mainWindow.on("maximize", () => persistMaximized(true));
+  mainWindow.on("unmaximize", () => persistMaximized(false));
+  mainWindow.on("close", () => persistMaximized(mainWindow.isMaximized()));
 
   registerNavigationHotkeys(mainWindow.webContents, mainWindow, createWindow);
 
@@ -193,22 +226,26 @@ const createWindow = async () => {
 let arrowLockEnabled = true;
 
 app.whenReady().then(async () => {
-  // Enable mock by default only if explicitly requested via env.
+  settingsStore = new SettingsStore(app.getPath("userData"));
+  await settingsStore.load().catch((error) => console.error("Unable to load settings", error));
+
+  // Enable mock by default if explicitly requested via env, otherwise fall back to stored preference.
   const envMock = process.env.MOCK_FACEBOOK === "1" || process.env.MOCK_FACEBOOK?.toLowerCase() === "true";
   const envBase = process.env.MOCK_FACEBOOK_BASE_URL;
+  const storedMockPreference = settingsStore.getMockPreference();
   if (envMock || envBase) {
     await setMockEnabled(true);
     if (envBase) {
       process.env.MOCK_FACEBOOK_BASE_URL = envBase;
       mockEnabled = true;
     }
+  } else if (storedMockPreference) {
+    await setMockEnabled(true);
   }
-
-  settingsStore = new SettingsStore(app.getPath("userData"));
-  await settingsStore.load().catch((error) => console.error("Unable to load settings", error));
   bagCountService = new BagCountService();
   costService = new CostService();
   networksService = new NetworksService();
+  tablesService = new TablesService();
   contentService = new ContentService();
   memberCountService = new MemberCountService();
   memberCountService = new MemberCountService();
@@ -274,6 +311,42 @@ app.whenReady().then(async () => {
   ipcMain.handle("maps:listFiles", async (_event, mapSource: string) => {
     if (!networksService) throw new Error("NetworksService unavailable");
     return networksService.listMapFiles(mapSource);
+  });
+  ipcMain.handle("tables:list", async () => {
+    if (!tablesService) throw new Error("TablesService unavailable");
+    return tablesService.listTables();
+  });
+  ipcMain.handle("tables:scan", async (_event, payload) => {
+    if (!tablesService) throw new Error("TablesService unavailable");
+    return tablesService.scan(payload);
+  });
+  ipcMain.handle("tables:put", async (_event, payload) => {
+    if (!tablesService) throw new Error("TablesService unavailable");
+    return tablesService.putItem(payload.tableName, payload.item);
+  });
+  ipcMain.handle("tables:delete", async (_event, payload) => {
+    if (!tablesService) throw new Error("TablesService unavailable");
+    return tablesService.deleteItem(payload.tableName, payload.key);
+  });
+  ipcMain.handle("settings:getTablesPrefs", () => settingsStore?.getTablesPreferences() ?? null);
+  ipcMain.handle("settings:setTablesPrefs", async (_event, prefs: TablePreferences) => {
+    if (!settingsStore) throw new Error("SettingsStore unavailable");
+    return settingsStore.setTablesPreferences(prefs ?? {});
+  });
+  ipcMain.handle("settings:getLastTab", () => settingsStore?.getLastTabId() ?? null);
+  ipcMain.handle("settings:setLastTab", async (_event, tabId: string) => {
+    if (!settingsStore) throw new Error("SettingsStore unavailable");
+    return settingsStore.setLastTabId(tabId);
+  });
+  ipcMain.handle("settings:getSelectedNetwork", () => settingsStore?.getSelectedNetworkId() ?? null);
+  ipcMain.handle("settings:setSelectedNetwork", async (_event, networkId: string | null) => {
+    if (!settingsStore) throw new Error("SettingsStore unavailable");
+    return settingsStore.setSelectedNetworkId(networkId ?? undefined);
+  });
+  ipcMain.handle("settings:getMockPreference", () => settingsStore?.getMockPreference(undefined) ?? null);
+  ipcMain.handle("settings:setMockPreference", async (_event, value: boolean) => {
+    if (!settingsStore) throw new Error("SettingsStore unavailable");
+    return settingsStore.setMockPreference(!!value);
   });
   ipcMain.handle("content:run", async (_event, payload: ContentJobParams) => {
     if (!contentService) throw new Error("ContentService unavailable");
