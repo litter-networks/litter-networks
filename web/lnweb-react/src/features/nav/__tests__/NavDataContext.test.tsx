@@ -1,4 +1,4 @@
-// Copyright 2025 Litter Networks / Clean and Green Communities CIC
+// Copyright Litter Networks / Clean and Green Communities CIC
 // SPDX-License-Identifier: Apache-2.0
 
 import { renderHook, render, waitFor } from '@testing-library/react';
