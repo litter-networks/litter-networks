@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 """S3 and DynamoDB sync stubs."""
@@ -35,7 +35,11 @@ class S3Sync:
                 if asset.key in uploaded_assets:
                     continue
                 if self.dry_run:
-                    logger.info("[dry-run] would upload asset %s (%s bytes)", asset.key, len(asset.body))
+                    logger.info(
+                        "[dry-run] would upload asset %s (%s bytes)",
+                        asset.key,
+                        len(asset.body),
+                    )
                 else:
                     self.aws.s3.put_object(
                         Bucket=self.config.aws.s3_bucket,
@@ -79,7 +83,6 @@ class S3Sync:
             )
             logger.info("Uploaded %s", key)
 
-
     def _html_key(self, relative_path: Path) -> str:
         html_path = relative_path.with_suffix(".html")
         return f"docs/{html_path.as_posix()}"
@@ -93,7 +96,11 @@ class DynamoSync:
 
     def update_documents(self, documents: Iterable[ConvertedDocument]) -> None:
         hierarchy = build_hierarchy(documents)
-        table = None if self.dry_run else self.aws.dynamodb.Table(self.config.aws.dynamodb_table)
+        table = (
+            None
+            if self.dry_run
+            else self.aws.dynamodb.Table(self.config.aws.dynamodb_table)
+        )
 
         for unique_id, node in hierarchy.items():
             item = {
@@ -154,9 +161,17 @@ class CloudfrontInvalidator:
             invalidation_promises.append((distribution_id, invalidation_id, waiter))
 
         for distribution_id, invalidation_id, waiter in invalidation_promises:
-            logger.info("Waiting for invalidation %s on %s to complete...", invalidation_id, distribution_id)
+            logger.info(
+                "Waiting for invalidation %s on %s to complete...",
+                invalidation_id,
+                distribution_id,
+            )
             waiter.wait(DistributionId=distribution_id, Id=invalidation_id)
-            logger.info("CloudFront invalidation %s complete for %s", invalidation_id, distribution_id)
+            logger.info(
+                "CloudFront invalidation %s complete for %s",
+                invalidation_id,
+                distribution_id,
+            )
 
 
 __all__ = ["S3Sync", "DynamoSync", "CloudfrontInvalidator"]

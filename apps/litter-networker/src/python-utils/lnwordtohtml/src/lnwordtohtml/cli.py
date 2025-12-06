@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 """Command-line entry for lnwordtohtml."""
@@ -55,7 +55,9 @@ def app(ctx: click.Context, config_path: Optional[Path]) -> None:
     help="Optional directory to write generated HTML/assets for comparison/review.",
 )
 @click.pass_context
-def sync(ctx: click.Context, source: Path | None, dry_run: bool, dump_dir: Path | None) -> None:
+def sync(
+    ctx: click.Context, source: Path | None, dry_run: bool, dump_dir: Path | None
+) -> None:
     """Convert and synchronise docs to S3/DynamoDB."""
 
     config: Config = ctx.obj["config"]

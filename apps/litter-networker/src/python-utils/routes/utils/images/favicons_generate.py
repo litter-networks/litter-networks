@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 from PIL import Image, ImageDraw
@@ -8,8 +8,15 @@ from routes.utils.images.image_utils import save_image_to_s3
 
 # Define the required icon sizes
 icon_sizes = [
-    (512, 512), (192, 192), (180, 180), (144, 144), (96, 96),
-    (72, 72), (48, 48), (32, 32), (16, 16)
+    (512, 512),
+    (192, 192),
+    (180, 180),
+    (144, 144),
+    (96, 96),
+    (72, 72),
+    (48, 48),
+    (32, 32),
+    (16, 16),
 ]
 
 # Define input and output paths
@@ -31,9 +38,11 @@ with Image.open(input_image_path) as img:
     mask = Image.new("L", (img.width, img.height), 0)
     draw = ImageDraw.Draw(mask)
     draw.rounded_rectangle((0, 0, img.width, img.height), radius=45, fill=255)
-        
+
     # Apply anti-aliasing by resizing mask to a larger size first, then back down to smooth edges
-    mask = mask.resize((img.width * 2, img.height * 2), Image.LANCZOS).resize((img.width, img.height), Image.LANCZOS)
+    mask = mask.resize((img.width * 2, img.height * 2), Image.LANCZOS).resize(
+        (img.width, img.height), Image.LANCZOS
+    )
 
     # Apply the mask for rounded corners
     img.putalpha(mask)
@@ -42,7 +51,7 @@ with Image.open(input_image_path) as img:
     for size in icon_sizes:
         # Resize the image
         resized_img = img.resize(size, Image.LANCZOS)
-        
+
         # Ensure the resized image retains transparency and rounded corners
         rounded_icon = Image.new("RGBA", size)
         rounded_icon.paste(resized_img, (0, 0), resized_img)
@@ -59,11 +68,13 @@ with Image.open(input_image_path) as img:
 
         # Merge grayscale RGB channels back with original alpha channel
         bw_rgb = Image.merge("RGB", (r, g, b)).convert("L")  # Convert to grayscale
-        bw_icon = Image.merge("RGBA", (bw_rgb, bw_rgb, bw_rgb, alpha))  # Reassemble with the alpha channel
+        bw_icon = Image.merge(
+            "RGBA", (bw_rgb, bw_rgb, bw_rgb, alpha)
+        )  # Reassemble with the alpha channel
 
         # Save the black-and-white icon
         bw_s3_key = output_dir + f"icon-{size[0]}x{size[1]}-bw.png"
         save_image_to_s3(bw_icon, bw_s3_key)
         print(f"Saved black-and-white icon to s3: {bw_s3_key}")
-        
+
 print("Icon generation complete.")

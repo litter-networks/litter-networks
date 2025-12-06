@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 """Configuration helpers for lnwordtohtml."""
@@ -47,6 +47,7 @@ def _default_targets(aws_config: AwsConfig) -> List[CloudfrontTarget]:
         )
     return targets
 
+
 @dataclass(slots=True)
 class PathsConfig:
     source_root: Path = Path("one-drive/Core Team Shared/Litter Networks/_web_docs")
@@ -78,6 +79,8 @@ class Config:
 
 
 __all__ = ["Config", "CloudfrontTarget", "resolve_path"]
+
+
 def resolve_path(path: Path) -> Path:
     """Resolve repo-relative paths, honoring LN_REPO_ROOT if provided."""
     if path.is_absolute():

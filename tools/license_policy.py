@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -8,7 +8,7 @@ import subprocess
 from typing import Iterable, Iterator, List, Sequence, Set
 
 TARGET_LICENSE_LINES: Sequence[str] = (
-    "Copyright Litter Networks / Clean and Green Communities CIC",
+    "Copyright Clean and Green Communities CIC / Litter Networks",
     "SPDX-License-Identifier: Apache-2.0",
 )
 

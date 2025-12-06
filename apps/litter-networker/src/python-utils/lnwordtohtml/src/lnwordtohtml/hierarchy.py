@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 """Helpers for building the knowledge hierarchy."""
@@ -71,7 +71,9 @@ def build_hierarchy(documents: Iterable[ConvertedDocument]) -> Dict[str, Hierarc
 
 
 def serialize_child_pages(node: HierarchyNode) -> str:
-    return json.dumps([child.to_dict() for child in node.child_pages], ensure_ascii=False)
+    return json.dumps(
+        [child.to_dict() for child in node.child_pages], ensure_ascii=False
+    )
 
 
 __all__ = ["HierarchyNode", "build_hierarchy", "serialize_child_pages"]

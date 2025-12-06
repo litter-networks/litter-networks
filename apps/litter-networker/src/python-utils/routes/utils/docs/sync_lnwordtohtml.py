@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 """Helper script to run the lnwordtohtml sync inside python-utils."""
@@ -14,7 +14,9 @@ from lnwordtohtml.runner import Runner
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Sync LN knowledge docs to S3/DynamoDB.")
+    parser = argparse.ArgumentParser(
+        description="Sync LN knowledge docs to S3/DynamoDB."
+    )
     parser.add_argument(
         "--config",
         type=Path,

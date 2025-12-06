@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 """Dataclasses for converted outputs."""
@@ -16,7 +16,9 @@ class CssBundle:
     rules: Dict[str, str]
 
     def to_text(self) -> str:
-        return "\n".join(f".{klass} {{{decl}}}" for klass, decl in sorted(self.rules.items()))
+        return "\n".join(
+            f".{klass} {{{decl}}}" for klass, decl in sorted(self.rules.items())
+        )
 
 
 @dataclass(frozen=True)
