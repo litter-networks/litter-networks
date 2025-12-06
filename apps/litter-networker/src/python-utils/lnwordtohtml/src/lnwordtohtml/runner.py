@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 """High-level orchestration for lnwordtohtml."""
@@ -38,18 +38,26 @@ class Runner:
             logger.warning("No DOCX files found under %s", self.source_dir)
             return
 
-        converted_docs = self._run_stage("Converting documents", lambda: self._convert_documents(documents))
+        converted_docs = self._run_stage(
+            "Converting documents", lambda: self._convert_documents(documents)
+        )
 
         if self.dump_dir:
-            self._run_stage("Dumping artifacts", lambda: self._dump_artifacts(converted_docs))
+            self._run_stage(
+                "Dumping artifacts", lambda: self._dump_artifacts(converted_docs)
+            )
 
         aws = AwsContext(config=self.config.aws)
         s3_sync = S3Sync(config=self.config, aws=aws, dry_run=self.dry_run)
         dynamo_sync = DynamoSync(config=self.config, aws=aws, dry_run=self.dry_run)
-        invalidator = CloudfrontInvalidator(config=self.config, aws=aws, dry_run=self.dry_run)
+        invalidator = CloudfrontInvalidator(
+            config=self.config, aws=aws, dry_run=self.dry_run
+        )
 
         self._run_stage("S3 sync", lambda: s3_sync.sync_documents(converted_docs))
-        self._run_stage("Dynamo update", lambda: dynamo_sync.update_documents(converted_docs))
+        self._run_stage(
+            "Dynamo update", lambda: dynamo_sync.update_documents(converted_docs)
+        )
         if not self.dry_run:
             self._run_stage("CloudFront invalidation", invalidator.invalidate)
 

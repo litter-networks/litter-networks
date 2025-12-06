@@ -1,4 +1,4 @@
-// Copyright Litter Networks / Clean and Green Communities CIC
+// Copyright Clean and Green Communities CIC / Litter Networks
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';

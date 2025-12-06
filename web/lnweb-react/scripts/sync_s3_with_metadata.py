@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 """Synchronise the built SPA assets with S3 and ensure metadata is correct."""
@@ -44,8 +44,12 @@ ALLOWED_EXTENSIONS = {
 BUCKET_NAME = os.environ.get("DEPLOY_BUCKET")
 DISTRIBUTION_ID = os.environ.get("DISTRIBUTION_ID")
 SOURCE_DIR = Path(os.environ.get("SOURCE_DIR", "./dist")).resolve()
-ASSET_CACHE_CONTROL = os.environ.get("ASSET_CACHE_CONTROL", "public, max-age=3600, immutable")
-HTML_CACHE_CONTROL = os.environ.get("HTML_CACHE_CONTROL", "public, max-age=60, must-revalidate")
+ASSET_CACHE_CONTROL = os.environ.get(
+    "ASSET_CACHE_CONTROL", "public, max-age=3600, immutable"
+)
+HTML_CACHE_CONTROL = os.environ.get(
+    "HTML_CACHE_CONTROL", "public, max-age=60, must-revalidate"
+)
 CONTENT_DISPOSITION = os.environ.get("CONTENT_DISPOSITION", "inline")
 BUILD_INFO_JSON = os.environ.get("BUILD_INFO_JSON")
 SMOKE_TEST_URL = os.environ.get("SMOKE_TEST_URL")
@@ -56,7 +60,10 @@ if not BUCKET_NAME:
     sys.exit(2)
 
 if not SOURCE_DIR.exists():
-    print(f"Source directory '{SOURCE_DIR}' does not exist. Run npm run build first.", file=sys.stderr)
+    print(
+        f"Source directory '{SOURCE_DIR}' does not exist. Run npm run build first.",
+        file=sys.stderr,
+    )
     sys.exit(2)
 
 s3_client = boto3.client("s3")
@@ -124,7 +131,9 @@ def _should_upload(file_path: Path, key: str) -> bool:
         return False
 
     s3_last_modified = response["LastModified"]
-    local_last_modified = datetime.fromtimestamp(file_path.stat().st_mtime, tz=timezone.utc)
+    local_last_modified = datetime.fromtimestamp(
+        file_path.stat().st_mtime, tz=timezone.utc
+    )
     if local_last_modified > s3_last_modified:
         print(f"[sync] {key} older in bucket, scheduling upload")
         return True
@@ -244,7 +253,9 @@ def _invalidate_cloudfront() -> None:
         )
         print(f"[cf] invalidation {invalidation_id} completed")
     except WaiterError as exc:
-        print(f"[cf] invalidation {invalidation_id} did not complete within the configured wait: {exc}")
+        print(
+            f"[cf] invalidation {invalidation_id} did not complete within the configured wait: {exc}"
+        )
         _mark_error()
     except ClientError as exc:  # pragma: no cover - network failure
         print(f"[cf] invalidation wait failed: {exc}")
@@ -273,7 +284,9 @@ def upload_build_info() -> None:
 def fetch_url(url: str) -> str:
     parsed = urlparse(url)
     if parsed.scheme.lower() not in {"http", "https"}:
-        raise ValueError(f"Only http(s) schemes are allowed for smoke-test URLs; got {url}")
+        raise ValueError(
+            f"Only http(s) schemes are allowed for smoke-test URLs; got {url}"
+        )
     response = urllib_request.urlopen(url, timeout=30)
     charset = response.headers.get_content_charset() or "utf-8"
     body = response.read().decode(charset, errors="ignore")
@@ -303,7 +316,9 @@ def verify_spa_shell():
 
 def verify_build_info():
     if not (SMOKE_TEST_URL and BUILD_INFO_JSON):
-        print("[smoke] Skipping build-info check (missing SMOKE_TEST_URL or BUILD_INFO_JSON).")
+        print(
+            "[smoke] Skipping build-info check (missing SMOKE_TEST_URL or BUILD_INFO_JSON)."
+        )
         return
     expected = json.loads(BUILD_INFO_JSON)
     info_url = urljoin(SMOKE_TEST_URL.rstrip("/") + "/", "build-info.json")
@@ -317,7 +332,9 @@ def verify_build_info():
         raise RuntimeError(f"Invalid JSON returned from {info_url}: {exc}") from exc
 
     if actual != expected:
-        raise RuntimeError(f"Build info mismatch.\nExpected: {expected}\nActual:   {actual}")
+        raise RuntimeError(
+            f"Build info mismatch.\nExpected: {expected}\nActual:   {actual}"
+        )
     print("[smoke] Build info matches latest upload. \033[32mOK\033[0m")
 
 
@@ -354,7 +371,10 @@ def main() -> int:
     print(f"SYNC_RESULT:{result}")
     run_smoke_tests()
     if aws_errors_detected:
-        print("[sync] Completed with AWS errors; see log output for details.", file=sys.stderr)
+        print(
+            "[sync] Completed with AWS errors; see log output for details.",
+            file=sys.stderr,
+        )
         return 1
     return 0
 

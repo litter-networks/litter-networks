@@ -3,7 +3,7 @@ Thank you for taking the time to read through the Litter Networks sources. At th
 If you are touching code that ships with this repository, please include our short SPDX notice at the top of new files and scripts so a future audit tool can see the licensing information quickly. Use the following literal block:
 
 ```
-Copyright Litter Networks / Clean and Green Communities CIC
+Copyright Clean and Green Communities CIC / Litter Networks
 SPDX-License-Identifier: Apache-2.0
 ```
 

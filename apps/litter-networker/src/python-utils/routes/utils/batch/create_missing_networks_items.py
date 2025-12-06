@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 import os
@@ -16,17 +16,18 @@ from routes.utils.images.logo_generate import generate_logo, ImageStyle
 from tqdm import tqdm
 import concurrent.futures
 
+
 def create_missing_networks_items(specific_network="", force_generate=False):
     """
     Generate any missing QR codes, flyer images, and logo images for the given network(s), then update global proximity mappings.
-    
+
     When a specific network uniqueId is provided, only that network and a global "all" group are processed; otherwise all networks and the "all" group are processed. After ensuring assets exist (or are regenerated when requested), proximity information is updated globally.
-    
+
     Args:
         specific_network (str, optional): UniqueId of a single network to process. If empty, all networks are processed. Defaults to "".
         force_generate (bool, optional): If True, existing assets will be regenerated; if False, existing assets will be left intact when possible. Defaults to False.
     """
-    
+
     if specific_network:
         network_ids = [specific_network]
     else:
@@ -44,17 +45,32 @@ def create_missing_networks_items(specific_network="", force_generate=False):
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         qr_tasks = []
         for network_id in network_ids:
-            qr_tasks.append(executor.submit(generate_qr, network_id, True, force_generate))
-            qr_tasks.append(executor.submit(generate_qr, network_id, False, force_generate))
-        
-        for _ in tqdm(concurrent.futures.as_completed(qr_tasks), total=len(qr_tasks), desc="Ensuring QR Codes (needed for flyer images)"):
+            qr_tasks.append(
+                executor.submit(generate_qr, network_id, True, force_generate)
+            )
+            qr_tasks.append(
+                executor.submit(generate_qr, network_id, False, force_generate)
+            )
+
+        for _ in tqdm(
+            concurrent.futures.as_completed(qr_tasks),
+            total=len(qr_tasks),
+            desc="Ensuring QR Codes (needed for flyer images)",
+        ):
             pass  # The actual generation is handled by generate_qr
 
     # Ensure Flyer Images
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        flyer_tasks = [executor.submit(generate_flyer, network_id, force_generate) for network_id in network_ids]
-        
-        for _ in tqdm(concurrent.futures.as_completed(flyer_tasks), total=len(flyer_tasks), desc="Ensuring Flyer Images"):
+        flyer_tasks = [
+            executor.submit(generate_flyer, network_id, force_generate)
+            for network_id in network_ids
+        ]
+
+        for _ in tqdm(
+            concurrent.futures.as_completed(flyer_tasks),
+            total=len(flyer_tasks),
+            desc="Ensuring Flyer Images",
+        ):
             pass
 
     # Define a list of ImageStyles to process
@@ -66,19 +82,27 @@ def create_missing_networks_items(specific_network="", force_generate=False):
         ImageStyle.GREEN,
         ImageStyle.GREEN_ALPHA,
         ImageStyle.GREEN_ALPHA_VOLUNTEER,
-        ImageStyle.WHITE_ALPHA
+        ImageStyle.WHITE_ALPHA,
     ]
 
     # Ensure Logo Images for each ImageStyle
     for style in tqdm(image_styles, desc="Ensuring Logo Images"):
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            logo_tasks = [executor.submit(generate_logo, network_id, style, force_generate) for network_id in network_ids]
-            
-            for _ in tqdm(concurrent.futures.as_completed(logo_tasks), total=len(logo_tasks), desc=f"Ensuring {style.name} Logo Images"):
+            logo_tasks = [
+                executor.submit(generate_logo, network_id, style, force_generate)
+                for network_id in network_ids
+            ]
+
+            for _ in tqdm(
+                concurrent.futures.as_completed(logo_tasks),
+                total=len(logo_tasks),
+                desc=f"Ensuring {style.name} Logo Images",
+            ):
                 pass
 
     # Update proximity info - uses mapping to determine closest N networks to each, thus is always done globally:
     update_proximities()
+
 
 def main():
     """
@@ -87,7 +111,7 @@ def main():
     create_missing_networks_items()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Generate network assets")

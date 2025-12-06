@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 """Source directory scanning utilities."""
@@ -25,7 +25,9 @@ class SourceScanner:
     def scan(self) -> List[SourceDocument]:
         docs: List[SourceDocument] = []
         for path in self._iter_docx(self.root):
-            docs.append(SourceDocument(path=path, relative_path=path.relative_to(self.root)))
+            docs.append(
+                SourceDocument(path=path, relative_path=path.relative_to(self.root))
+            )
         return docs
 
     def _iter_docx(self, root: Path) -> Iterable[Path]:

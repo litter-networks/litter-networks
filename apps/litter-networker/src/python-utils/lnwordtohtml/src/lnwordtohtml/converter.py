@@ -1,4 +1,4 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 """DOCX -> HTML converter."""
@@ -77,10 +77,10 @@ class DocxConverter:
         html_body = "\n".join(fragment for fragment in body_fragments if fragment)
         shell_class = self.registry.shell_class()
         body_html = f'<div class="{shell_class}">\n{html_body}\n</div>'
-        css_bundle = CssBundle(name=self._css_name(relative_path), rules=self.registry.rules())
-        css_href = (
-            f"https://cdn.litternetworks.org/docs/styles/{css_bundle.name}.css"
+        css_bundle = CssBundle(
+            name=self._css_name(relative_path), rules=self.registry.rules()
         )
+        css_href = f"https://cdn.litternetworks.org/docs/styles/{css_bundle.name}.css"
         head_fragment = f'<link rel="stylesheet" href="{css_href}"/>'
         document_html = "\n".join([head_fragment, body_html])
         return ConvertedDocument(
@@ -192,7 +192,9 @@ class DocxConverter:
             return 1
 
     def _convert_drawing(self, paragraph, drawing) -> str:
-        hlink = next((el for el in drawing.iter() if el.tag == f"{{{A_NS}}}hlinkClick"), None)
+        hlink = next(
+            (el for el in drawing.iter() if el.tag == f"{{{A_NS}}}hlinkClick"), None
+        )
         if hlink is not None:
             rel_id = hlink.get(qn("r:id"))
             if rel_id and rel_id in paragraph.part.rels:
@@ -229,7 +231,9 @@ class DocxConverter:
         return f'<img src="{src}"{style_html} alt=""/>'
 
     def _drawing_dimensions(self, drawing) -> Tuple[float | None, float | None]:
-        extent = next((el for el in drawing.iter() if el.tag == f"{{{WP_NS}}}extent"), None)
+        extent = next(
+            (el for el in drawing.iter() if el.tag == f"{{{WP_NS}}}extent"), None
+        )
         if extent is None:
             return None, None
         cx = extent.get("cx")
@@ -242,7 +246,9 @@ class DocxConverter:
         if key in self._asset_keys:
             return
         self._asset_keys.add(key)
-        self._asset_uploads.append(AssetUpload(key=key, body=blob, content_type=content_type))
+        self._asset_uploads.append(
+            AssetUpload(key=key, body=blob, content_type=content_type)
+        )
 
     def _list_metadata(self, paragraph):
         props = paragraph._p.pPr

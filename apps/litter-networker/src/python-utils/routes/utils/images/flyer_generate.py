@@ -1,33 +1,37 @@
-# Copyright Litter Networks / Clean and Green Communities CIC
+# Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
 import os
 from PIL import Image, ImageDraw, ImageFont
 from routes.utils.info.network_info import get_network_info, get_all_network_ids
-from routes.utils.images.image_utils import save_image_to_s3, load_image_from_s3, image_exists_on_s3
+from routes.utils.images.image_utils import (
+    save_image_to_s3,
+    load_image_from_s3,
+    image_exists_on_s3,
+)
+
 
 def generate_flyer(net, force_generate=False):
-    
     """
     Generate and upload a flyer image and its thumbnail for a network to S3.
-    
+
     Creates a composed flyer by combining a background and foreground template, overlaying the network QR code, rendering the network name (with automatic scaling and line-wrapping), optional "Litter Network" label, contact email, website URL, and Facebook/branding text. Saves the full-size image and a 1/5-size thumbnail to predetermined S3 paths.
-    
+
     Parameters:
         net (str): Network identifier to generate the flyer for, or the literal "all" to generate the generic flyer.
         force_generate (bool): If True, regenerate and upload images even if both full and thumbnail already exist on S3. If False, the function exits early when both images are present.
-    
+
     Notes:
         - If required source images, QR image, or font files cannot be opened or loaded, the function prints an error and returns without saving images.
         - The function has no return value; its observable effect is saving image files to S3.
     """
-    is_all = ( net == "all")
+    is_all = net == "all"
 
     # firstly let's generate output file-paths...
     file_name_full = f"flyer-{net}.png"
     file_name_thumb = f"flyer-{net}-thumb.png"
 
-    file_path_full = f'proc/images/resources/flyer/{file_name_full}'
+    file_path_full = f"proc/images/resources/flyer/{file_name_full}"
     file_path_thumb = f"proc/images/resources/flyer/" + file_name_thumb
 
     # ... and see if they already exist on s3:
@@ -43,17 +47,19 @@ def generate_flyer(net, force_generate=False):
     text_colour = (255, 255, 255)  # White
 
     # Font files
-    font_source_serif = os.path.join(base_dir, 'fonts/SourceSerifPro-Regular.otf')
-    font_poppins = os.path.join(base_dir, 'fonts/Poppins-Regular.otf')
-    font_poppins_m = os.path.join(base_dir, 'fonts/Poppins-Medium.otf')
-    font_poppins_b = os.path.join(base_dir, 'fonts/Poppins-Bold.otf')
+    font_source_serif = os.path.join(base_dir, "fonts/SourceSerifPro-Regular.otf")
+    font_poppins = os.path.join(base_dir, "fonts/Poppins-Regular.otf")
+    font_poppins_m = os.path.join(base_dir, "fonts/Poppins-Medium.otf")
+    font_poppins_b = os.path.join(base_dir, "fonts/Poppins-Bold.otf")
 
     # Get network info
     selected_network_info = get_network_info(net)
 
     # Image templates
     image_path_template = os.path.join(base_dir, "source", "flyer-template.png")
-    image_path_background = os.path.join(base_dir, "source", "flyer-defaultbackground.png")
+    image_path_background = os.path.join(
+        base_dir, "source", "flyer-defaultbackground.png"
+    )
 
     try:
         image_fg = Image.open(image_path_template).convert("RGBA")
@@ -73,7 +79,7 @@ def generate_flyer(net, force_generate=False):
     had_errors = False
 
     # Add QR code to image
-    image_qr = load_image_from_s3(f'proc/images/resources/qr/qr-{net}.png');
+    image_qr = load_image_from_s3(f"proc/images/resources/qr/qr-{net}.png")
 
     # Resize QR code to 360x360
     image_qr = image_qr.resize((360, 360), Image.Resampling.LANCZOS)
@@ -81,14 +87,16 @@ def generate_flyer(net, force_generate=False):
     image.paste(image_qr, (2020, 2450), image_qr)
 
     # Add network name to image
-    selected_network_logo_name = selected_network_info.get("logoName") or selected_network_info.get("fullName", "")
+    selected_network_logo_name = selected_network_info.get(
+        "logoName"
+    ) or selected_network_info.get("fullName", "")
     lines = selected_network_logo_name.split("|")
     num_lines = len(lines)
 
     text_y = 550 if is_all else 380 if num_lines > 1 else 430
     font_size = 260 if num_lines > 1 else 340
 
-    font_scale = 1.2;
+    font_scale = 1.2
 
     draw = ImageDraw.Draw(image)
 
@@ -101,7 +109,7 @@ def generate_flyer(net, force_generate=False):
             return
 
         # Calculate text size
-        text_box = draw.textbbox((0,0), line, font=font)
+        text_box = draw.textbbox((0, 0), line, font=font)
         text_width = text_box[2] - text_box[0]
         text_height = text_box[3] - text_box[1]
 
@@ -115,7 +123,7 @@ def generate_flyer(net, force_generate=False):
             except IOError:
                 print(f"Error: Cannot load font {font_source_serif}")
                 return
-            text_box = draw.textbbox((0,0), line, font=font)
+            text_box = draw.textbbox((0, 0), line, font=font)
             text_width = text_box[2] - text_box[0]
             text_height = text_box[3] - text_box[1]
 
@@ -140,7 +148,7 @@ def generate_flyer(net, force_generate=False):
             print(f"Error: Cannot load font {font_poppins_m}")
             return
 
-        text_box = draw.textbbox((0,0), line, font=font_litter)
+        text_box = draw.textbbox((0, 0), line, font=font_litter)
         text_width = text_box[2] - text_box[0]
         text_height = text_box[3] - text_box[1]
 
@@ -157,7 +165,11 @@ def generate_flyer(net, force_generate=False):
     text_y = 3000
 
     selected_network_email = selected_network_info.get("contactEmail", "")
-    email_text = selected_network_email if selected_network_email else "contact@litternetworks.org"
+    email_text = (
+        selected_network_email
+        if selected_network_email
+        else "contact@litternetworks.org"
+    )
 
     try:
         font_email = ImageFont.truetype(font_poppins_m, lower_font_size)
@@ -165,7 +177,7 @@ def generate_flyer(net, force_generate=False):
         print(f"Error: Cannot load font {font_poppins_m}")
         return
 
-    text_box = draw.textbbox((0,0), email_text, font=font_email)
+    text_box = draw.textbbox((0, 0), email_text, font=font_email)
     text_width = text_box[2] - text_box[0]
 
     text_scale = min(max_width_left_side / text_width, 1.0)
@@ -184,9 +196,13 @@ def generate_flyer(net, force_generate=False):
     text_x = 300
     text_y = 3250
 
-    selected_network_url = "litternetworks.org" if is_all else f"litternetworks.org/{selected_network_info.get('shortId', '')}"
+    selected_network_url = (
+        "litternetworks.org"
+        if is_all
+        else f"litternetworks.org/{selected_network_info.get('shortId', '')}"
+    )
 
-    text_box = draw.textbbox((0,0), selected_network_url, font=font_email_scaled)
+    text_box = draw.textbbox((0, 0), selected_network_url, font=font_email_scaled)
     text_width = text_box[2] - text_box[0]
 
     text_scale = min(max_width_left_side / text_width, 1.0)
@@ -198,12 +214,18 @@ def generate_flyer(net, force_generate=False):
         print(f"Error: Cannot load font {font_poppins_m}")
         return
 
-    draw.text((text_x, text_y), selected_network_url, font=font_url_scaled, fill=text_colour)
+    draw.text(
+        (text_x, text_y), selected_network_url, font=font_url_scaled, fill=text_colour
+    )
     text_y += text_sep_y
 
     # Add Facebook info
     selected_network_name = selected_network_info.get("fullName", "")
-    fb_lines = ["\"Litter Networks\""] if is_all else [f"\"{selected_network_name}", "Litter Network\""]
+    fb_lines = (
+        ['"Litter Networks"']
+        if is_all
+        else [f'"{selected_network_name}', 'Litter Network"']
+    )
     num_fb_lines = len(fb_lines)
 
     text_x = 1895
@@ -220,7 +242,7 @@ def generate_flyer(net, force_generate=False):
             print(f"Error: Cannot load font {font_poppins_b}")
             return
 
-        text_box = draw.textbbox((0,0), actual_line, font=font_fb)
+        text_box = draw.textbbox((0, 0), actual_line, font=font_fb)
         text_width = text_box[2] - text_box[0]
         text_height = text_box[3] - text_box[1]
 
@@ -230,7 +252,7 @@ def generate_flyer(net, force_generate=False):
 
         is_first_line = False
         text_y_fb += 100
-    
+
     # Save image with alpha channel preserved
     image = image.convert("RGBA")
 
@@ -241,11 +263,11 @@ def generate_flyer(net, force_generate=False):
     save_image_to_s3(image, file_path_full)
     save_image_to_s3(image_thumb, file_path_thumb)
 
-def main():
 
+def main():
     """
     Entry point that generates flyer images for either a single network or all networks.
-    
+
     When configured for single-file mode, invokes generation for the hard-coded network "anfieldlitter".
     Otherwise, retrieves all network IDs and invokes flyer generation for each, displaying a progress bar during the batch run.
     """
@@ -258,10 +280,11 @@ def main():
         unique_ids = get_all_network_ids()
 
         from tqdm import tqdm
-        
+
         # Loop over each uniqueId and perform the desired action
         for unique_id in tqdm(unique_ids, desc="Processing Flyer Images"):
             generate_flyer(net=unique_id)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
