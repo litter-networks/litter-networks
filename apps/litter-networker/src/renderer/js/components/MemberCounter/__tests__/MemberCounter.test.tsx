@@ -18,6 +18,6 @@ describe("MemberCounter", () => {
         applying={false}
       />
     );
-    expect(screen.getByText("Since Sample Label")).toBeTruthy();
+    expect(screen.getByText("as of Sample Label")).toBeTruthy();
   });
 });
