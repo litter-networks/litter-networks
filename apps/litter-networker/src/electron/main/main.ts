@@ -16,6 +16,7 @@ import type { TablePreferences } from "../../shared/tables";
 
 const DEFAULT_SPLIT_RATIO = 0.75;
 const ENABLE_BROWSER_CONTEXT_MENU = process.env.NODE_ENV !== "production";
+const ICON_FILE_NAME = "logo.png";
 
 let settingsStore: SettingsStore | null = null;
 let mockServer: { close: () => Promise<void>; urlBase: string } | null = null;
@@ -26,6 +27,11 @@ let networksService: NetworksService | null = null;
 let contentService: ContentService | null = null;
 let memberCountService: MemberCountService | null = null;
 let tablesService: TablesService | null = null;
+
+const resolveWindowIcon = () => {
+  const baseDir = app.isPackaged ? path.join(process.resourcesPath, "images") : path.join(app.getAppPath(), "images");
+  return path.join(baseDir, ICON_FILE_NAME);
+};
 
 const ensureMockServer = async () => {
   if (mockServer) return mockServer.urlBase;
@@ -159,6 +165,7 @@ const createWindow = async () => {
     backgroundColor: "#1a1a1a",
     show: false,
     autoHideMenuBar: true,
+    icon: resolveWindowIcon(),
     webPreferences: {
       preload: path.join(__dirname, "../preload/index.js"),
       contextIsolation: true,
@@ -224,6 +231,10 @@ const createWindow = async () => {
 };
 
 let arrowLockEnabled = true;
+
+if (process.platform === "win32") {
+  app.setAppUserModelId("org.litternetworks.litter-networker");
+}
 
 app.whenReady().then(async () => {
   settingsStore = new SettingsStore(app.getPath("userData"));

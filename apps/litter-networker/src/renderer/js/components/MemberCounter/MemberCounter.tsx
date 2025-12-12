@@ -29,7 +29,7 @@ const MemberCounter = ({ inputValue, onChange, memberCount, sinceLabel, onApply,
           <span className={widgetStyles.eyebrow}>Last Count {memberCount?.toFixed(0) ?? "0"}</span>
         </div>
         <div className={widgetStyles.sinceRow}>
-          <span className={widgetStyles.eyebrow}>Since {sinceLabel}</span>
+          <span className={widgetStyles.eyebrow}>as of {sinceLabel}</span>
         </div>
       </div>
       <div className={widgetStyles.controls}>

@@ -67,11 +67,16 @@
         "AppImage",
         "tar.gz"
       ],
-      "category": "Utility"
+      "category": "Utility",
+      "icon": "images/logo.png"
     },
     "asar": false,
     "extraResources": [
-      "dist/python-utils"
+      "dist/python-utils",
+      {
+        "from": "images",
+        "to": "images"
+      }
     ]
   }
 }

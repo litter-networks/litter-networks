@@ -31,7 +31,7 @@ const BagCounter = ({ inputValue, onChange, sessionCount, totalLabel, sinceLabel
           <span className={widgetStyles.eyebrow}>This {sessionCount.toFixed(1)}</span>
         </div>
         <div className={widgetStyles.sinceRow}>
-          <span className={widgetStyles.eyebrow}>Since {sinceText}</span>
+          <span className={widgetStyles.eyebrow}>as of {sinceText}</span>
         </div>
       </div>
       <div className={widgetStyles.controls}>
