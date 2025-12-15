@@ -43,11 +43,7 @@ const galleryItems: GalleryItem[] = [
   {
     url: 'https://cdn.litternetworks.org/proc/images/news/edf0f3d98ba7d669.jpg',
     captionHtml: 'Litter volunteers break another record during GB Spring Clean!',
-  },
-  {
-    url: 'https://cdn.litternetworks.org/proc/images/news/449f054bd77b562c.jpg',
-    captionHtml: '<b>Litter Networks</b> help keep Warrington tidy',
-  },
+  }
 ];
 
 const entryClassMap: Record<BlockType, string> = {
