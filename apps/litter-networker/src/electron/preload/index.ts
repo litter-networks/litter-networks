@@ -64,7 +64,7 @@ const api = {
     ipcRenderer.invoke("settings:setSelectedNetwork", networkId) as Promise<void>,
   getMockPreference: () => ipcRenderer.invoke("settings:getMockPreference") as Promise<boolean | null>,
   setMockPreference: (value: boolean) => ipcRenderer.invoke("settings:setMockPreference", value) as Promise<void>,
-  runContentJob: (payload: { job?: "legacy" | "docs"; networkId?: string; force?: boolean; dryRun?: boolean }) =>
+  runContentJob: (payload: { job?: "legacy" | "docs" | "news"; networkId?: string; force?: boolean; dryRun?: boolean }) =>
     ipcRenderer.invoke("content:run", payload) as Promise<{ ok: true }>,
   stopContentJob: () => ipcRenderer.invoke("content:stop") as Promise<{ stopped: boolean }>,
   subscribeContentProgress: () => ipcRenderer.send("content:subscribe"),

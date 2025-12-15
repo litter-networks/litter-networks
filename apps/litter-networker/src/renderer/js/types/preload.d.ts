@@ -54,7 +54,7 @@ declare global {
       setSelectedNetworkId: (networkId: string | null) => Promise<void>;
       getMockPreference: () => Promise<boolean | null>;
       setMockPreference: (value: boolean) => Promise<void>;
-      runContentJob: (payload: { job?: "legacy" | "docs"; networkId?: string; force?: boolean; dryRun?: boolean }) => Promise<{ ok: true }>;
+      runContentJob: (payload: { job?: "legacy" | "docs" | "news"; networkId?: string; force?: boolean; dryRun?: boolean }) => Promise<{ ok: true }>;
       stopContentJob: () => Promise<{ stopped: boolean }>;
       subscribeContentProgress: () => void;
       onContentProgress: (callback: (payload: { type: string; message?: string; detail?: any }) => void) => () => void;

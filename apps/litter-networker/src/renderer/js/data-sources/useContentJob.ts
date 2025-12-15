@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-type ContentJobPayload = { job?: "legacy" | "docs"; networkId?: string; force?: boolean; dryRun?: boolean };
+type ContentJobPayload = { job?: "legacy" | "docs" | "news"; networkId?: string; force?: boolean; dryRun?: boolean };
 type ProgressPayload = { type: string; message?: string; detail?: any };
 
 export const useContentJob = () => {

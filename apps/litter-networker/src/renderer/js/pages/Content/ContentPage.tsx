@@ -18,7 +18,6 @@ export default function ContentPage() {
   const { networks = [] } = snapshot ?? { networks: [] };
   const { logs, running, summary, run, stop } = useContentJob();
   const [selectedNetwork, setSelectedNetwork] = useState<string>(networks[0]?.id ?? "");
-  const [docsDryRun, setDocsDryRun] = useState(false);
 
   const friendlyNetworks = useMemo(
     () =>
@@ -91,19 +90,18 @@ export default function ContentPage() {
             type="button"
             className={`${styles.secondaryButton} ${running ? styles.disabledButton : ""}`}
             disabled={running}
-            onClick={() => run({ job: "docs", dryRun: docsDryRun })}
+            onClick={() => run({ job: "docs" })}
           >
             Sync Knowledge Docs
           </button>
-          <label className={styles.checkboxGroup}>
-            <input
-              type="checkbox"
-              checked={docsDryRun}
-              disabled={running}
-              onChange={(event) => setDocsDryRun(event.target.checked)}
-            />
-            Dry run (skip uploads + invalidation)
-          </label>
+          <button
+            type="button"
+            className={`${styles.secondaryButton} ${running ? styles.disabledButton : ""}`}
+            disabled={running}
+            onClick={() => run({ job: "news" })}
+          >
+            News Upload
+          </button>
         </section>
         <section className={styles.logs}>
           <p className={styles.logsTitle}>{summary}</p>

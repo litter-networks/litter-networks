@@ -7,7 +7,7 @@ import path from "node:path";
 import { existsSync } from "node:fs";
 import { app, WebContents } from "electron";
 
-export type ContentJobKind = "legacy" | "docs";
+export type ContentJobKind = "legacy" | "docs" | "news";
 
 export type ContentJobParams = {
   job?: ContentJobKind;
@@ -44,6 +44,9 @@ export class ContentService extends EventEmitter {
   private buildScriptPath(job: ContentJobKind) {
     if (job === "docs") {
       return path.join(this.pythonUtilsRoot, "routes/utils/docs/sync_lnwordtohtml.py");
+    }
+    if (job === "news") {
+      return path.join(this.pythonUtilsRoot, "routes/utils/images/news_upload.py");
     }
     return path.join(this.pythonUtilsRoot, "routes/utils/batch/create_missing_networks_items.py");
   }
@@ -114,8 +117,11 @@ export class ContentService extends EventEmitter {
       if (params.force) {
         args.push("--force");
       }
-    } else {
+    } else if (job === "docs") {
       args.push(params.dryRun ? "--dry-run" : "--no-dry-run");
+    } else if (job === "news" && params.force) {
+      // Allow forcing the news upload script even if not exposed in the UI.
+      args.push("--force");
     }
     const repoRoot = path.resolve(this.pythonUtilsRoot, "..", "..", "..", "..");
     const env = { ...process.env, PYTHONPATH: this.pythonUtilsRoot, LN_REPO_ROOT: repoRoot };

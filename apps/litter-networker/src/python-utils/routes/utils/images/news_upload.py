@@ -1,12 +1,16 @@
 # Copyright Clean and Green Communities CIC / Litter Networks
 # SPDX-License-Identifier: Apache-2.0
 
+import os
+
+os.environ.setdefault("AWS_PROFILE", "ln")
+os.environ.setdefault("AWS_REGION", "eu-west-2")
+
 import boto3
 import hashlib
 import requests
 from PIL import Image
 from io import BytesIO
-import os
 
 # Initialize boto3 clients
 dynamodb = boto3.resource("dynamodb")
