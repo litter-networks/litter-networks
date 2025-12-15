@@ -31,6 +31,11 @@ interface GalleryItem {
 
 const galleryItems: GalleryItem[] = [
   {
+    url: 'https://cdn.litternetworks.org/proc/images/news/a12a2e80389d4307.jpg',
+    captionHtml:
+      '<b>Litter Networks</b> volunteers celebrate <b>King’s Award</b> for Voluntary Service',
+  },
+  {
     url: 'https://cdn.litternetworks.org/proc/images/news/8b65d2745404665d.jpg',
     captionHtml:
       '<b>Litter Networks</b> reach significant landmark for can recycling and raise money for charity!',
