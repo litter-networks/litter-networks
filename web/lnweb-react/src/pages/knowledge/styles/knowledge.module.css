@@ -167,7 +167,7 @@
   margin: 0.75rem;
   background-color: #fff;
   border-radius: 0.75em;
-  border: 5px solid rgba(135, 129, 190, 0.2);
+  border: 5px solid color-mix(in srgb, var(--info-color) 25%, transparent);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: transform 120ms ease, box-shadow 120ms ease;
 }
@@ -197,11 +197,28 @@
   margin: 0;
 }
 
+.externalLinkIcon {
+  height: 0.85em;
+  margin-left: 0.5rem;
+  vertical-align: text-bottom;
+}
+
 .majorEntryDescription {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.85);
   margin: 0;
   margin-top: 0.25rem;
+}
+
+.linkBlockBody {
+  padding: 0.75rem 1rem 1rem;
+}
+
+.linkBlockImage {
+  width: 100%;
+  display: block;
+  border-bottom-left-radius: 0.55em;
+  border-bottom-right-radius: 0.55em;
 }
 
 .contentsMinorContainer {
@@ -217,7 +234,7 @@
   min-width: 220px;
   background-color: #fff;
   border-radius: 0.6em;
-  border: 4px solid rgba(135, 129, 190, 0.25);
+  border: 4px solid color-mix(in srgb, var(--info-color) 28%, transparent);
   padding: 0.5rem 0.75rem 1rem;
   text-align: left;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);

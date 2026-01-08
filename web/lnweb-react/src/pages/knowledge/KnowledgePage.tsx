@@ -1,7 +1,7 @@
 // Copyright Clean and Green Communities CIC / Litter Networks
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { fetchKnowledgeChildPages, fetchKnowledgePage, type KnowledgeChildPage } from '@/data-sources/knowledge';
 import { usePageTitle } from '@/shared/hooks/usePageTitle';
@@ -12,8 +12,16 @@ import styles from './styles/knowledge.module.css';
 const CONTENT_PLACEHOLDER = '{{knowledge-base-contents}}';
 
 interface HtmlBlock {
-  type: 'html' | 'contents';
+  type: 'html' | 'contents' | 'link-block';
   html?: string;
+  linkBlock?: LinkBlock;
+}
+
+interface LinkBlock {
+  href: string;
+  title: string;
+  body?: string;
+  image?: string;
 }
 
 interface Metadata {
@@ -84,23 +92,12 @@ export function KnowledgePage() {
         }
 
         const processedHtml = updateInternalLinks(pageData.bodyContent, `/${filterString}`);
-        const segments = processedHtml.split(CONTENT_PLACEHOLDER);
-
-        const computedBlocks: HtmlBlock[] = [];
-        segments.forEach((segment, index) => {
-          if (segment.trim()) {
-            computedBlocks.push({ type: 'html', html: segment });
-          }
-          if (index < segments.length - 1) {
-            computedBlocks.push({ type: 'contents' });
-          }
-        });
-
-        setBlocks(computedBlocks.length ? computedBlocks : [{ type: 'html', html: processedHtml }]);
+        const computedBlocks = parseKnowledgeBlocks(processedHtml);
+        setBlocks(computedBlocks);
         setMetadata(pageData.metadata);
         setLoadingPage(false);
 
-        if (segments.length > 1) {
+        if (computedBlocks.some((block) => block.type === 'contents')) {
           setLoadingContents(true);
           try {
             const sections = await fetchKnowledgeChildPages(knowledgePath, controller.signal);
@@ -169,18 +166,22 @@ export function KnowledgePage() {
             <p>Loading knowledge content…</p>
           </div>
         ) : (
-          blocks.map((block, index) =>
-            block.type === 'html' ? (
-              renderHtmlBlock(block.html, `/${filterString}`, index)
-            ) : (
-              <KnowledgeContents
-                key={`contents-${index}`}
-                sections={childSections}
-                filterString={filterString}
-                loading={loadingContents}
-              />
-            ),
-          )
+          blocks.map((block, index) => {
+            if (block.type === 'html') {
+              return renderHtmlBlock(block.html, `/${filterString}`, index);
+            }
+            if (block.type === 'contents') {
+              return (
+                <KnowledgeContents
+                  key={`contents-${index}`}
+                  sections={childSections}
+                  filterString={filterString}
+                  loading={loadingContents}
+                />
+              );
+            }
+            return renderLinkBlock(block.linkBlock, filterString, index);
+          })
         )}
       </div>
     </div>
@@ -208,6 +209,164 @@ function renderHtmlBlock(html: string | undefined, linkBase: string, index: numb
       dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
   );
+}
+
+function renderLinkBlock(linkBlock: LinkBlock | undefined, filterString: string, index: number) {
+  if (!linkBlock) {
+    return null;
+  }
+  const { href, title, body, image } = linkBlock;
+  const resolvedHref = resolveLinkHref(href, filterString);
+  const isExternal = /^https?:\/\//i.test(resolvedHref);
+  const style = getLinkBlockStyle(href, isExternal, filterString);
+
+  const header = (
+    <div className={`${styles.majorEntryHeader} ${styles.majorEntryHeaderNoChild}`}>
+      <div className={styles.majorEntryTitle}>
+        <span>{title}</span>
+        {isExternal && (
+          <img src="/icons/icon-external-link.svg" className={styles.externalLinkIcon} alt="External link" />
+        )}
+      </div>
+      {body && <div className={styles.majorEntryDescription}>{body}</div>}
+    </div>
+  );
+
+  return (
+    <div className={styles.contentsWrapper} style={style} key={`link-block-${index}`}>
+      <div className={styles.contentsMajorEntry}>
+        {isExternal ? (
+          <a className={styles.knowledgeLink} href={resolvedHref} target="_blank" rel="noopener noreferrer">
+            {header}
+          </a>
+        ) : (
+          <Link className={styles.knowledgeLink} to={resolvedHref}>
+            {header}
+          </Link>
+        )}
+        {image && (
+          <div className={styles.linkBlockBody}>
+            <img src={image} alt="" className={styles.linkBlockImage} loading="lazy" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function getLinkBlockStyle(href: string, isExternal: boolean, filterString: string): CSSProperties | undefined {
+  if (isExternal) {
+    return {
+      '--info-color': 'var(--join-in-color)',
+      '--info-color-active': 'var(--join-in-color-active)',
+      '--info-color-hover': 'var(--join-in-color-hover)',
+    } as CSSProperties;
+  }
+
+  const normalizedHref = normalizeInternalHref(href, filterString);
+  if (normalizedHref.includes('/join-in')) {
+    return {
+      '--info-color': 'var(--join-in-color)',
+      '--info-color-active': 'var(--join-in-color-active)',
+      '--info-color-hover': 'var(--join-in-color-hover)',
+    } as CSSProperties;
+  }
+  if (normalizedHref.includes('/news')) {
+    return {
+      '--info-color': 'var(--news-color)',
+      '--info-color-active': 'var(--news-color-active)',
+      '--info-color-hover': 'var(--news-color-hover)',
+    } as CSSProperties;
+  }
+
+  return undefined;
+}
+
+function resolveLinkHref(href: string, filterString: string): string {
+  if (/^https?:\/\//i.test(href)) {
+    return href;
+  }
+  const normalized = href.replace(/^\/+/, '');
+  if (normalized.startsWith(`${filterString}/`)) {
+    return `/${normalized}`.replace(/\/+/g, '/');
+  }
+  return `/${filterString}/${normalized}`.replace(/\/+/g, '/');
+}
+
+function normalizeInternalHref(href: string, filterString: string): string {
+  const normalized = href.replace(/^\/+/, '');
+  if (normalized.startsWith(`${filterString}/`)) {
+    return `/${normalized.slice(filterString.length + 1)}`.toLowerCase();
+  }
+  return `/${normalized}`.toLowerCase();
+}
+
+function parseKnowledgeBlocks(html: string): HtmlBlock[] {
+  const blocks: HtmlBlock[] = [];
+  const tokenRegex = /{{knowledge-base-contents}}|{{link-block\s+([^}]*)}}/gi;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = tokenRegex.exec(html)) !== null) {
+    const segment = html.slice(lastIndex, match.index);
+    if (segment.trim()) {
+      blocks.push({ type: 'html', html: segment });
+    }
+
+    if (match[0].toLowerCase().startsWith(CONTENT_PLACEHOLDER)) {
+      blocks.push({ type: 'contents' });
+    } else {
+      const rawAttributes = decodeHtmlEntities(match[1] ?? '');
+      const linkBlock = parseLinkBlockAttributes(rawAttributes);
+      if (linkBlock) {
+        blocks.push({ type: 'link-block', linkBlock });
+      }
+    }
+
+    lastIndex = tokenRegex.lastIndex;
+  }
+
+  const tail = html.slice(lastIndex);
+  if (tail.trim()) {
+    blocks.push({ type: 'html', html: tail });
+  }
+
+  if (!blocks.length) {
+    return [{ type: 'html', html }];
+  }
+
+  return blocks;
+}
+
+function parseLinkBlockAttributes(raw: string): LinkBlock | undefined {
+  const attrs: Record<string, string> = {};
+  const attrRegex = /(\w+)\s*=\s*"([^"]*)"/g;
+  let match: RegExpExecArray | null;
+  while ((match = attrRegex.exec(raw)) !== null) {
+    attrs[match[1].toLowerCase()] = match[2];
+  }
+
+  const href = attrs.href || attrs.url;
+  const title = attrs.title || attrs.label;
+  if (!href || !title) {
+    return undefined;
+  }
+
+  return {
+    href,
+    title,
+    body: attrs.body || attrs.text || attrs.description,
+    image: attrs.image,
+  };
+}
+
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
 }
 
 /**
