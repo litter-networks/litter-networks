@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useNavData } from '@/features/nav/useNavData';
 import { getPathSuffix } from '@/components/header/header-helpers';
 import styles from './styles/networkSwitcher.module.css';
@@ -29,6 +29,7 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
     isFavorite,
   } = useNavData();
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const trimmedTerm = searchTerm.trim().toLowerCase();
   const returnPathState = useMemo(
@@ -77,6 +78,52 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
       })
       .slice(0, 5);
   }, [networks, trimmedTerm]);
+
+  const sortedNetworks = useMemo(() => {
+    return [...networks].sort((a, b) => {
+      const nameA = (a.fullName ?? a.uniqueId ?? '').toLowerCase();
+      const nameB = (b.fullName ?? b.uniqueId ?? '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+  }, [networks]);
+
+  const currentNetworkIndex = useMemo(() => {
+    if (!network) {
+      return -1;
+    }
+    return sortedNetworks.findIndex((item) => item.uniqueId === network.uniqueId);
+  }, [network, sortedNetworks]);
+
+  const nextNetwork = useMemo(() => {
+    if (sortedNetworks.length === 0) {
+      return undefined;
+    }
+    if (currentNetworkIndex === -1) {
+      return sortedNetworks[0];
+    }
+    return sortedNetworks[(currentNetworkIndex + 1) % sortedNetworks.length];
+  }, [currentNetworkIndex, sortedNetworks]);
+
+  const prevNetwork = useMemo(() => {
+    if (sortedNetworks.length === 0) {
+      return undefined;
+    }
+    if (currentNetworkIndex === -1) {
+      return sortedNetworks[sortedNetworks.length - 1];
+    }
+    return sortedNetworks[(currentNetworkIndex - 1 + sortedNetworks.length) % sortedNetworks.length];
+  }, [currentNetworkIndex, sortedNetworks]);
+
+  const handleNetworkJump = useCallback(
+    (targetId?: string) => {
+      if (!targetId) {
+        return;
+      }
+      navigate(buildNetworkSwitchPath(targetId));
+      onRequestClose();
+    },
+    [buildNetworkSwitchPath, navigate, onRequestClose],
+  );
 
   useEffect(() => {
     if (!open) {
@@ -144,6 +191,24 @@ export function NetworkSwitcherMenu({ open, onRequestClose, headerColorClass, se
             onClick={() => setSearchTerm('')}
           >
             ×
+          </button>
+        </div>
+        <div className={styles.networkSwitcherNavButtons}>
+          <button
+            type="button"
+            className={styles.networkSwitcherNavButton}
+            onClick={() => handleNetworkJump(prevNetwork?.uniqueId)}
+            disabled={!prevNetwork}
+          >
+            Prev
+          </button>
+          <button
+            type="button"
+            className={styles.networkSwitcherNavButton}
+            onClick={() => handleNetworkJump(nextNetwork?.uniqueId)}
+            disabled={!nextNetwork}
+          >
+            Next
           </button>
         </div>
       </li>
