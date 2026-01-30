@@ -36,7 +36,7 @@ const config: UserConfigExport & { test: Record<string, unknown> } = {
     allowedHosts: ['local.litternetworks.org'],
     proxy: {
       '/api': {
-        target: 'https://aws.litternetworks.org',
+        target: 'https://litternetworks.org',
         changeOrigin: true,
         secure: true,
       },

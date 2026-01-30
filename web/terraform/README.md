@@ -1,7 +1,7 @@
 ## CloudFront infrastructure (Terraform)
 
 - `cloudfront.tf` is the migrated config from the legacy LNWebServerless repo. It owns both CloudFront distributions:
-  - `E38XGOGM7XNRC5` &rarr; dynamic/API traffic (`api.litternetworks.org`, `aws.litternetworks.org`, `static.litternetworks.org`)
+  - `E38XGOGM7XNRC5` &rarr; dynamic/API traffic (`api.litternetworks.org`, `aws.litternetworks.org`, `static.litternetworks.org`, `litternetworks.org`)
   - `EWXIG6ZADYHMA` &rarr; static CDN (`cdn.litternetworks.org` backed by `lnweb-public`/`lnweb-docs`)
 - `sync_terraform.sh` is the helper the legacy repo used to run `terraform apply` and invalidate both distributions afterwards.
 

@@ -6,6 +6,7 @@ the C# tool while making it easier to run on Linux/macOS, eliminate inline
 styles, and slot neatly into this repo.
 
 ## Goals
+
 - Convert DOCX sources from OneDrive into HTML + CSS suitable for the public
   docs site with zero inline `style=` attributes.
 - Synchronise generated HTML, CSS, and asset files with the `lnweb-docs` S3
@@ -19,6 +20,7 @@ styles, and slot neatly into this repo.
   (e.g. `python -m lnwordtohtml.cli sync`).
 
 ## Getting Started
+
 The workflow now lives inside the Electron “Content” panel, so authors can trigger dry runs or real syncs directly from the desktop app. To execute the converter manually:
 
 ```bash
@@ -29,6 +31,7 @@ python3 -m venv .venv
 ```
 
 Key CLI flags:
+
 - `--config PATH` overrides bucket/table/profile defaults via YAML.
 - `--source PATH` can point to any DOCX tree (absolute or relative).
 - `--dry-run/--no-dry-run` toggles upload mode (defaults to real sync).
@@ -36,6 +39,7 @@ Key CLI flags:
   against S3 before uploading.
 
 ## Typical Workflow
+
 1. Run the converter with `--dry-run --dump-dir tmp/lnwordtohtml-new` (either through the Electron UI’s dry-run toggle or via the CLI command shown above).
 2. Compare `tmp/lnwordtohtml-new` with a golden snapshot from S3 (for example
    by syncing `s3://lnweb-docs/docs` into `tmp/lnwordtohtml-golden`) and review
@@ -43,16 +47,18 @@ Key CLI flags:
 3. Once satisfied, re-run without `--dry-run`. This uploads HTML,
    CSS, assets, updates Dynamo, and automatically requests a CloudFront
    invalidation for `/knowledge*` and `/docs/styles/*`.
-4. Spot-check `aws.litternetworks.org` (or the Content panel) after the
+4. Spot-check `litternetworks.org` (or the Content panel) after the
    invalidation completes to confirm the changes are live.
 
 ## Source Inputs
+
 - OneDrive folder: `one-drive/Core Team Shared/Litter Networks/_web_docs`
   - Index pages live as `knowledge/<section>.docx` files in the root.
   - Child pages live in folders (e.g. `knowledge/our-organisation/documents/*.docx`).
   - Each `.docx` should become `docs/<same-structure>.html` in S3.
 
 ## Outputs
+
 - HTML fragments that link to their scoped stylesheet via
   `<link rel="stylesheet" href="https://cdn.litternetworks.org/docs/styles/<slug>.css">`
   (no inline `style=` attributes).
@@ -63,6 +69,7 @@ Key CLI flags:
 - DynamoDB items per `uniqueId` mirroring the legacy `HierarchyNode` shape.
 
 ## Components
+
 1. **CLI entry point** (`__main__.py`) – parses args (watch directory, AWS
    profile, dry-run) and orchestrates sync steps.
 2. **Scanner** – walks the source tree, collecting DOCX files and metadata; keeps
@@ -84,6 +91,7 @@ Key CLI flags:
    (using moto/boto3 stubs).
 
 ## Workflow
+
 1. `sync` command identifies DOCX files and determines which need processing by
    comparing timestamps or hashes with the cached state file.
 2. For changed files, converter produces HTML fragment + metadata + style usage,
@@ -98,6 +106,7 @@ Key CLI flags:
 7. Script exits non-zero on any failed upload/DB write (so CI can react).
 
 ## Implementation Milestones
+
 - **Text & Metadata** – finish porting paragraph/run handling so headings,
   emphasis, links, and metadata tags render exactly like the C# output.
 - **Lists/Tables/CSS** – emit semantic classes for lists + tables, generate a
@@ -111,6 +120,7 @@ Key CLI flags:
   content authors can run `sync_docs.sh` locally.
 
 ## Integration with Litter Networker
+
 The desktop Content panel includes a **Sync Knowledge Docs** button. Use the Dry
 Run toggle to exercise a no-op deployment (the logs stream live in the panel),
 then uncheck it to perform the real sync + invalidation from the app. This is
@@ -118,6 +128,7 @@ handy when you don’t want to run commands manually but still want to see the
 full output before promoting.
 
 ## Styling Strategy
+
 - Normalise paragraph alignment (`justify`, `center`, `right`) via classes.
 - Wrap the page content in `.ln-knowledge-shell` to provide the width/margin that
   currently lives on `<body style="max-width:700px;margin:0 auto;">`.
@@ -127,6 +138,7 @@ full output before promoting.
   can preload or bundle them.
 
 ## AWS Considerations
+
 - Use boto3 with the existing `ln` profile by default; allow overrides.
 - Preserve metadata headers: `Cache-Control: public, max-age=3600, immutable`
   and `Content-Disposition: inline`.
@@ -135,6 +147,7 @@ full output before promoting.
   `uniqueId`). Include a dry-run to inspect JSON before writing.
 
 ## Open Questions / TODOs
+
 - Finalise whether we generate a single global CSS file or one per section.
 - Decide if we store per-file state locally (e.g. `.lnwordtohtml-cache.json`) to
   avoid re-converting unchanged DOCX even if S3 listing timestamps differ.

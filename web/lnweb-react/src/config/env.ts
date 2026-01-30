@@ -5,7 +5,7 @@ const rawEnv: ImportMetaEnv =
   typeof import.meta !== 'undefined' ? import.meta.env : (({} as unknown) as ImportMetaEnv);
 
 const DEFAULT_DEV_API = 'http://local.litternetworks.org:8080';
-const DEFAULT_PROD_API = 'https://aws.litternetworks.org/api';
+const DEFAULT_PROD_API = 'https://litternetworks.org/api';
 const DEFAULT_CDN = 'https://cdn.litternetworks.org';
 
 const resolvedAppEnv = rawEnv.VITE_APP_ENV ?? rawEnv.MODE ?? 'development';

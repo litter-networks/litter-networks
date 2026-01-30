@@ -18,7 +18,7 @@ pushd "${SCRIPT_DIR}" >/dev/null
 export AWS_PROFILE="${AWS_PROFILE:-ln}"
 export DEPLOY_BUCKET="lnweb-public"
 export DISTRIBUTION_ID="${DISTRIBUTION_ID:-E38XGOGM7XNRC5}"
-export SMOKE_TEST_URL="${SMOKE_TEST_URL:-https://aws.litternetworks.org}"
+export SMOKE_TEST_URL="${SMOKE_TEST_URL:-https://litternetworks.org}"
 export BUILD_INFO_JSON="$(jq -n --arg ts "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" --arg sha "$(git rev-parse --short HEAD)" '{buildTime:$ts, commit:$sha}')"
 
 current_stage="initialisation"

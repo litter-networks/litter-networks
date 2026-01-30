@@ -262,6 +262,7 @@ resource "aws_cloudfront_distribution" "dynamic" {
     "api.litternetworks.org",
     "aws.litternetworks.org",
     "static.litternetworks.org",
+    "litternetworks.org",
   ]
   enabled             = true
   http_version        = "http2"
