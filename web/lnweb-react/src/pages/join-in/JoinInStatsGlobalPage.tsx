@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { fetchGlobalStatsTable, type GlobalStatsRow } from '@/data-sources/stats';
 import { usePageTitle } from '@/shared/hooks/usePageTitle';
 import styles from './styles/join-in-stats-global.module.css';
@@ -75,11 +74,9 @@ const withLabel = (label: string, suffix?: string) => (suffix ? `${label} (${suf
  * Renders a global stats table combining bag counts and member counts.
  */
 export function JoinInStatsGlobalPage() {
-  const { filterString } = useParams<{ filterString?: string }>();
   usePageTitle('Join In | Stats | Global');
 
   const [rows, setRows] = useState<GlobalStatsRow[]>([]);
-  const [generatedAt, setGeneratedAt] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
@@ -95,7 +92,6 @@ export function JoinInStatsGlobalPage() {
         const data = await fetchGlobalStatsTable();
         if (!cancelled) {
           setRows(data.rows ?? []);
-          setGeneratedAt(data.generatedAt ?? '');
         }
       } catch (err) {
         if (!cancelled) {
