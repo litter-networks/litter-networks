@@ -6,6 +6,12 @@ import { AppLayout } from './layouts/AppLayout';
 import { RouteErrorBoundary } from './pages/RouteErrorBoundary';
 import { HomePage } from './pages/home/HomePage';
 import { RedirectToNetworkRoot } from './pages/RedirectToNetworkRoot';
+import {
+  LegacyKnowledgeRedirect,
+  LegacyNetworkRedirect,
+  LegacyRulesRedirect,
+  LegacySafetyAdviceRedirect,
+} from './pages/LegacyRedirects';
 import { NewsPage } from './pages/news/NewsPage';
 import { KnowledgePage } from './pages/knowledge/KnowledgePage';
 import { JoinInPage } from './pages/join-in/JoinInPage';
@@ -25,11 +31,39 @@ const JoinInStatsPageBounded = withErrorBoundary(JoinInStatsPage, 'Join In Stats
 const JoinInResourcesPageBounded = withErrorBoundary(JoinInResourcesPage, 'Join In Resources Page');
 const KnowledgePageBounded = withErrorBoundary(KnowledgePage, 'Knowledge Page');
 const RedirectToNetworkRootBounded = withErrorBoundary(RedirectToNetworkRoot, 'Redirect');
+const LegacyNetworkRedirectBounded = withErrorBoundary(LegacyNetworkRedirect, 'Legacy Redirect');
+const LegacyKnowledgeRedirectBounded = withErrorBoundary(LegacyKnowledgeRedirect, 'Legacy Knowledge Redirect');
+const LegacyRulesRedirectBounded = withErrorBoundary(LegacyRulesRedirect, 'Legacy Rules Redirect');
+const LegacySafetyAdviceRedirectBounded = withErrorBoundary(LegacySafetyAdviceRedirect, 'Legacy Safety Advice Redirect');
 
 const router = createBrowserRouter([
   {
     path: '/maps/area',
     element: <MapAreaPageBounded />,
+  },
+  {
+    path: '/knowledge/safetyadvice',
+    element: <LegacySafetyAdviceRedirectBounded />,
+  },
+  {
+    path: '/rules',
+    element: <LegacyRulesRedirectBounded />,
+  },
+  {
+    path: '/knowledge',
+    element: <LegacyKnowledgeRedirectBounded />,
+  },
+  {
+    path: '/knowledge/*',
+    element: <LegacyKnowledgeRedirectBounded />,
+  },
+  {
+    path: '/network/:filterString',
+    element: <LegacyNetworkRedirectBounded />,
+  },
+  {
+    path: '/network/:filterString/*',
+    element: <LegacyNetworkRedirectBounded />,
   },
   {
     path: '/:filterString?',
