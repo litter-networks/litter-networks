@@ -18,6 +18,7 @@ type Column = {
   key: string;
   label: string;
   align?: 'left' | 'right';
+  isNumeric?: boolean;
   getValue: (row: GlobalStatsRow) => string;
   getSortValue: (row: GlobalStatsRow) => string | number;
 };
@@ -42,6 +43,11 @@ const numberFormatter = new Intl.NumberFormat();
 const formatNumber = (value: unknown) => {
   const parsed = toNumber(value);
   return numberFormatter.format(parsed);
+};
+
+const formatMemberCount = (value: number | null) => {
+  if (value === null || value === undefined) return '-';
+  return formatNumber(value);
 };
 
 const formatText = (value: unknown) => {
@@ -122,8 +128,14 @@ export function JoinInStatsGlobalPage() {
   const columns = useMemo<Column[]>(
     () => [
       {
+        key: 'statType',
+        label: 'Type',
+        getValue: (row) => formatText(row.statType),
+        getSortValue: (row) => row.statType ?? '',
+      },
+      {
         key: 'fullName',
-        label: 'Network',
+        label: 'Full Name',
         getValue: (row) => formatText(row.fullName ?? row.uniqueId),
         getSortValue: (row) => row.fullName ?? row.uniqueId ?? '',
       },
@@ -143,13 +155,15 @@ export function JoinInStatsGlobalPage() {
         key: 'memberCount',
         label: 'Members',
         align: 'right',
-        getValue: (row) => formatNumber(row.memberCount),
-        getSortValue: (row) => row.memberCount ?? 0,
+        isNumeric: true,
+        getValue: (row) => formatMemberCount(row.memberCount),
+        getSortValue: (row) => row.memberCount ?? -1,
       },
       {
         key: 'thisMonth',
         label: withLabel('This Month', monthLabels.thisMonthName),
         align: 'right',
+        isNumeric: true,
         getValue: (row) => formatNumber(row.bagCounts.thisMonth),
         getSortValue: (row) => toNumber(row.bagCounts.thisMonth),
       },
@@ -157,6 +171,7 @@ export function JoinInStatsGlobalPage() {
         key: 'lastMonth',
         label: withLabel('Last Month', monthLabels.lastMonthName),
         align: 'right',
+        isNumeric: true,
         getValue: (row) => formatNumber(row.bagCounts.lastMonth),
         getSortValue: (row) => toNumber(row.bagCounts.lastMonth),
       },
@@ -164,6 +179,7 @@ export function JoinInStatsGlobalPage() {
         key: 'thisYear',
         label: withLabel('This Year', monthLabels.thisYearName),
         align: 'right',
+        isNumeric: true,
         getValue: (row) => formatNumber(row.bagCounts.thisYear),
         getSortValue: (row) => toNumber(row.bagCounts.thisYear),
       },
@@ -171,6 +187,7 @@ export function JoinInStatsGlobalPage() {
         key: 'lastYear',
         label: withLabel('Last Year', monthLabels.lastYearName),
         align: 'right',
+        isNumeric: true,
         getValue: (row) => formatNumber(row.bagCounts.lastYear),
         getSortValue: (row) => toNumber(row.bagCounts.lastYear),
       },
@@ -178,21 +195,9 @@ export function JoinInStatsGlobalPage() {
         key: 'allTime',
         label: 'All Time',
         align: 'right',
+        isNumeric: true,
         getValue: (row) => formatNumber(row.bagCounts.allTime),
         getSortValue: (row) => toNumber(row.bagCounts.allTime),
-      },
-      {
-        key: 'gbsc',
-        label: 'GBSC',
-        align: 'right',
-        getValue: (row) => formatNumber(row.bagCounts.gbsc ?? 0),
-        getSortValue: (row) => toNumber(row.bagCounts.gbsc ?? 0),
-      },
-      {
-        key: 'mostRecentPost',
-        label: 'Most Recent Post',
-        getValue: (row) => formatText(row.bagCounts.mostRecentPost),
-        getSortValue: (row) => row.bagCounts.mostRecentPost ?? '',
       },
       {
         key: 'statsCreatedTime',
@@ -214,12 +219,12 @@ export function JoinInStatsGlobalPage() {
     if (!query) return rows;
     return rows.filter((row) => {
       const haystack = [
+        row.statType,
         row.fullName,
         row.uniqueId,
         row.shortId,
         row.districtId,
         row.districtName,
-        row.bagCounts.mostRecentPost,
       ]
         .filter(Boolean)
         .map((value) => String(value).toLowerCase());
@@ -245,10 +250,11 @@ export function JoinInStatsGlobalPage() {
 
   const toggleSort = (key: string) => {
     setSort((current) => {
+      const column = columns.find((col) => col.key === key);
       if (current.key === key) {
         return { key, direction: current.direction === 'asc' ? 'desc' : 'asc' };
       }
-      return { key, direction: 'asc' };
+      return { key, direction: column?.isNumeric ? 'desc' : 'asc' };
     });
   };
 

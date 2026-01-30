@@ -30,7 +30,8 @@ type GlobalStatsRow = {
   fullName?: string;
   districtId?: string;
   districtName?: string;
-  memberCount: number;
+  statType: "Network" | "District" | "Global";
+  memberCount: number | null;
   bagCounts: BagCounts;
 };
 
@@ -151,26 +152,53 @@ function initializeRoutes(): Router {
         networksInfo.getAllBagCounts(),
       ]);
 
+      const networkById = new Map<string, NetworkRecord>();
+      networks.forEach((network) => {
+        networkById.set(network.uniqueId, network);
+      });
+
       const districtNameById = new Map<string, string>();
       districts.forEach((district) => {
         districtNameById.set(district.uniqueId, district.fullName);
       });
 
       const templateCounts = bagCountsById.get("all");
-      const rows: GlobalStatsRow[] = networks.map((network) => {
-        const bagCounts = buildBagCounts(bagCountsById.get(network.uniqueId), templateCounts);
-        const memberCount = memberCountByNetwork.get(network.uniqueId) ?? 0;
-        const districtName = network.districtId ? districtNameById.get(network.districtId) ?? "" : "";
+      const rows: GlobalStatsRow[] = [];
 
-        return {
-          uniqueId: network.uniqueId,
-          shortId: network.shortId,
-          fullName: network.fullName,
-          districtId: network.districtId,
-          districtName,
-          memberCount,
-          bagCounts,
-        };
+      bagCountsById.forEach((bagCountsRecord, uniqueId) => {
+        const network = networkById.get(uniqueId);
+        const districtName = network?.districtId ? districtNameById.get(network.districtId) ?? "" : "";
+        const districtNameForId = districtNameById.get(uniqueId) ?? "";
+        let statType: GlobalStatsRow["statType"] = "Network";
+        let fullName = network?.fullName ?? "";
+        let shortId = network?.shortId;
+        let districtId = network?.districtId;
+        let resolvedDistrictName = districtName;
+
+        if (uniqueId === "all") {
+          statType = "Global";
+          fullName = "All Litter Networks";
+          shortId = undefined;
+          districtId = undefined;
+          resolvedDistrictName = "";
+        } else if (!network && districtNameForId) {
+          statType = "District";
+          fullName = districtNameForId;
+          shortId = undefined;
+          districtId = uniqueId;
+          resolvedDistrictName = districtNameForId;
+        }
+
+        rows.push({
+          uniqueId,
+          shortId,
+          fullName,
+          districtId,
+          districtName: resolvedDistrictName,
+          statType,
+          memberCount: memberCountByNetwork.get(uniqueId) ?? null,
+          bagCounts: buildBagCounts(bagCountsRecord, templateCounts),
+        });
       });
 
       const response: GlobalStatsResponse = {

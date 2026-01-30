@@ -41,7 +41,8 @@ export interface GlobalStatsRow {
   fullName?: string;
   districtId?: string;
   districtName?: string;
-  memberCount: number;
+  statType: 'Network' | 'District' | 'Global';
+  memberCount: number | null;
   bagCounts: BagCounts;
 }
 
