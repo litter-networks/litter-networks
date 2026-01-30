@@ -35,6 +35,21 @@ export interface StatsSummary {
   memberCountAll: number;
 }
 
+export interface GlobalStatsRow {
+  uniqueId: string;
+  shortId?: string;
+  fullName?: string;
+  districtId?: string;
+  districtName?: string;
+  memberCount: number;
+  bagCounts: BagCounts;
+}
+
+export interface GlobalStatsTable {
+  generatedAt: string;
+  rows: GlobalStatsRow[];
+}
+
 /**
  * Fetches bag statistics and related metadata for a given network or district identifier.
  *
@@ -60,4 +75,14 @@ export async function fetchBagsInfo(uniqueId: string, signal?: AbortSignal): Pro
 export async function fetchStatsSummary(uniqueId?: string, signal?: AbortSignal): Promise<StatsSummary> {
   const path = uniqueId && uniqueId !== 'all' ? `/stats/summary/${uniqueId}` : '/stats/summary';
   return apiRequest<StatsSummary>({ path, signal });
+}
+
+/**
+ * Fetches the global stats table for all networks, combining bag counts and member counts.
+ *
+ * @param signal - Optional AbortSignal to cancel the request.
+ * @returns A GlobalStatsTable with metadata and per-network rows.
+ */
+export async function fetchGlobalStatsTable(signal?: AbortSignal): Promise<GlobalStatsTable> {
+  return apiRequest<GlobalStatsTable>({ path: '/stats/global-table', signal });
 }

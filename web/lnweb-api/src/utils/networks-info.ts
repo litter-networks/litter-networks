@@ -25,6 +25,23 @@ export type DistrictRecord = {
   [key: string]: any;
 };
 
+export type BagCountsRecord = {
+  uniqueId: string;
+  thisMonthName?: string;
+  thisMonth?: number | string;
+  lastMonthName?: string;
+  lastMonth?: number | string;
+  thisYearName?: string;
+  thisYear?: number | string;
+  lastYearName?: string;
+  lastYear?: number | string;
+  allTime?: number | string;
+  gbsc?: number | string;
+  statsCreatedTime?: string | number | null;
+  mostRecentPost?: string;
+  [key: string]: any;
+};
+
 type NearbyNetwork = {
   uniqueId: string;
   distance_miles: number;
@@ -38,6 +55,7 @@ class NetworksInfo {
   private cacheDistrictLocalInfos = new NodeCache({ stdTTL: 5 * 60 });
   private cacheNearbyNetworks = new NodeCache({ stdTTL: 5 * 60 });
   private cacheBagsInfo = new NodeCache({ stdTTL: 60 });
+  private cacheAllBagCounts = new NodeCache({ stdTTL: 60 });
   private cacheCurrentMemberCounts = new NodeCache({ stdTTL: 60 });
   private cacheAllMemberCounts = new NodeCache({ stdTTL: 60 });
   private tableName = 'LN-NetworksInfo';
@@ -225,6 +243,41 @@ class NetworksInfo {
       console.error(`Error fetching data for uniqueId ${networkId}:`, error);
       throw error;
     }
+  }
+
+  async getAllBagCounts(): Promise<Map<string, BagCountsRecord>> {
+    const cached = this.cacheAllBagCounts.get<Map<string, BagCountsRecord>>('allBagCounts');
+    if (cached) {
+      return cached;
+    }
+    const bagCounts = await this.fetchAllBagCounts();
+    this.cacheAllBagCounts.set('allBagCounts', bagCounts);
+    return bagCounts;
+  }
+
+  private async fetchAllBagCounts(): Promise<Map<string, BagCountsRecord>> {
+    const bagCounts = new Map<string, BagCountsRecord>();
+    let exclusiveStartKey: Record<string, any> | undefined;
+
+    do {
+      const result = await this.dynamoDbClient.send(
+        new ScanCommand({
+          TableName: 'LN-BagCounts',
+          ExclusiveStartKey: exclusiveStartKey,
+        }),
+      );
+
+      (result.Items ?? []).forEach((item) => {
+        const flattened = this.flattenItem(item) as BagCountsRecord;
+        if (flattened?.uniqueId) {
+          bagCounts.set(flattened.uniqueId, flattened);
+        }
+      });
+
+      exclusiveStartKey = result.LastEvaluatedKey;
+    } while (exclusiveStartKey);
+
+    return bagCounts;
   }
 
   async getBagsInfo(statsUniqueId: string): Promise<any> {
@@ -419,6 +472,7 @@ function resetCachesForTests() {
     'cacheDistrictLocalInfos',
     'cacheNearbyNetworks',
     'cacheBagsInfo',
+    'cacheAllBagCounts',
     'cacheCurrentMemberCounts',
     'cacheAllMemberCounts',
   ].forEach((cacheKey) => {

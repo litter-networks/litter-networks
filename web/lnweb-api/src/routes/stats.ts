@@ -2,12 +2,70 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import express, { Request, Response, Router } from "express";
-import networksInfo, { type NetworkRecord } from "../utils/networks-info";
+import networksInfo, { type BagCountsRecord, type NetworkRecord } from "../utils/networks-info";
 
 type BagsInfoRequest = Request<{ uniqueId: string }>;
 type SummaryRequest = Request<{ networkId?: string }>;
 
 type RouterHandler = (req: SummaryRequest, res: Response) => Promise<void>;
+
+type BagCounts = {
+  thisMonthName: string;
+  thisMonth: number;
+  lastMonthName: string;
+  lastMonth: number;
+  thisYearName: string;
+  thisYear: number;
+  lastYearName: string;
+  lastYear: number;
+  allTime: number;
+  gbsc?: number;
+  statsCreatedTime?: string | number | null;
+  mostRecentPost?: string;
+};
+
+type GlobalStatsRow = {
+  uniqueId: string;
+  shortId?: string;
+  fullName?: string;
+  districtId?: string;
+  districtName?: string;
+  memberCount: number;
+  bagCounts: BagCounts;
+};
+
+type GlobalStatsResponse = {
+  generatedAt: string;
+  rows: GlobalStatsRow[];
+};
+
+const normalizeNumber = (value: unknown): number => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : 0;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return 0;
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+};
+
+const buildBagCounts = (record?: BagCountsRecord, template?: BagCountsRecord): BagCounts => ({
+  thisMonthName: record?.thisMonthName ?? template?.thisMonthName ?? "",
+  thisMonth: normalizeNumber(record?.thisMonth),
+  lastMonthName: record?.lastMonthName ?? template?.lastMonthName ?? "",
+  lastMonth: normalizeNumber(record?.lastMonth),
+  thisYearName: record?.thisYearName ?? template?.thisYearName ?? "",
+  thisYear: normalizeNumber(record?.thisYear),
+  lastYearName: record?.lastYearName ?? template?.lastYearName ?? "",
+  lastYear: normalizeNumber(record?.lastYear),
+  allTime: normalizeNumber(record?.allTime),
+  gbsc: record?.gbsc === undefined ? undefined : normalizeNumber(record?.gbsc),
+  statsCreatedTime: record?.statsCreatedTime ?? template?.statsCreatedTime ?? null,
+  mostRecentPost: record?.mostRecentPost ?? "-",
+});
 
 function createSummaryHandler(): RouterHandler {
   return async (req: SummaryRequest, res: Response) => {
@@ -83,6 +141,49 @@ function initializeRoutes(): Router {
   const summaryHandler = createSummaryHandler();
   router.get("/summary", summaryHandler);
   router.get("/summary/:networkId", summaryHandler);
+
+  router.get("/global-table", async (_req: Request, res: Response) => {
+    try {
+      const [networks, districts, memberCountByNetwork, bagCountsById] = await Promise.all([
+        networksInfo.getAllNetworks(),
+        networksInfo.getAllDistricts(),
+        networksInfo.getAllMemberCounts(),
+        networksInfo.getAllBagCounts(),
+      ]);
+
+      const districtNameById = new Map<string, string>();
+      districts.forEach((district) => {
+        districtNameById.set(district.uniqueId, district.fullName);
+      });
+
+      const templateCounts = bagCountsById.get("all");
+      const rows: GlobalStatsRow[] = networks.map((network) => {
+        const bagCounts = buildBagCounts(bagCountsById.get(network.uniqueId), templateCounts);
+        const memberCount = memberCountByNetwork.get(network.uniqueId) ?? 0;
+        const districtName = network.districtId ? districtNameById.get(network.districtId) ?? "" : "";
+
+        return {
+          uniqueId: network.uniqueId,
+          shortId: network.shortId,
+          fullName: network.fullName,
+          districtId: network.districtId,
+          districtName,
+          memberCount,
+          bagCounts,
+        };
+      });
+
+      const response: GlobalStatsResponse = {
+        generatedAt: new Date().toISOString(),
+        rows,
+      };
+
+      res.json(response);
+    } catch (error) {
+      console.error("Error retrieving global stats table:", error);
+      res.status(500).json({ error: "An error occurred while fetching the global stats table" });
+    }
+  });
 
   router.get("/get-bag-stats-json/:uniqueId", async (req: BagsInfoRequest, res: Response) => {
     try {

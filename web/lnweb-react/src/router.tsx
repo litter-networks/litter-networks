@@ -16,6 +16,7 @@ import { NewsPage } from './pages/news/NewsPage';
 import { KnowledgePage } from './pages/knowledge/KnowledgePage';
 import { JoinInPage } from './pages/join-in/JoinInPage';
 import { JoinInStatsPage } from './pages/join-in/JoinInStatsPage';
+import { JoinInStatsGlobalPage } from './pages/join-in/JoinInStatsGlobalPage';
 import { JoinInResourcesPage } from './pages/join-in/JoinInResourcesPage';
 import { JoinInChoosePage } from './pages/join-in/JoinInChoosePage';
 import { MapAreaPage } from './pages/maps/MapAreaPage';
@@ -28,6 +29,7 @@ const NewsPageBounded = withErrorBoundary(NewsPage, 'News Page');
 const JoinInPageBounded = withErrorBoundary(JoinInPage, 'Join In Page');
 const JoinInChoosePageBounded = withErrorBoundary(JoinInChoosePage, 'Join In Choose Page');
 const JoinInStatsPageBounded = withErrorBoundary(JoinInStatsPage, 'Join In Stats Page');
+const JoinInStatsGlobalPageBounded = withErrorBoundary(JoinInStatsGlobalPage, 'Join In Stats Global Page');
 const JoinInResourcesPageBounded = withErrorBoundary(JoinInResourcesPage, 'Join In Resources Page');
 const KnowledgePageBounded = withErrorBoundary(KnowledgePage, 'Knowledge Page');
 const RedirectToNetworkRootBounded = withErrorBoundary(RedirectToNetworkRoot, 'Redirect');
@@ -85,6 +87,10 @@ const router = createBrowserRouter([
       {
         path: 'join-in/choose',
         element: <JoinInChoosePageBounded />,
+      },
+      {
+        path: 'join-in/stats/global',
+        element: <JoinInStatsGlobalPageBounded />,
       },
       {
         path: 'join-in/stats/:formal?',
