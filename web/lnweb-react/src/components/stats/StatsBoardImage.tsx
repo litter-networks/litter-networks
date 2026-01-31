@@ -34,14 +34,14 @@ export function StatsBoardImage({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [imageSrc, setImageSrc] = useState<string | undefined>(placeholderSrc);
   const [loading, setLoading] = useState(true);
-  const baseImageSrc =
+  const placeholderBaseImageSrc =
     variant === 'formal'
       ? `${appEnv.staticAssetsBaseUrl}/images/stats-board-formal.png`
       : `${appEnv.staticAssetsBaseUrl}/images/stats-board.png`;
 
   useEffect(() => {
-    setImageSrc(placeholderSrc ?? baseImageSrc);
-  }, [placeholderSrc, uniqueId, variant, baseImageSrc]);
+    setImageSrc(placeholderSrc ?? placeholderBaseImageSrc);
+  }, [placeholderSrc, uniqueId, variant, placeholderBaseImageSrc]);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,10 +50,20 @@ export function StatsBoardImage({
     async function load() {
       try {
         setLoading(true);
-        const [bagsInfo, baseImage] = await Promise.all([
-          fetchBagsInfo(uniqueId, controller.signal),
-          loadBaseImage(baseImageSrc),
-        ]);
+        const bagsInfo = await fetchBagsInfo(uniqueId, controller.signal);
+        const defaultFormalBaseImageSrc = `${appEnv.staticAssetsBaseUrl}/images/stats-board-formal.png`;
+        const baseImageSrc =
+          variant === 'formal'
+            ? bagsInfo.isAll
+              ? `${appEnv.staticAssetsBaseUrl}/images/stats-board-formal-all.png`
+              : bagsInfo.isDistrict
+                ? `${appEnv.staticAssetsBaseUrl}/images/stats-board-formal-district.png`
+                : defaultFormalBaseImageSrc
+            : `${appEnv.staticAssetsBaseUrl}/images/stats-board.png`;
+        const baseImage =
+          variant === 'formal' && baseImageSrc !== defaultFormalBaseImageSrc
+            ? await loadBaseImage(baseImageSrc).catch(() => loadBaseImage(defaultFormalBaseImageSrc))
+            : await loadBaseImage(baseImageSrc);
         if (!canvasRef.current) {
           return;
         }
@@ -81,7 +91,7 @@ export function StatsBoardImage({
       cancelled = true;
       controller.abort();
     };
-  }, [uniqueId, variant, baseImageSrc]);
+  }, [uniqueId, variant]);
 
   return (
     <>
