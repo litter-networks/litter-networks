@@ -16,6 +16,7 @@ import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 
 const VIEW_MODE_STORAGE_KEY = 'ln.choose.viewMode';
 const UNKNOWN_DISTRICT_KEY = 'unknown';
+const CHOOSE_PLACEHOLDER = '- please choose -';
 
 interface LayerClickMessage {
   type: 'layerClick';
@@ -38,8 +39,8 @@ export function JoinInChoosePage() {
   const isDesktop = useMediaQuery('(min-width: 1100px)', false);
   usePageTitle('Join In | Choose');
 
-  const [areaName, setAreaName] = useState('- please choose -');
-  const [networkName, setNetworkName] = useState('- please choose -');
+  const [areaName, setAreaName] = useState(CHOOSE_PLACEHOLDER);
+  const [networkName, setNetworkName] = useState(CHOOSE_PLACEHOLDER);
   const [selectedNetworkId, setSelectedNetworkId] = useState<string | null>(null);
   const [expandedDistricts, setExpandedDistricts] = useState<Set<string>>(new Set());
   const [districtMeta, setDistrictMeta] = useState<Record<string, DistrictCsvRow>>({});
@@ -163,14 +164,14 @@ export function JoinInChoosePage() {
       }
       const info = event.data.data;
       selectionFromMapRef.current = true;
-      scheduleStateUpdate(() => setAreaName(info.areaFullName || info.areaId || '- please choose -'));
+      scheduleStateUpdate(() => setAreaName(info.areaFullName || info.areaId || CHOOSE_PLACEHOLDER));
       const { networkFullName, networkId } = info;
       if (typeof networkId === 'string' && networkId.length > 0) {
         const resolvedName = networkFullName ?? networkId;
         scheduleStateUpdate(() => setNetworkName(resolvedName));
         scheduleStateUpdate(() => setSelectedNetworkId(networkId));
       } else {
-        scheduleStateUpdate(() => setNetworkName('- please choose -'));
+        scheduleStateUpdate(() => setNetworkName(CHOOSE_PLACEHOLDER));
         scheduleStateUpdate(() => setSelectedNetworkId(null));
       }
       const scrollCandidate: ScrollTarget | null =
@@ -248,14 +249,14 @@ export function JoinInChoosePage() {
           return next;
         }),
       );
-      if (areaName === '- please choose -') {
+      if (areaName === CHOOSE_PLACEHOLDER) {
         const primaryId = matched.districtId.split(',').map((id) => id.trim()).filter(Boolean)[0];
         const districtName = getDistrictLabel(primaryId, matched.districtFullName);
         if (districtName) {
           scheduleStateUpdate(() => setAreaName(districtName));
         }
       }
-      if (networkName === '- please choose -' && (matched.fullName || matched.uniqueId)) {
+      if (networkName === CHOOSE_PLACEHOLDER && (matched.fullName || matched.uniqueId)) {
         scheduleStateUpdate(() => setNetworkName(matched.fullName ?? matched.uniqueId));
       }
     }
