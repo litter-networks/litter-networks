@@ -38,8 +38,8 @@ export function JoinInChoosePage() {
   const isDesktop = useMediaQuery('(min-width: 1100px)', false);
   usePageTitle('Join In | Choose');
 
-  const [areaName, setAreaName] = useState('-');
-  const [networkName, setNetworkName] = useState('-');
+  const [areaName, setAreaName] = useState('- please choose -');
+  const [networkName, setNetworkName] = useState('- please choose -');
   const [selectedNetworkId, setSelectedNetworkId] = useState<string | null>(null);
   const [expandedDistricts, setExpandedDistricts] = useState<Set<string>>(new Set());
   const [districtMeta, setDistrictMeta] = useState<Record<string, DistrictCsvRow>>({});
@@ -163,14 +163,14 @@ export function JoinInChoosePage() {
       }
       const info = event.data.data;
       selectionFromMapRef.current = true;
-      scheduleStateUpdate(() => setAreaName(info.areaFullName || info.areaId || '-'));
+      scheduleStateUpdate(() => setAreaName(info.areaFullName || info.areaId || '- please choose -'));
       const { networkFullName, networkId } = info;
       if (typeof networkId === 'string' && networkId.length > 0) {
         const resolvedName = networkFullName ?? networkId;
         scheduleStateUpdate(() => setNetworkName(resolvedName));
         scheduleStateUpdate(() => setSelectedNetworkId(networkId));
       } else {
-        scheduleStateUpdate(() => setNetworkName('-'));
+        scheduleStateUpdate(() => setNetworkName('- please choose -'));
         scheduleStateUpdate(() => setSelectedNetworkId(null));
       }
       const scrollCandidate: ScrollTarget | null =
@@ -248,14 +248,14 @@ export function JoinInChoosePage() {
           return next;
         }),
       );
-      if (areaName === '-') {
+      if (areaName === '- please choose -') {
         const primaryId = matched.districtId.split(',').map((id) => id.trim()).filter(Boolean)[0];
         const districtName = getDistrictLabel(primaryId, matched.districtFullName);
         if (districtName) {
           scheduleStateUpdate(() => setAreaName(districtName));
         }
       }
-      if (networkName === '-' && (matched.fullName || matched.uniqueId)) {
+      if (networkName === '- please choose -' && (matched.fullName || matched.uniqueId)) {
         scheduleStateUpdate(() => setNetworkName(matched.fullName ?? matched.uniqueId));
       }
     }
